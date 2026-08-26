@@ -32,9 +32,9 @@ export class Game {
     this.audio = new AudioManager();
     this.camera = new Camera();
     this.input = new InputManager(canvas);
-    this.houseMap = new HouseMap();
-    this.dialogueEngine = new DialogueEngine();
     this.taskManager = new TaskManager(this);
+    this.houseMap = new HouseMap(this);
+    this.dialogueEngine = new DialogueEngine();
     this.sabotageSystem = new SabotageSystem(this);
     this.meetingEngine = new MeetingEngine(this);
     this.multiplayer = new MultiplayerEngine(this);
@@ -166,10 +166,8 @@ export class Game {
       }
     });
 
-    // Reset Cleanliness State
-    this.taskManager.cleanliness = 0;
-    this.taskManager.tasksCompletedCount = 0;
-    this.taskManager.updateHUD();
+    // Reset Cleanliness State & completed tasks
+    this.taskManager.reset();
 
     this.camera.setFloor(1);
     this.updateHUDHeader();
@@ -241,9 +239,7 @@ export class Game {
       lobbyPlayers: this.multiplayer.lobbyPlayers
     });
 
-    this.taskManager.cleanliness = 0;
-    this.taskManager.tasksCompletedCount = 0;
-    this.taskManager.updateHUD();
+    this.taskManager.reset();
 
     this.camera.setFloor(1);
     this.updateHUDHeader();
@@ -528,8 +524,16 @@ export class Game {
       prompt.style.top = `${this.activeNearbyHotspot.y - 15}px`;
 
       const pText = prompt.querySelector(".prompt-text");
-      if (pText) {
-        pText.innerText = this.activeNearbyHotspot.label;
+      const kBadge = prompt.querySelector(".key-badge");
+      const isTask = !!this.activeNearbyHotspot.taskId;
+      const isDone = isTask && this.taskManager.isTaskCompleted(this.activeNearbyHotspot.taskId);
+
+      if (isDone) {
+        if (kBadge) kBadge.innerText = "✨";
+        if (pText) pText.innerText = `${this.activeNearbyHotspot.label} (Cleaned)`;
+      } else {
+        if (kBadge) kBadge.innerText = "E";
+        if (pText) pText.innerText = this.activeNearbyHotspot.label;
       }
     } else {
       prompt.classList.add("hidden");

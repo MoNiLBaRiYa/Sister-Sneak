@@ -1,7 +1,7 @@
 /**
  * Sister Sneak: Phone Locked - Task Manager System
- * Manages task registry, mini-game execution, and Cleanliness Meter.
- * Synchronizes cleanliness across all online multiplayer peers.
+ * Manages task registry, mini-game execution, Cleanliness Meter,
+ * and tracks completed chores so players don't have to repeat them.
  */
 
 import { ClothesTask } from '../minigames/ClothesTask.js';
@@ -19,6 +19,7 @@ export class TaskManager {
     this.cleanliness = 0; // 0% to 100%
     this.tasksCompletedCount = 0;
     this.activeMiniGame = null;
+    this.completedTasks = new Set(); // Stores completed taskId strings
 
     this.miniGameMap = {
       CLOTHES_COLLECT: ClothesTask,
@@ -44,6 +45,21 @@ export class TaskManager {
         this.closeMiniGame();
       });
     }
+  }
+
+  reset() {
+    this.cleanliness = 0;
+    this.tasksCompletedCount = 0;
+    this.completedTasks.clear();
+    this.updateHUD();
+  }
+
+  isTaskCompleted(taskId) {
+    return this.completedTasks.has(taskId);
+  }
+
+  markTaskCompleted(taskId) {
+    this.completedTasks.add(taskId);
   }
 
   contributeCleanliness(amount) {
@@ -78,6 +94,14 @@ export class TaskManager {
   openTask(taskId) {
     if (this.activeMiniGame) return;
 
+    // Check if task is already completed
+    if (this.isTaskCompleted(taskId)) {
+      // Play sparkle sound and notify user without opening popup again
+      this.game.audio.playClick();
+      alert("✨ This chore is already 100% sparkling clean! Check other rooms for pending chores.");
+      return;
+    }
+
     // Check if floor is blacked out
     if (this.game.houseMap.isFloorBlackedOut(this.game.player.floor)) {
       alert("⚡ Power blackout on this floor! Fix the fuse box or wait for power before doing tasks!");
@@ -107,6 +131,7 @@ export class TaskManager {
       () => {
         // Task completed successfully
         this.tasksCompletedCount++;
+        this.markTaskCompleted(taskId);
         this.game.audio.playTaskComplete();
 
         // Bonus speed or boost from characters

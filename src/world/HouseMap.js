@@ -1,13 +1,15 @@
 /**
  * Sister Sneak: Phone Locked - 3-Floor Cutaway House Map
- * Manages rendering of the entire vertical house cross-section and room detection.
+ * Manages rendering of the vertical house cross-section, rooms, and
+ * visual differentiation between Pending vs Completed chores.
  */
 
 import { CANVAS_WIDTH, CANVAS_HEIGHT, FLOORS, FLOOR_Y, ROOMS, HOTSPOTS } from '../config/constants.js';
 import { Room } from './Room.js';
 
 export class HouseMap {
-  constructor() {
+  constructor(game) {
+    this.game = game;
     this.floors = FLOORS;
     this.rooms = [];
     this.hotspots = HOTSPOTS;
@@ -95,43 +97,100 @@ export class HouseMap {
       room.draw(ctx, isBlackedOut);
     });
 
-    // 4. Draw Hotspot Glowing Halos
+    // 4. Draw Hotspot Glowing Halos with Pending vs Completed Indicators
     this.drawHotspots(ctx, activeFloor);
   }
 
   drawHotspots(ctx, activeFloor) {
     const time = Date.now() / 300;
+    const taskManager = this.game ? this.game.taskManager : null;
+
     this.hotspots.forEach((hs) => {
-      // Draw glowing pulse for active floor hotspots
-      if (hs.floor === activeFloor) {
-        const pulse = Math.sin(time) * 4;
-        ctx.save();
+      if (hs.floor !== activeFloor) return;
 
-        if (hs.isEmergencyButton) {
-          ctx.strokeStyle = "rgba(239, 68, 68, 0.8)";
-          ctx.fillStyle = "rgba(239, 68, 68, 0.25)";
-        } else if (hs.isStairHotspot) {
-          ctx.strokeStyle = "rgba(245, 158, 11, 0.8)";
-          ctx.fillStyle = "rgba(245, 158, 11, 0.2)";
-        } else {
-          ctx.strokeStyle = "rgba(16, 185, 129, 0.85)";
-          ctx.fillStyle = "rgba(16, 185, 129, 0.25)";
-        }
+      const pulse = Math.sin(time) * 4;
+      const isTask = !!hs.taskId;
+      const isDone = isTask && taskManager && taskManager.isTaskCompleted(hs.taskId);
 
+      ctx.save();
+
+      if (hs.isEmergencyButton) {
+        // Red Emergency Phone Box
+        ctx.strokeStyle = "rgba(239, 68, 68, 0.9)";
+        ctx.fillStyle = "rgba(239, 68, 68, 0.3)";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(hs.x, hs.y, hs.radius + pulse, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fill();
+
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "18px Fredoka, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("🚨", hs.x, hs.y + 6);
+      } else if (hs.isStairHotspot) {
+        // Yellow Stairs
+        ctx.strokeStyle = "rgba(245, 158, 11, 0.8)";
+        ctx.fillStyle = "rgba(245, 158, 11, 0.2)";
         ctx.lineWidth = 2.5;
         ctx.beginPath();
         ctx.arc(hs.x, hs.y, hs.radius + pulse, 0, Math.PI * 2);
         ctx.stroke();
         ctx.fill();
 
-        // Hotspot Icon & Tiny Label
         ctx.fillStyle = "#FFFFFF";
-        ctx.font = "14px Fredoka, sans-serif";
+        ctx.font = "16px Fredoka, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(hs.icon, hs.x, hs.y + 5);
+      } else if (isDone) {
+        // ✅ COMPLETED CHORE: Soft Green ring + Green Checkmark Badge
+        ctx.strokeStyle = "rgba(16, 185, 129, 0.6)";
+        ctx.fillStyle = "rgba(16, 185, 129, 0.15)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(hs.x, hs.y, hs.radius, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fill();
+
+        // Icon
+        ctx.font = "16px Fredoka, sans-serif";
         ctx.textAlign = "center";
         ctx.fillText(hs.icon, hs.x, hs.y + 5);
 
-        ctx.restore();
+        // Overhead Green Check Badge
+        ctx.fillStyle = "#10B981";
+        ctx.beginPath();
+        ctx.arc(hs.x + 16, hs.y - 16, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "bold 11px Fredoka, sans-serif";
+        ctx.fillText("✓", hs.x + 16, hs.y - 12);
+      } else {
+        // ⚠️ PENDING CHORE: Bright Glowing Gold Ring + Pulsing Attention Indicator
+        ctx.strokeStyle = "rgba(245, 158, 11, 0.95)";
+        ctx.fillStyle = "rgba(245, 158, 11, 0.35)";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(hs.x, hs.y, hs.radius + pulse, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fill();
+
+        // Icon
+        ctx.font = "18px Fredoka, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(hs.icon, hs.x, hs.y + 6);
+
+        // Overhead Yellow Warning/Pending Dot
+        ctx.fillStyle = "#F59E0B";
+        ctx.beginPath();
+        ctx.arc(hs.x + 16, hs.y - 16, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#451A03";
+        ctx.font = "bold 11px Fredoka, sans-serif";
+        ctx.fillText("!", hs.x + 16, hs.y - 12);
       }
+
+      ctx.restore();
     });
   }
 }
