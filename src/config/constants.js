@@ -1,5 +1,6 @@
 /**
- * Sister Sneak: Phone Locked - Game Constants & Configurations
+ * Sister Sneak: Phone Locked - Game Constants & Hotspots Configurations
+ * 18 Distinct Interactive Chores Across 3 Floors with Balanced Progress.
  */
 
 export const CANVAS_WIDTH = 1280;
@@ -7,9 +8,9 @@ export const CANVAS_HEIGHT = 720;
 
 export const FLOOR_HEIGHT = 200;
 export const FLOOR_Y = {
-  2: 60,   // Terrace / Top Floor
-  1: 280,  // 1st Floor (Living Hub)
-  0: 500   // Ground Floor (Storage & Entry)
+  2: 60,   // Terrace / Top Floor (3F)
+  1: 280,  // 1st Floor (Living Hub 2F)
+  0: 500   // Ground Floor (Storage & Entry 1F)
 };
 
 export const FLOORS = [
@@ -19,24 +20,22 @@ export const FLOORS = [
 ];
 
 export const ROOMS = {
-  // --- TERRACE (Floor 2) ---
+  // --- TERRACE (Floor 2 / 3F) ---
   TERRACE_DRY: {
     id: "TERRACE_DRY",
     floor: 2,
-    name: "Terrace Clothes Line",
-    bounds: { x: 80, y: FLOOR_Y[2] + 20, w: 480, h: 160 },
+    name: "Terrace Clothes Line & Solar Roof",
+    bounds: { x: 60, y: FLOOR_Y[2] + 20, w: 500, h: 160 },
     theme: "#E0F2FE",
-    icon: "🧺",
-    tasks: ["CLOTHES_COLLECT"]
+    icon: "🧺"
   },
   TERRACE_TANK: {
     id: "TERRACE_TANK",
     floor: 2,
-    name: "Water Tank Roof",
+    name: "Water Tank & Papad Terrace",
     bounds: { x: 580, y: FLOOR_Y[2] + 20, w: 320, h: 160 },
     theme: "#BAE6FD",
-    icon: "🚰",
-    tasks: ["TANK_VALVE"]
+    icon: "🚰"
   },
   TERRACE_STAIRS: {
     id: "TERRACE_STAIRS",
@@ -49,43 +48,39 @@ export const ROOMS = {
     connectsTo: { floor: 1, x: 960, y: FLOOR_Y[1] + 100 }
   },
 
-  // --- 1ST FLOOR - LIVING HUB (Floor 1) ---
+  // --- 1ST FLOOR - LIVING HUB (Floor 1 / 2F) ---
   BALCONY: {
     id: "BALCONY",
     floor: 1,
     name: "Green Balcony",
     bounds: { x: 60, y: FLOOR_Y[1] + 20, w: 180, h: 160 },
     theme: "#DCFCE7",
-    icon: "🌿",
-    tasks: ["PLANT_WATER", "HOMEWORK"]
+    icon: "🌿"
   },
   BEDROOM_1: {
     id: "BEDROOM_1",
     floor: 1,
-    name: "Sisters' Bedroom 1",
+    name: "Sisters' Bedroom & Study Corner",
     bounds: { x: 250, y: FLOOR_Y[1] + 20, w: 200, h: 160 },
     theme: "#FEE2E2",
-    icon: "🛏️",
-    tasks: ["BEDSHEET_TUCK"]
+    icon: "🛏️"
   },
   CENTRAL_HALL: {
     id: "CENTRAL_HALL",
     floor: 1,
     name: "Central Living Hall (Phone Box)",
-    bounds: { x: 460, y: FLOOR_Y[1] + 20, w: 340, h: 160 },
+    bounds: { x: 460, y: FLOOR_Y[1] + 20, w: 310, h: 160 },
     theme: "#FEF3C7",
     icon: "🛋️",
-    isMeetingRoom: true,
-    tasks: []
+    isMeetingRoom: true
   },
   KITCHEN: {
     id: "KITCHEN",
     floor: 1,
     name: "Grand Kitchen",
-    bounds: { x: 810, y: FLOOR_Y[1] + 20, w: 220, h: 160 },
+    bounds: { x: 780, y: FLOOR_Y[1] + 20, w: 250, h: 160 },
     theme: "#FFEDD5",
-    icon: "🍳",
-    tasks: ["FRIDGE_REFILL", "SNACK_RAID"]
+    icon: "🍳"
   },
   HUB_STAIRS: {
     id: "HUB_STAIRS",
@@ -98,15 +93,14 @@ export const ROOMS = {
     connectsTo: { floor: 2, x: 980, y: FLOOR_Y[2] + 100 }
   },
 
-  // --- GROUND FLOOR - STORAGE & ENTRY (Floor 0) ---
+  // --- GROUND FLOOR - STORAGE & ENTRY (Floor 0 / 1F) ---
   VERANDA: {
     id: "VERANDA",
     floor: 0,
     name: "Entry Veranda & Rangoli",
     bounds: { x: 60, y: FLOOR_Y[0] + 20, w: 230, h: 160 },
     theme: "#FEF9C3",
-    icon: "👡",
-    tasks: ["FOOTWEAR_MATCH"]
+    icon: "👡"
   },
   STORE_ROOM: {
     id: "STORE_ROOM",
@@ -114,8 +108,7 @@ export const ROOMS = {
     name: "Dadi's Trunk Store Room",
     bounds: { x: 300, y: FLOOR_Y[0] + 20, w: 240, h: 160 },
     theme: "#E2E8F0",
-    icon: "🧳",
-    tasks: ["ACHAR_HUNT"]
+    icon: "🧳"
   },
   BAR_COUNTER: {
     id: "BAR_COUNTER",
@@ -123,17 +116,15 @@ export const ROOMS = {
     name: "Chai & Glassware Counter",
     bounds: { x: 550, y: FLOOR_Y[0] + 20, w: 240, h: 160 },
     theme: "#FAE8FF",
-    icon: "🥛",
-    tasks: ["GLASSWARE_ALIGN"]
+    icon: "🥛"
   },
   GROUND_BEDROOM: {
     id: "GROUND_BEDROOM",
     floor: 0,
-    name: "Ground Guest Room & Bath",
+    name: "Ground Guest Room & Power Board",
     bounds: { x: 800, y: FLOOR_Y[0] + 20, w: 230, h: 160 },
     theme: "#F1F5F9",
-    icon: "💡",
-    tasks: ["SWITCHES_OFF"]
+    icon: "💡"
   },
   GROUND_STAIRS: {
     id: "GROUND_STAIRS",
@@ -148,26 +139,58 @@ export const ROOMS = {
 };
 
 export const HOTSPOTS = [
-  // --- Terrace Hotspots ---
+  // ==========================================
+  // --- 3F TERRACE HOTSPOTS (Floor 2) ---
+  // ==========================================
   {
     id: "HS_CLOTHES",
     floor: 2,
-    x: 240,
+    x: 200,
     y: FLOOR_Y[2] + 120,
-    radius: 40,
+    radius: 36,
     taskId: "CLOTHES_COLLECT",
-    label: "Dry Clothes",
+    label: "Fold Fluttering Sarees",
     icon: "🧺"
+  },
+  {
+    id: "HS_KITE",
+    floor: 2,
+    x: 360,
+    y: FLOOR_Y[2] + 120,
+    radius: 36,
+    taskId: "KITE_UNTANGLE",
+    label: "Untangle Kite Thread",
+    icon: "🪁"
   },
   {
     id: "HS_TANK",
     floor: 2,
+    x: 600,
+    y: FLOOR_Y[2] + 120,
+    radius: 36,
+    taskId: "TANK_VALVE",
+    label: "Water Tank Dial",
+    icon: "🚰"
+  },
+  {
+    id: "HS_PAPAD",
+    floor: 2,
     x: 740,
     y: FLOOR_Y[2] + 120,
-    radius: 40,
-    taskId: "TANK_VALVE",
-    label: "Water Tank Valve",
-    icon: "🚰"
+    radius: 36,
+    taskId: "PAPAD_DRY",
+    label: "Sun-Dry Papad Spread",
+    icon: "🫓"
+  },
+  {
+    id: "HS_SOLAR",
+    floor: 2,
+    x: 880,
+    y: FLOOR_Y[2] + 120,
+    radius: 36,
+    taskId: "SOLAR_PANEL",
+    label: "Wipe Solar Panels",
+    icon: "☀️"
   },
   {
     id: "HS_STAIRS_T",
@@ -182,51 +205,93 @@ export const HOTSPOTS = [
     icon: "⬇️"
   },
 
-  // --- Living Hub Hotspots ---
+  // ==========================================
+  // --- 2F LIVING HUB HOTSPOTS (Floor 1) ---
+  // ==========================================
   {
     id: "HS_BALCONY",
     floor: 1,
     x: 140,
     y: FLOOR_Y[1] + 120,
-    radius: 40,
+    radius: 36,
     taskId: "PLANT_WATER",
-    label: "Water Plants",
+    label: "Water Tulsi & Plants",
     icon: "🌿"
   },
   {
     id: "HS_BED_1",
     floor: 1,
-    x: 350,
+    x: 310,
     y: FLOOR_Y[1] + 120,
-    radius: 40,
+    radius: 36,
     taskId: "BEDSHEET_TUCK",
     label: "Straighten Bedsheet",
     icon: "🛏️"
   },
   {
+    id: "HS_HOMEWORK",
+    floor: 1,
+    x: 410,
+    y: FLOOR_Y[1] + 120,
+    radius: 36,
+    taskId: "HOMEWORK_MATH",
+    label: "Sister's Math Homework",
+    icon: "✏️"
+  },
+  {
     id: "HS_PHONE_BOX",
     floor: 1,
-    x: 630,
+    x: 620,
     y: FLOOR_Y[1] + 105,
-    radius: 45,
+    radius: 44,
     isEmergencyButton: true,
     label: "Phone Lockbox (Call Meeting)",
     icon: "🚨"
   },
   {
+    id: "HS_SPICE",
+    floor: 1,
+    x: 820,
+    y: FLOOR_Y[1] + 120,
+    radius: 36,
+    taskId: "SPICE_RACK",
+    label: "Organize Masala Dabba",
+    icon: "🧂"
+  },
+  {
     id: "HS_KITCHEN_FRIDGE",
     floor: 1,
-    x: 910,
+    x: 890,
     y: FLOOR_Y[1] + 120,
-    radius: 40,
+    radius: 36,
     taskId: "FRIDGE_REFILL",
-    label: "Refill Fridge Bottle",
+    label: "Refill Cold Water",
     icon: "🍾"
+  },
+  {
+    id: "HS_CHAI",
+    floor: 1,
+    x: 950,
+    y: FLOOR_Y[1] + 120,
+    radius: 36,
+    taskId: "CHAI_FILTER",
+    label: "Strain Masala Chai",
+    icon: "☕"
+  },
+  {
+    id: "HS_KHAKHRA",
+    floor: 1,
+    x: 1010,
+    y: FLOOR_Y[1] + 120,
+    radius: 36,
+    taskId: "SNACK_CONTAINER",
+    label: "Seal Khakhra Box",
+    icon: "📦"
   },
   {
     id: "HS_STAIRS_HUB_DOWN",
     floor: 1,
-    x: 1100,
+    x: 1090,
     y: FLOOR_Y[1] + 120,
     radius: 35,
     isStairHotspot: true,
@@ -248,33 +313,55 @@ export const HOTSPOTS = [
     icon: "⬆️"
   },
 
-  // --- Ground Floor Hotspots ---
+  // ==========================================
+  // --- 1F GROUND ENTRY HOTSPOTS (Floor 0) ---
+  // ==========================================
   {
     id: "HS_VERANDA",
     floor: 0,
-    x: 170,
+    x: 130,
     y: FLOOR_Y[0] + 120,
-    radius: 40,
+    radius: 36,
     taskId: "FOOTWEAR_MATCH",
     label: "Match Dadi's Chappals",
     icon: "👡"
   },
   {
+    id: "HS_RANGOLI",
+    floor: 0,
+    x: 230,
+    y: FLOOR_Y[0] + 120,
+    radius: 36,
+    taskId: "RANGOLI_TOUCHUP",
+    label: "Fill Veranda Rangoli",
+    icon: "🌸"
+  },
+  {
     id: "HS_STORE_ACHAR",
     floor: 0,
-    x: 420,
+    x: 370,
     y: FLOOR_Y[0] + 120,
-    radius: 40,
+    radius: 36,
     taskId: "ACHAR_HUNT",
     label: "Hunt Mango Achar Jar",
     icon: "🧳"
+  },
+  {
+    id: "HS_TRUNK_LOCK",
+    floor: 0,
+    x: 480,
+    y: FLOOR_Y[0] + 120,
+    radius: 36,
+    taskId: "TRUNK_LOCK",
+    label: "Oil Antique Trunk Lock",
+    icon: "🗝️"
   },
   {
     id: "HS_GLASSWARE",
     floor: 0,
     x: 670,
     y: FLOOR_Y[0] + 120,
-    radius: 40,
+    radius: 36,
     taskId: "GLASSWARE_ALIGN",
     label: "Align Chai Glasses",
     icon: "🥛"
@@ -284,9 +371,9 @@ export const HOTSPOTS = [
     floor: 0,
     x: 910,
     y: FLOOR_Y[0] + 120,
-    radius: 40,
+    radius: 36,
     taskId: "SWITCHES_OFF",
-    label: "Switch Off Lights & Fan",
+    label: "Turn Off Power Switches",
     icon: "💡"
   },
   {
@@ -303,9 +390,9 @@ export const HOTSPOTS = [
   }
 ];
 
-export const ROUND_DURATION_SEC = 180; // 3 minutes round
+export const ROUND_DURATION_SEC = 180;
 export const SABOTAGE_COOLDOWNS = {
-  BLACKOUT: 35,
-  KUNDI: 25,
-  MESS: 30
+  BLACKOUT: 30,
+  KUNDI: 20,
+  MESS: 25
 };

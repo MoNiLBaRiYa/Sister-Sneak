@@ -1,7 +1,6 @@
 /**
  * Sister Sneak: Phone Locked - Task Manager System
- * Manages task registry, mini-game execution, Cleanliness Meter,
- * and tracks completed chores so players don't have to repeat them.
+ * 18 Distinct Interactive Chores Across 3 Floors with Balanced Progress.
  */
 
 import { ClothesTask } from '../minigames/ClothesTask.js';
@@ -12,6 +11,15 @@ import { FootwearTask } from '../minigames/FootwearTask.js';
 import { AcharTask } from '../minigames/AcharTask.js';
 import { GlasswareTask } from '../minigames/GlasswareTask.js';
 import { WateringTask } from '../minigames/WateringTask.js';
+import { PapadTask } from '../minigames/PapadTask.js';
+import { SolarPanelTask } from '../minigames/SolarPanelTask.js';
+import { KiteTask } from '../minigames/KiteTask.js';
+import { SpiceRackTask } from '../minigames/SpiceRackTask.js';
+import { ChaiTask } from '../minigames/ChaiTask.js';
+import { KhakhraTask } from '../minigames/KhakhraTask.js';
+import { HomeworkTask } from '../minigames/HomeworkTask.js';
+import { RangoliTask } from '../minigames/RangoliTask.js';
+import { TrunkLockTask } from '../minigames/TrunkLockTask.js';
 
 export class TaskManager {
   constructor(game) {
@@ -22,17 +30,29 @@ export class TaskManager {
     this.completedTasks = new Set(); // Stores completed taskId strings
 
     this.miniGameMap = {
+      // 3F Terrace
       CLOTHES_COLLECT: ClothesTask,
-      FRIDGE_REFILL: FridgeTask,
-      BEDSHEET_TUCK: BedsheetTask,
-      SWITCHES_OFF: SwitchesTask,
-      FOOTWEAR_MATCH: FootwearTask,
-      ACHAR_HUNT: AcharTask,
-      GLASSWARE_ALIGN: GlasswareTask,
-      PLANT_WATER: WateringTask,
+      KITE_UNTANGLE: KiteTask,
       TANK_VALVE: FridgeTask,
-      SNACK_RAID: AcharTask,
-      HOMEWORK: SwitchesTask
+      PAPAD_DRY: PapadTask,
+      SOLAR_PANEL: SolarPanelTask,
+
+      // 2F Living Hub
+      PLANT_WATER: WateringTask,
+      BEDSHEET_TUCK: BedsheetTask,
+      HOMEWORK_MATH: HomeworkTask,
+      SPICE_RACK: SpiceRackTask,
+      FRIDGE_REFILL: FridgeTask,
+      CHAI_FILTER: ChaiTask,
+      SNACK_CONTAINER: KhakhraTask,
+
+      // 1F Ground Floor
+      FOOTWEAR_MATCH: FootwearTask,
+      RANGOLI_TOUCHUP: RangoliTask,
+      ACHAR_HUNT: AcharTask,
+      TRUNK_LOCK: TrunkLockTask,
+      GLASSWARE_ALIGN: GlasswareTask,
+      SWITCHES_OFF: SwitchesTask
     };
 
     this.bindUI();
@@ -87,7 +107,7 @@ export class TaskManager {
   updateHUD() {
     const text = document.getElementById("cleanliness-text");
     const fill = document.getElementById("cleanliness-fill");
-    if (text) text.innerText = `${Math.round(this.cleanliness)}%`;
+    if (text) text.innerText = `${Math.round(this.cleanliness)}% (${this.completedTasks.size} / 17 Chores)`;
     if (fill) fill.style.width = `${Math.round(this.cleanliness)}%`;
   }
 
@@ -96,9 +116,8 @@ export class TaskManager {
 
     // Check if task is already completed
     if (this.isTaskCompleted(taskId)) {
-      // Play sparkle sound and notify user without opening popup again
       this.game.audio.playClick();
-      alert("✨ This chore is already 100% sparkling clean! Check other rooms for pending chores.");
+      alert("✨ This chore is already 100% clean & completed! Look for other pending chores in the house.");
       return;
     }
 
@@ -134,10 +153,10 @@ export class TaskManager {
         this.markTaskCompleted(taskId);
         this.game.audio.playTaskComplete();
 
-        // Bonus speed or boost from characters
-        let cleanBonus = 15;
-        if (this.game.player.id === "SHRUTI" && (taskId === "BEDSHEET_TUCK" || taskId === "GLASSWARE_ALIGN")) {
-          cleanBonus = 25; // Shruti's Artistic Flow
+        // Balanced Cleanliness contribution (~6% per task across 17 tasks)
+        let cleanBonus = 6.0;
+        if (this.game.player.id === "SHRUTI" && (taskId === "BEDSHEET_TUCK" || taskId === "GLASSWARE_ALIGN" || taskId === "RANGOLI_TOUCHUP")) {
+          cleanBonus = 9.0; // Shruti's Artistic Flow perk
         }
 
         this.contributeCleanliness(cleanBonus);
