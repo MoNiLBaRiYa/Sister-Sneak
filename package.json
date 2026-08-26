@@ -1,0 +1,22 @@
+{
+  "name": "sister-sneak-phone-locked",
+  "version": "1.0.0",
+  "description": "Sister Sneak: Phone Locked - 2D Social Deduction Multiplayer Game",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "game",
+    "multiplayer",
+    "social-deduction",
+    "canvas",
+    "websocket"
+  ],
+  "author": "Google Deepmind AAC",
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
