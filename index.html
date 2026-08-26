@@ -2,96 +2,83 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Sister Sneak: Phone Locked 📱🔒</title>
+  <link rel="stylesheet" href="css/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Outfit:wght@400;600;800&family=Yatra+One&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
-  <!-- PeerJS for zero-server WebRTC Multiplayer Room Sync -->
-  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700;800&family=Yatra+One&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div id="game-app">
-    <!-- Main Game Canvas -->
-    <div id="canvas-container">
-      <canvas id="game-canvas" width="1280" height="720"></canvas>
-      
-      <!-- Top HUD (In-Game) -->
-      <div id="game-hud" class="hud-layer hidden">
-        <div class="hud-panel left-panel">
-          <div class="hud-badge role-badge" id="hud-role-badge">
-            <span class="role-icon">👧</span>
-            <span class="role-text">Innocent</span>
-          </div>
-          <div class="hud-badge character-badge" id="hud-character-badge">
-            <span id="hud-char-avatar">🌸</span>
-            <span id="hud-char-name">Riddhi</span>
-          </div>
-        </div>
+  <div id="game-container">
+    <!-- Main 2D Canvas Viewport -->
+    <canvas id="gameCanvas" width="1280" height="720"></canvas>
 
-        <div class="hud-panel center-panel">
-          <div class="cleanliness-container">
-            <div class="cleanliness-header">
-              <span class="cleanliness-label">✨ HOUSE CLEANLINESS</span>
-              <span class="cleanliness-val" id="cleanliness-text">0%</span>
-            </div>
-            <div class="cleanliness-bar-track">
-              <div class="cleanliness-bar-fill" id="cleanliness-fill" style="width: 0%;"></div>
-            </div>
-          </div>
-          <!-- Active Character Power Button -->
-          <button id="btn-use-power" class="power-hud-btn" title="Use Character Active Power (Key: Q / Space)">
-            <span class="power-icon">⚡</span>
-            <span class="power-label" id="hud-power-name">Use Power</span>
-            <span class="power-cd" id="hud-power-cd"></span>
-          </button>
+    <!-- Top Game HUD (Header) -->
+    <div id="game-hud" class="hud-layer hidden">
+      <div class="hud-left">
+        <div class="hud-badge role-badge" id="hud-role-badge">
+          <span class="role-icon">😇</span>
+          <span class="role-text">Innocent</span>
         </div>
+        <div class="hud-badge char-badge" id="hud-char-badge">
+          <span class="char-avatar" id="hud-char-avatar">👩</span>
+          <span class="char-name" id="hud-char-name">Riddhi</span>
+        </div>
+        <!-- Active Character Power Button with Cooldown -->
+        <button id="btn-use-power" class="hud-power-btn" title="Trigger Character Ability (Hotkey: Q / Space)">
+          <span class="power-icon">⚡</span>
+          <span class="power-name" id="hud-power-name">Use Power</span>
+          <span class="power-cd" id="hud-power-cd">(READY)</span>
+        </button>
+      </div>
 
-        <div class="hud-panel right-panel">
-          <div class="hud-badge room-badge" id="hud-room-badge">
-            <span class="room-icon">📍</span>
-            <span id="hud-room-name">Living Hub</span>
+      <div class="hud-center">
+        <!-- Cleanliness Progress Bar -->
+        <div class="cleanliness-meter-container">
+          <div class="meter-label">
+            <span>✨ House Cleanliness:</span>
+            <span id="cleanliness-text">0% (0 / 17 Chores)</span>
           </div>
-          <button id="btn-sound-toggle" class="icon-btn" title="Toggle Sound">🔊</button>
-          <button id="btn-help-toggle" class="icon-btn" title="Game Controls">❓</button>
+          <div class="meter-bar-track">
+            <div id="cleanliness-fill" class="meter-bar-fill"></div>
+          </div>
         </div>
       </div>
 
-      <!-- Floor Switcher Quick Bar -->
-      <div id="floor-switcher" class="hud-layer hidden">
-        <div class="floor-title">STAIRS / FLOORS</div>
-        <div class="floor-buttons">
-          <button class="floor-btn" data-floor="2" id="floor-btn-2">
-            <span class="floor-num">3F</span>
-            <span class="floor-name">Terrace</span>
-          </button>
-          <button class="floor-btn active" data-floor="1" id="floor-btn-1">
-            <span class="floor-num">2F</span>
-            <span class="floor-name">Living Hub</span>
-          </button>
-          <button class="floor-btn" data-floor="0" id="floor-btn-0">
-            <span class="floor-num">1F</span>
-            <span class="floor-name">Ground Entry</span>
-          </button>
+      <div class="hud-right">
+        <div class="hud-room-display" id="hud-current-room">
+          <span class="room-icon">📍</span>
+          <span id="hud-room-name">Living Hub</span>
         </div>
+        <button id="btn-sound-toggle" class="hud-icon-btn" aria-label="Toggle Audio">🔊</button>
+        <button id="btn-help-toggle" class="hud-icon-btn" aria-label="Help">❓</button>
+      </div>
+    </div>
+
+    <!-- On-Screen In-World Interactive Overlays -->
+    <div id="in-game-overlays">
+      <!-- Mummy Approach Radar / Warning Flash -->
+      <div id="mummy-alert" class="mummy-warning-banner hidden">
+        <span class="pulse-icon">🚨</span>
+        <span class="warning-text">MUMMY IS ON THIS FLOOR! LOOK BUSY!</span>
       </div>
 
-      <!-- Mummy Proximity Alert Radar -->
-      <div id="mummy-alert" class="mummy-radar hidden">
-        <div class="radar-pulse"></div>
-        <span class="mummy-icon">👩‍🦱</span>
-        <span id="mummy-alert-text">MUMMY IS PATROLLING NEARBY!</span>
-      </div>
-
-      <!-- Action Prompt Hover -->
+      <!-- Action Key Prompt Bubble (e.g. "Press E to clean") -->
       <div id="action-prompt" class="action-bubble hidden">
         <span class="key-badge">E</span>
         <span class="prompt-text">Do Chore</span>
       </div>
 
-      <!-- Imposter Sabotage Bar (Visible only for Imposter) -->
-      <div id="sabotage-bar" class="hud-layer hidden">
+      <!-- Vertical Floor Switcher Fast-Nav (Right side) -->
+      <div id="floor-switcher" class="floor-nav-panel hidden">
+        <button class="floor-nav-btn" data-floor="2" id="floor-btn-2">3F<br><small>Terrace</small></button>
+        <button class="floor-nav-btn active" data-floor="1" id="floor-btn-1">2F<br><small>Living</small></button>
+        <button class="floor-nav-btn" data-floor="0" id="floor-btn-0">1F<br><small>Entry</small></button>
+      </div>
+
+      <!-- Sabotage Floating Bar (Visible only for Imposter) -->
+      <div id="sabotage-bar" class="sabotage-panel hidden">
         <div class="sabotage-title">🤫 SECRET SABOTAGE</div>
         <div class="sabotage-actions">
           <button class="sab-btn" id="sab-blackout" title="Switchboard Blackout (Cut lights & freeze tasks on floor)">
@@ -141,7 +128,7 @@
           
           <div class="lobby-story">
             <p><strong>The Crisis:</strong> The On-Duty Mummy locked all five sisters' phones in the heirloom steel box!
-            Nobody gets their phone back until the entire 3-floor house is <strong>100% clean</strong>. But one sister is secretly sabotaging chores...</p>
+            Nobody gets their phone back until the house is <strong>100% clean</strong>. But one sister is secretly sabotaging chores...</p>
           </div>
 
           <div class="character-select-section">
@@ -183,14 +170,18 @@
             </div>
           </div>
 
+          <!-- Global Role Preference Selection (Applies to Singleplayer & Multiplayer) -->
+          <div class="role-preference-section" style="margin: 12px 0; padding: 10px; background: rgba(254, 243, 199, 0.6); border-radius: 10px; border: 2px solid #F59E0B; text-align: center;">
+            <h3 style="margin-bottom: 6px; font-size: 13px; color: #78350F;">3. Choose Your Role:</h3>
+            <div class="role-preference-bar" style="display: flex; justify-content: center; gap: 16px;">
+              <label style="cursor:pointer; font-weight:700;"><input type="radio" name="rolePref" value="random" checked> 🎲 Random Role</label>
+              <label style="cursor:pointer; font-weight:700; color:#16A34A;"><input type="radio" name="rolePref" value="innocent"> 😇 Force Innocent</label>
+              <label style="cursor:pointer; font-weight:700; color:#DC2626;"><input type="radio" name="rolePref" value="imposter"> 😈 Force Imposter</label>
+            </div>
+          </div>
+
           <!-- Single Player Options -->
           <div id="singleplayer-options-panel" class="lobby-options-panel">
-            <div class="role-preference-bar">
-              <label><input type="radio" name="rolePref" value="random" checked> 🎲 Random Role</label>
-              <label><input type="radio" name="rolePref" value="innocent"> 😇 Force Innocent</label>
-              <label><input type="radio" name="rolePref" value="imposter"> 😈 Force Imposter</label>
-            </div>
-
             <button id="btn-start-game" class="main-cta-btn">
               <span>START SNEAKING & CLEANING (SOLO)</span>
               <span class="btn-arrow">➔</span>
@@ -279,7 +270,7 @@
         </div>
       </div>
 
-      <!-- 4. Emergency Meeting / Courtroom Screen -->
+      <!-- 4. Emergency Meeting / Courtroom Screen with Live Multiplayer Chat -->
       <div id="screen-meeting" class="screen-view hidden">
         <div class="courtroom-card">
           <div class="courtroom-header">
@@ -302,12 +293,30 @@
             </div>
           </div>
 
-          <!-- Courtroom Live Chat / Gujlish Debate Feed -->
-          <div class="courtroom-debate-log" id="debate-log">
-            <div class="log-entry system-entry">⚠️ Emergency Meeting called. Discuss and vote who the Imposter is!</div>
+          <!-- Live Chat / Quick-Chat Section for Emergency Meeting -->
+          <div class="meeting-chat-container">
+            <div class="courtroom-debate-log" id="debate-log">
+              <div class="log-entry system-entry">⚠️ Emergency Meeting called. Discuss, chat, and vote who the Imposter is!</div>
+            </div>
+
+            <!-- Quick Chat Chips -->
+            <div class="quick-chat-chips" id="quick-chat-chips" style="display:flex; flex-wrap:wrap; gap:6px; margin: 6px 0;">
+              <button class="qc-chip" data-msg="I was folding clothes on 3F Terrace! 🧺">🧺 Terrace</button>
+              <button class="qc-chip" data-msg="I was in the Kitchen making chai! ☕">☕ Kitchen</button>
+              <button class="qc-chip" data-msg="I was watering plants on the Balcony! 🌿">🌿 Balcony</button>
+              <button class="qc-chip" data-msg="I saw someone sneaking near the switchboard! ⚡">⚡ Switchboard</button>
+              <button class="qc-chip" data-msg="I am innocent! Mummy please believe me! 😇">😇 Innocent</button>
+              <button class="qc-chip" data-msg="Skip vote! We don't have enough proof yet! 🤐">🤐 Skip Vote</button>
+            </div>
+
+            <!-- Interactive Chat Input Row -->
+            <div class="chat-input-row" style="display:flex; gap:8px; margin-top:4px;">
+              <input type="text" id="meeting-chat-input" placeholder="💬 Type your alibi, defense, or accuse someone..." maxlength="120" style="flex:1; padding:8px 12px; border:2px solid #D97706; border-radius:8px; font-family:inherit; font-size:13px;" />
+              <button id="btn-meeting-chat-send" style="background:#B45309; color:#FFF; border:none; border-radius:8px; padding:8px 16px; font-weight:800; cursor:pointer;">Send 💬</button>
+            </div>
           </div>
 
-          <div class="courtroom-actions">
+          <div class="courtroom-actions" style="margin-top:10px;">
             <button id="btn-skip-vote" class="skip-vote-btn">Skip Vote (No Suspect)</button>
             <div class="vote-timer" id="meeting-timer">Voting ends in: <span id="vote-timer-val">25s</span></div>
           </div>

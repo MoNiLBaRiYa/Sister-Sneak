@@ -176,14 +176,22 @@ export class Game {
     this.showIntroCutscene();
   }
 
-  startMultiplayerRoundAsHost(hostSisterId, chosenMummyId = "SOHINI") {
+  startMultiplayerRoundAsHost(hostSisterId, chosenMummyId = "SOHINI", rolePreference = "random") {
     this.selectedSisterId = hostSisterId;
     const sisterKeys = Object.keys(SISTERS);
 
     const lobbyPlayers = this.multiplayer.lobbyPlayers;
     const humanSisterIds = lobbyPlayers.map(p => p.sisterId);
     
-    this.imposterSisterId = sisterKeys[Math.floor(Math.random() * sisterKeys.length)];
+    // Honor Role Preference (Force Imposter / Force Innocent / Random)
+    if (rolePreference === "imposter") {
+      this.imposterSisterId = hostSisterId;
+    } else if (rolePreference === "innocent") {
+      const otherKeys = sisterKeys.filter((k) => k !== hostSisterId);
+      this.imposterSisterId = otherKeys[Math.floor(Math.random() * otherKeys.length)];
+    } else {
+      this.imposterSisterId = sisterKeys[Math.floor(Math.random() * sisterKeys.length)];
+    }
 
     const mummyKeys = ["SOHINI", "SHRUTI_MUMMY", "JISHA_MUMMY", "JYEANA_MUMMY"];
     if (chosenMummyId === "RANDOM" || !MUMMIES[chosenMummyId]) {

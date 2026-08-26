@@ -1,7 +1,6 @@
 /**
  * Sister Sneak: Phone Locked - Meeting & Courtroom Engine
- * Orchestrates emergency meetings, Gujlish debates, voting, and Mummy verdicts.
- * Fully supports Single-Player AI Bots and Real-Time Online Multiplayer.
+ * Orchestrates emergency meetings, Gujlish debates, live multiplayer chat, voting, and Mummy verdicts.
  */
 
 import { DIALOGUES } from '../config/dialogues.js';
@@ -22,6 +21,8 @@ export class MeetingEngine {
   bindUI() {
     const btnSkip = document.getElementById("btn-skip-vote");
     const btnVerdictCont = document.getElementById("btn-verdict-continue");
+    const btnChatSend = document.getElementById("btn-meeting-chat-send");
+    const chatInput = document.getElementById("meeting-chat-input");
 
     if (btnSkip) {
       btnSkip.addEventListener("click", () => {
@@ -34,6 +35,68 @@ export class MeetingEngine {
         this.closeVerdict();
       });
     }
+
+    // Chat Send button
+    if (btnChatSend && chatInput) {
+      btnChatSend.addEventListener("click", () => {
+        this.submitChat();
+      });
+
+      chatInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          this.submitChat();
+        }
+      });
+    }
+
+    // Quick Chat Chips
+    const qcChips = document.querySelectorAll(".qc-chip");
+    qcChips.forEach((chip) => {
+      chip.addEventListener("click", () => {
+        const msg = chip.getAttribute("data-msg");
+        if (msg) {
+          this.sendChatMessage(msg);
+        }
+      });
+    });
+  }
+
+  submitChat() {
+    const input = document.getElementById("meeting-chat-input");
+    if (!input) return;
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = "";
+    this.sendChatMessage(text);
+  }
+
+  sendChatMessage(text) {
+    if (!this.game.player) return;
+    const player = this.game.player;
+    this.appendChatMessage(player.name, player.avatar, player.color, text, true);
+
+    if (this.game.multiplayer && this.game.multiplayer.isMultiplayer) {
+      this.game.multiplayer.sendChat(text, player.id, player.name, player.avatar, player.color);
+    }
+  }
+
+  receiveRemoteChatMessage(data) {
+    this.appendChatMessage(data.senderName, data.avatar || "👧", data.color || "#F59E0B", data.text, false);
+  }
+
+  appendChatMessage(name, avatar, color, text, isMe) {
+    const log = document.getElementById("debate-log");
+    if (!log) return;
+
+    const entry = document.createElement("div");
+    entry.className = `log-entry ${isMe ? 'my-chat-entry' : ''}`;
+    entry.innerHTML = `
+      <span class="log-avatar">${avatar}</span>
+      <strong class="log-speaker" style="color:${color};">${name}${isMe ? ' (You)' : ''}:</strong>
+      <span class="log-text">"${text}"</span>
+    `;
+    log.appendChild(entry);
+    log.scrollTop = log.scrollHeight;
   }
 
   getAllSisters() {
@@ -132,11 +195,7 @@ export class MeetingEngine {
       setTimeout(() => {
         if (!this.isActive) return;
         const line = this.game.dialogueEngine.getRandomDebateLine(s.id);
-        const entry = document.createElement("div");
-        entry.className = "log-entry";
-        entry.innerHTML = `<span class="log-speaker" style="color:${s.color};">${s.name}:</span> "${line.text}"`;
-        log.appendChild(entry);
-        log.scrollTop = log.scrollHeight;
+        this.appendChatMessage(s.name, s.avatar, s.color, line.text, s === this.game.player);
       }, (idx + 1) * 1500);
     });
   }

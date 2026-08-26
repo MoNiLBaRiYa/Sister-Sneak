@@ -205,6 +205,12 @@ export class MultiplayerEngine {
         }
         break;
 
+      case 'CHAT_MESSAGE':
+        if (data.senderId !== this.myPlayerId) {
+          this.game.meetingEngine.receiveRemoteChatMessage(data);
+        }
+        break;
+
       case 'ERROR':
         alert(data.message);
         if (this.onErrorCallback) this.onErrorCallback(new Error(data.message));
@@ -286,6 +292,19 @@ export class MultiplayerEngine {
       senderId: this.myPlayerId,
       sisterId: sisterId,
       targetId: targetId
+    });
+  }
+
+  sendChat(text, sisterId, senderName, avatar, color) {
+    if (!this.isMultiplayer) return;
+    this.send({
+      type: 'CHAT_MESSAGE',
+      senderId: this.myPlayerId,
+      sisterId: sisterId,
+      senderName: senderName,
+      avatar: avatar,
+      color: color,
+      text: text
     });
   }
 }

@@ -1,6 +1,7 @@
 /**
- * Sister Sneak: Phone Locked - Main App Bootstrap
- * Wires Sister Selection, Round Inspector Mummy Selection, Single Player & Online Multiplayer Room Matchmaking.
+ * Sister Sneak: Phone Locked - Main Application Bootstrap
+ * Initializes game engine, lobby character selector, role preferences,
+ * and matchmaking connections.
  */
 
 import { Game } from './core/Game.js';
@@ -8,27 +9,26 @@ import { SISTERS } from './config/characters.js';
 import { MUMMIES } from './config/mummies.js';
 
 window.addEventListener('DOMContentLoaded', () => {
-  const canvas = document.getElementById('game-canvas');
-  if (!canvas) return;
-
+  const canvas = document.getElementById('gameCanvas');
   const game = new Game(canvas);
   game.start();
 
   let selectedSister = "RIDDHI";
   let selectedMummy = "SOHINI";
 
-  // 1. Populate Lobby Sister Cards
+  // 1. Populate Sister Selection Cards
   const sisterGrid = document.getElementById('sister-cards-grid');
   if (sisterGrid) {
-    Object.values(SISTERS).forEach((s) => {
+    sisterGrid.innerHTML = "";
+    Object.values(SISTERS).forEach((s, idx) => {
       const card = document.createElement('div');
-      card.className = `sister-card ${s.id === selectedSister ? 'selected' : ''}`;
+      card.className = `sister-card ${idx === 0 ? 'selected' : ''}`;
       card.setAttribute('data-id', s.id);
       card.innerHTML = `
-        <div class="sister-avatar">${s.avatar}</div>
-        <div class="sister-name">${s.name}</div>
-        <div class="sister-trait">${s.archetype.split(' ')[0]}</div>
-        <div class="sister-ability-desc"><strong>⚡ Power:</strong> ${s.innocentPower.name}</div>
+        <div class="card-avatar">${s.avatar}</div>
+        <div class="card-name">${s.name}</div>
+        <div class="card-tagline">${s.tagline}</div>
+        <div class="card-power">⚡ ${s.powerName}</div>
       `;
 
       card.addEventListener('click', () => {
@@ -153,10 +153,13 @@ window.addEventListener('DOMContentLoaded', () => {
   const btnMpStart = document.getElementById('btn-mp-start-game');
   if (btnMpStart) {
     btnMpStart.addEventListener('click', () => {
+      const rolePrefEl = document.querySelector('input[name="rolePref"]:checked');
+      const rolePref = rolePrefEl ? rolePrefEl.value : "random";
+
       document.getElementById('screen-lobby').classList.add('hidden');
       game.audio.resume();
       game.audio.playClick();
-      game.startMultiplayerRoundAsHost(selectedSister, selectedMummy);
+      game.startMultiplayerRoundAsHost(selectedSister, selectedMummy, rolePref);
     });
   }
 
