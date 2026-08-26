@@ -60,7 +60,6 @@ let WebSocketServer;
 try {
   WebSocketServer = require('ws').WebSocketServer || require('ws').Server;
 } catch (e) {
-  // If 'ws' is not yet installed locally, we provide a warning
   console.log("Note: Run 'npm install' to install ws package for Node.js WebSocket engine.");
 }
 
@@ -114,7 +113,7 @@ if (WebSocketServer) {
 
             const hostPlayer = {
               id: myPlayerId,
-              name: data.name || 'Sister',
+              name: data.name || 'Host',
               sisterId: data.sisterId || 'RIDDHI',
               isHost: true
             };
@@ -138,7 +137,7 @@ if (WebSocketServer) {
             if (!room) {
               ws.send(JSON.stringify({
                 type: 'ERROR',
-                message: `Room "${roomCode}" not found! Check the code and try again.`
+                message: `Room "${roomCode}" not found! Check the 4-letter code and try again.`
               }));
               return;
             }
@@ -179,13 +178,15 @@ if (WebSocketServer) {
             break;
           }
 
-          case 'START_GAME': {
+          case 'START_GAME':
+          case 'START_GAME_SYNC': {
             const room = rooms.get(currentRoomCode);
-            if (room && room.hostSocket === ws) {
+            if (room) {
               room.state.started = true;
               room.state.imposterSisterId = data.imposterSisterId;
               room.state.mummyId = data.mummyId;
 
+              // Broadcast START_GAME_SYNC to EVERYONE in the room including joiners
               broadcastToRoom(currentRoomCode, {
                 type: 'START_GAME_SYNC',
                 imposterSisterId: data.imposterSisterId,
@@ -261,6 +262,12 @@ if (WebSocketServer) {
               });
             }
             break;
+          }
+
+          default: {
+            if (currentRoomCode) {
+              broadcastToRoom(currentRoomCode, data, ws);
+            }
           }
         }
       } catch (err) {
