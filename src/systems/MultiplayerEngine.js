@@ -15,6 +15,10 @@ export class MultiplayerEngine {
     this.lobbyPlayers = [];
     this.localChannel = null;
 
+    this.onRoomCreatedCallback = null;
+    this.onJoinedCallback = null;
+    this.onErrorCallback = null;
+
     this.initLocalChannel();
   }
 
@@ -94,6 +98,7 @@ export class MultiplayerEngine {
   createRoom(hostSisterId, mummyId, onRoomCreated) {
     this.isMultiplayer = true;
     this.isHost = true;
+    this.onRoomCreatedCallback = onRoomCreated;
 
     this.connectSocket(() => {
       this.send({
@@ -110,14 +115,14 @@ export class MultiplayerEngine {
       if (onRoomCreated) onRoomCreated(this.roomCode);
       this.updateLobbyUI();
     });
-
-    this.onRoomCreatedCallback = onRoomCreated;
   }
 
   joinRoom(roomCode, mySisterId, playerName, onJoined, onError) {
     this.isMultiplayer = true;
     this.isHost = false;
     this.roomCode = roomCode.toUpperCase().trim();
+    this.onJoinedCallback = onJoined;
+    this.onErrorCallback = onError;
 
     this.connectSocket(() => {
       this.send({
@@ -138,9 +143,6 @@ export class MultiplayerEngine {
       });
       if (onJoined) onJoined(this.roomCode);
     });
-
-    this.onJoinedCallback = onJoined;
-    this.onErrorCallback = onError;
   }
 
   handleMessage(data) {
