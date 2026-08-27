@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Sister Sneak: Phone Locked 📱🔒</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -38,7 +38,7 @@
         <div class="cleanliness-meter-container">
           <div class="meter-label">
             <span>✨ House Cleanliness:</span>
-            <span id="cleanliness-text">0% (0 / 17 Chores)</span>
+            <span id="cleanliness-text">0%</span>
           </div>
           <div class="meter-bar-track">
             <div id="cleanliness-fill" class="meter-bar-fill"></div>
@@ -52,7 +52,19 @@
           <span id="hud-room-name">Living Hub</span>
         </div>
         <button id="btn-sound-toggle" class="hud-icon-btn" aria-label="Toggle Audio">🔊</button>
-        <button id="btn-help-toggle" class="hud-icon-btn" aria-label="Help">❓</button>
+        <button id="btn-pause-toggle" class="hud-icon-btn" aria-label="Pause / Exit Match">⏸️</button>
+      </div>
+    </div>
+
+    <!-- Personal Task Checklist Drawer (Top-Left under HUD) -->
+    <div id="tasklist-drawer" class="tasklist-drawer hidden">
+      <div class="tasklist-header">
+        <button id="btn-toggle-tasklist" class="tasklist-toggle-btn">
+          📋 My Chores (<span id="my-tasks-count">0/4</span>)
+        </button>
+      </div>
+      <div id="player-tasks-list" class="tasklist-body">
+        <!-- Populated dynamically with personal tasks -->
       </div>
     </div>
 
@@ -104,8 +116,10 @@
         <div id="virtual-joystick" class="joystick-zone">
           <div class="joystick-knob"></div>
         </div>
-        <button id="btn-touch-power" class="touch-power-btn" aria-label="Use Character Power">⚡</button>
-        <button id="btn-touch-action" class="touch-action-btn" aria-label="Interact / Do Chore">E</button>
+        <div class="touch-action-group">
+          <button id="btn-touch-power" class="touch-power-btn" aria-label="Use Character Power">⚡</button>
+          <button id="btn-touch-action" class="touch-action-btn" aria-label="Interact / Do Chore">E</button>
+        </div>
       </div>
     </div>
 
@@ -123,7 +137,7 @@
           <!-- Mode Selector Tabs: Single Player vs Multiplayer -->
           <div class="mode-tabs">
             <button class="mode-tab active" id="tab-singleplayer">🎮 Single Player (with AI Bots)</button>
-            <button class="mode-tab" id="tab-multiplayer">🌐 Multiplayer (4-Letter Room Code)</button>
+            <button class="mode-tab" id="tab-multiplayer">🌐 Multiplayer (Custom Code / Link)</button>
           </div>
           
           <div class="lobby-story">
@@ -142,9 +156,9 @@
           <div class="mummy-select-section">
             <h3>2. Choose Round Inspector Mummy:</h3>
             <div class="mummy-cards-grid" id="mummy-cards-grid">
-              <div class="mummy-card selected" data-id="SOHINI">
+              <div class="mummy-card selected" data-id="RIDDHI_MUMMY">
                 <span class="m-avatar">👩‍🦱</span>
-                <span class="m-name">Riddhi & Jahanvi's Mummy (Sohini)</span>
+                <span class="m-name">Riddhi & Jahanvi's Mummy</span>
                 <span class="m-trait">Strict on bedrooms & bedsheets</span>
               </div>
               <div class="mummy-card" data-id="SHRUTI_MUMMY">
@@ -171,12 +185,12 @@
           </div>
 
           <!-- Global Role Preference Selection (Applies to Singleplayer & Multiplayer) -->
-          <div class="role-preference-section" style="margin: 12px 0; padding: 10px; background: rgba(254, 243, 199, 0.6); border-radius: 10px; border: 2px solid #F59E0B; text-align: center;">
-            <h3 style="margin-bottom: 6px; font-size: 13px; color: #78350F;">3. Choose Your Role:</h3>
-            <div class="role-preference-bar" style="display: flex; justify-content: center; gap: 16px;">
-              <label style="cursor:pointer; font-weight:700;"><input type="radio" name="rolePref" value="random" checked> 🎲 Random Role</label>
-              <label style="cursor:pointer; font-weight:700; color:#16A34A;"><input type="radio" name="rolePref" value="innocent"> 😇 Force Innocent</label>
-              <label style="cursor:pointer; font-weight:700; color:#DC2626;"><input type="radio" name="rolePref" value="imposter"> 😈 Force Imposter</label>
+          <div class="role-preference-section">
+            <h3>3. Choose Your Role:</h3>
+            <div class="role-preference-bar">
+              <label><input type="radio" name="rolePref" value="random" checked> 🎲 Random Role</label>
+              <label class="role-innocent-label"><input type="radio" name="rolePref" value="innocent"> 😇 Force Innocent</label>
+              <label class="role-imposter-label"><input type="radio" name="rolePref" value="imposter"> 😈 Force Imposter</label>
             </div>
           </div>
 
@@ -193,14 +207,17 @@
             <div class="mp-room-actions">
               <div class="mp-box create-box">
                 <h4>🏠 Host Private Room</h4>
-                <p>Create a room code and invite sisters to join on phone or PC.</p>
+                <p>Create a custom 4-5 digit room code or auto-generate:</p>
+                <div class="mp-input-row" style="margin-bottom:8px;">
+                  <input type="text" id="input-custom-host-code" placeholder="Custom Code (e.g. 1234) or Leave Empty" maxlength="8">
+                </div>
                 <button id="btn-create-room" class="mp-action-btn">Generate Room Code & Host</button>
               </div>
               <div class="mp-box join-box">
                 <h4>🔑 Join Sister's Room</h4>
-                <p>Enter 4-letter code shared by host:</p>
+                <p>Enter 4-5 digit room code shared by host:</p>
                 <div class="mp-input-row">
-                  <input type="text" id="input-room-code" placeholder="e.g. SNEK42" maxlength="8">
+                  <input type="text" id="input-room-code" placeholder="e.g. 1234" maxlength="8">
                   <button id="btn-join-room" class="mp-action-btn secondary">Join Room</button>
                 </div>
               </div>
@@ -211,8 +228,11 @@
           <div id="multiplayer-waiting-room" class="lobby-options-panel hidden">
             <div class="room-code-banner">
               <span class="code-label">ROOM CODE:</span>
-              <span class="code-val" id="mp-room-code-display">SNEK99</span>
-              <button id="btn-copy-code" class="copy-code-btn">📋 Copy Code</button>
+              <span class="code-val" id="mp-room-code-display">1234</span>
+              <div class="code-btn-group">
+                <button id="btn-copy-code" class="copy-code-btn">📋 Copy Code</button>
+                <button id="btn-copy-invite-link" class="copy-code-btn link-btn">🔗 Share Invite Link</button>
+              </div>
             </div>
             <div class="mp-waiting-body">
               <div class="mp-waiting-header">
@@ -242,7 +262,7 @@
             </div>
           </div>
           <div class="dialogue-box intro-dialogue">
-            <div class="speaker-tag" id="intro-speaker">Riddhi & Jahanvi's Mummy (Sohini Mummy)</div>
+            <div class="speaker-tag" id="intro-speaker">Riddhi & Jahanvi's Mummy</div>
             <p class="dialogue-text" id="intro-dialogue-text">"Jya sudhi aakhu ghar chakachak saaf na thai jaay, ek pan chhokri ne phone nahi male! Kaam par laago!"</p>
             <div class="dialogue-translation" id="intro-translation">(Translation: "Until the entire house is sparkling clean, not a single girl gets her phone! Get to work!")</div>
             <button id="btn-cutscene-continue" class="dialogue-next-btn">Begin Round ➔</button>
@@ -281,7 +301,7 @@
           <div class="courtroom-stage">
             <div class="mummy-judge-stand">
               <div class="mummy-portrait" id="court-mummy-portrait">👩‍🦱</div>
-              <div class="mummy-name-tag" id="court-mummy-name">Sohini Mummy</div>
+              <div class="mummy-name-tag" id="court-mummy-name">Riddhi & Jahanvi's Mummy</div>
               <div class="suspicion-bubble" id="mummy-dialogue-bubble">
                 "Bolo! Kona lidhe aa badho kachro thayo?! Who did this?!"
               </div>
@@ -300,7 +320,7 @@
             </div>
 
             <!-- Quick Chat Chips -->
-            <div class="quick-chat-chips" id="quick-chat-chips" style="display:flex; flex-wrap:wrap; gap:6px; margin: 6px 0;">
+            <div class="quick-chat-chips" id="quick-chat-chips">
               <button class="qc-chip" data-msg="I was folding clothes on 3F Terrace! 🧺">🧺 Terrace</button>
               <button class="qc-chip" data-msg="I was in the Kitchen making chai! ☕">☕ Kitchen</button>
               <button class="qc-chip" data-msg="I was watering plants on the Balcony! 🌿">🌿 Balcony</button>
@@ -310,20 +330,38 @@
             </div>
 
             <!-- Interactive Chat Input Row -->
-            <div class="chat-input-row" style="display:flex; gap:8px; margin-top:4px;">
-              <input type="text" id="meeting-chat-input" placeholder="💬 Type your alibi, defense, or accuse someone..." maxlength="120" style="flex:1; padding:8px 12px; border:2px solid #D97706; border-radius:8px; font-family:inherit; font-size:13px;" />
-              <button id="btn-meeting-chat-send" style="background:#B45309; color:#FFF; border:none; border-radius:8px; padding:8px 16px; font-weight:800; cursor:pointer;">Send 💬</button>
+            <div class="chat-input-row">
+              <input type="text" id="meeting-chat-input" placeholder="💬 Type your alibi, defense, or accuse someone..." maxlength="120" />
+              <button id="btn-meeting-chat-send">Send 💬</button>
             </div>
           </div>
 
-          <div class="courtroom-actions" style="margin-top:10px;">
+          <div class="courtroom-actions">
             <button id="btn-skip-vote" class="skip-vote-btn">Skip Vote (No Suspect)</button>
             <div class="vote-timer" id="meeting-timer">Voting ends in: <span id="vote-timer-val">25s</span></div>
           </div>
         </div>
       </div>
 
-      <!-- 5. Verdict & Punishment Screen -->
+      <!-- 5. Pause & Exit Match Modal -->
+      <div id="screen-pause" class="screen-view hidden">
+        <div class="pause-card">
+          <div class="pause-header">
+            <h2>⏸️ MATCH PAUSED</h2>
+          </div>
+          <div class="pause-body">
+            <p>Need a quick break or want to leave the house?</p>
+            <button id="btn-pause-resume" class="main-cta-btn" style="margin-bottom:10px;">
+              <span>RESUME GAME ▶️</span>
+            </button>
+            <button id="btn-pause-exit" class="secondary-btn danger">
+              <span>EXIT TO LOBBY 🚪</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Verdict & Punishment Screen -->
       <div id="screen-verdict" class="screen-view hidden">
         <div class="verdict-card">
           <h2 class="verdict-title" id="verdict-title">Mummy Has Delivered the Verdict!</h2>
@@ -337,7 +375,7 @@
         </div>
       </div>
 
-      <!-- 6. Game Over (Win / Lose) Screen -->
+      <!-- 7. Game Over (Win / Lose) Screen -->
       <div id="screen-gameover" class="screen-view hidden">
         <div class="gameover-card">
           <div class="gameover-banner" id="gameover-banner">🎉 VICTORY! 🎉</div>
@@ -368,7 +406,7 @@
           </div>
           <div class="help-content">
             <div class="help-row">
-              <span class="help-key">WASD / Arrows / Touch</span>
+              <span class="help-key">WASD / Arrows / Joystick</span>
               <span>Move your sister around the 3-floor mansion.</span>
             </div>
             <div class="help-row">
@@ -381,7 +419,7 @@
             </div>
             <div class="help-row">
               <span class="help-key">Innocent Goal 😇</span>
-              <span>Finish household chores to reach 100% Cleanliness, or unmask the secret Imposter in emergency meetings!</span>
+              <span>Finish household chores on your task list to reach 100% Cleanliness, or unmask the secret Imposter in emergency meetings!</span>
             </div>
             <div class="help-row">
               <span class="help-key">Imposter Goal 😈</span>

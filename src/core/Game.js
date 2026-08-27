@@ -1,7 +1,8 @@
 /**
  * Sister Sneak: Phone Locked - Master Game Engine
  * Manages game loop, entity updates, render pipelines, custom cutscenes,
- * active character power system, and real-time multiplayer network sync.
+ * active character power system, real-time multiplayer network sync,
+ * pause/exit management, and mobile responsiveness.
  */
 
 import { CANVAS_WIDTH, CANVAS_HEIGHT, FLOOR_Y } from '../config/constants.js';
@@ -46,12 +47,36 @@ export class Game {
     this.mummy = null;
     this.imposterSisterId = null;
     this.selectedSisterId = "RIDDHI";
-    this.activeMummyId = "SOHINI";
+    this.activeMummyId = "RIDDHI_MUMMY";
 
     this.activeNearbyHotspot = null;
     this.posSyncInterval = 0;
 
     this.bindHUDButtons();
+    this.setupMobileViewport();
+  }
+
+  setupMobileViewport() {
+    const resize = () => {
+      const container = document.getElementById('game-container');
+      if (!container) return;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const scale = Math.min(w / CANVAS_WIDTH, h / CANVAS_HEIGHT);
+      
+      // Auto-scale canvas on mobile screens while maintaining aspect ratio
+      if (w < 1000) {
+        this.canvas.style.width = `${Math.floor(CANVAS_WIDTH * scale)}px`;
+        this.canvas.style.height = `${Math.floor(CANVAS_HEIGHT * scale)}px`;
+      } else {
+        this.canvas.style.width = '100%';
+        this.canvas.style.height = '100%';
+      }
+    };
+
+    window.addEventListener('resize', resize);
+    window.addEventListener('orientationchange', () => setTimeout(resize, 200));
+    resize();
   }
 
   bindHUDButtons() {
@@ -117,9 +142,85 @@ export class Game {
     if (closeHelp && helpModal) {
       closeHelp.addEventListener("click", () => helpModal.classList.add("hidden"));
     }
+
+    // Pause / Exit Menu Handlers
+    const pauseBtn = document.getElementById("btn-pause-toggle");
+    const pauseModal = document.getElementById("screen-pause");
+    const btnResume = document.getElementById("btn-pause-resume");
+    const btnExit = document.getElementById("btn-pause-exit");
+
+    if (pauseBtn && pauseModal) {
+      pauseBtn.addEventListener("click", () => {
+        pauseModal.classList.remove("hidden");
+      });
+    }
+
+    if (btnResume && pauseModal) {
+      btnResume.addEventListener("click", () => {
+        pauseModal.classList.add("hidden");
+      });
+    }
+
+    if (btnExit && pauseModal) {
+      btnExit.addEventListener("click", () => {
+        pauseModal.classList.add("hidden");
+        this.leaveMatchToLobby();
+      });
+    }
   }
 
-  initRound(playerSisterId, chosenMummyId = "SOHINI", rolePreference = "random") {
+  leaveMatchToLobby() {
+    this.multiplayer.exitMatch();
+    this.state = "LOBBY";
+    this.taskManager.reset();
+
+    document.getElementById("game-hud")?.classList.add("hidden");
+    document.getElementById("floor-switcher")?.classList.add("hidden");
+    document.getElementById("sabotage-bar")?.classList.add("hidden");
+    document.getElementById("screen-minigame")?.classList.add("hidden");
+    document.getElementById("screen-meeting")?.classList.add("hidden");
+    document.getElementById("screen-verdict")?.classList.add("hidden");
+    document.getElementById("screen-cutscene")?.classList.add("hidden");
+    document.getElementById("screen-gameover")?.classList.add("hidden");
+    document.getElementById("screen-lobby")?.classList.remove("hidden");
+  }
+
+  handleRemotePlayerLeft(data) {
+    // Show toast banner
+    this.showTopToast(`👧 ${data.playerName} (${data.sisterId}) left the match! AI bot took over.`);
+
+    // Replace remote player with AI bot
+    if (this.remotePlayers.has(data.sisterId)) {
+      const exiting = this.remotePlayers.get(data.sisterId);
+      this.remotePlayers.delete(data.sisterId);
+
+      const bConfig = SISTERS[data.sisterId];
+      const replacementBot = new Bot({
+        ...bConfig,
+        floor: exiting.floor,
+        x: exiting.x
+      });
+      replacementBot.role = exiting.role;
+      this.bots.push(replacementBot);
+    }
+  }
+
+  showTopToast(msg) {
+    let toast = document.getElementById("game-toast-banner");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "game-toast-banner";
+      toast.className = "game-toast-banner";
+      document.getElementById("game-container")?.appendChild(toast);
+    }
+    toast.innerText = msg;
+    toast.classList.add("show");
+    setTimeout(() => {
+      toast.classList.remove("show");
+    }, 4000);
+  }
+
+  initRound(playerSisterId, chosenMummyId = "RIDDHI_MUMMY", rolePreference = "random") {
     this.selectedSisterId = playerSisterId;
     const sisterKeys = Object.keys(SISTERS);
 
@@ -134,7 +235,7 @@ export class Game {
     }
 
     // Pick Mummy
-    const mummyKeys = ["SOHINI", "SHRUTI_MUMMY", "JISHA_MUMMY", "JYEANA_MUMMY"];
+    const mummyKeys = ["RIDDHI_MUMMY", "SHRUTI_MUMMY", "JISHA_MUMMY", "JYEANA_MUMMY"];
     if (chosenMummyId === "RANDOM" || !MUMMIES[chosenMummyId]) {
       this.activeMummyId = mummyKeys[Math.floor(Math.random() * mummyKeys.length)];
     } else {
@@ -166,8 +267,9 @@ export class Game {
       }
     });
 
-    // Reset Cleanliness State & completed tasks
+    // Reset Cleanliness State & assign tasks
     this.taskManager.reset();
+    this.taskManager.assignTasksForSister(playerSisterId, false);
 
     this.camera.setFloor(1);
     this.updateHUDHeader();
@@ -176,14 +278,14 @@ export class Game {
     this.showIntroCutscene();
   }
 
-  startMultiplayerRoundAsHost(hostSisterId, chosenMummyId = "SOHINI", rolePreference = "random") {
+  startMultiplayerRoundAsHost(hostSisterId, chosenMummyId = "RIDDHI_MUMMY", rolePreference = "random") {
     this.selectedSisterId = hostSisterId;
     const sisterKeys = Object.keys(SISTERS);
 
     const lobbyPlayers = this.multiplayer.lobbyPlayers;
     const humanSisterIds = lobbyPlayers.map(p => p.sisterId);
     
-    // Honor Role Preference (Force Imposter / Force Innocent / Random)
+    // Honor Role Preference
     if (rolePreference === "imposter") {
       this.imposterSisterId = hostSisterId;
     } else if (rolePreference === "innocent") {
@@ -193,7 +295,7 @@ export class Game {
       this.imposterSisterId = sisterKeys[Math.floor(Math.random() * sisterKeys.length)];
     }
 
-    const mummyKeys = ["SOHINI", "SHRUTI_MUMMY", "JISHA_MUMMY", "JYEANA_MUMMY"];
+    const mummyKeys = ["RIDDHI_MUMMY", "SHRUTI_MUMMY", "JISHA_MUMMY", "JYEANA_MUMMY"];
     if (chosenMummyId === "RANDOM" || !MUMMIES[chosenMummyId]) {
       this.activeMummyId = mummyKeys[Math.floor(Math.random() * mummyKeys.length)];
     } else {
@@ -248,6 +350,7 @@ export class Game {
     });
 
     this.taskManager.reset();
+    this.taskManager.assignTasksForSister(hostSisterId, true);
 
     this.camera.setFloor(1);
     this.updateHUDHeader();
@@ -256,7 +359,7 @@ export class Game {
 
   startMultiplayerRoundAsClient(data) {
     this.imposterSisterId = data.imposterSisterId;
-    this.activeMummyId = data.mummyId;
+    this.activeMummyId = data.mummyId || "RIDDHI_MUMMY";
     this.mummy = new Mummy(MUMMIES[this.activeMummyId]);
 
     const mySisterId = this.selectedSisterId;
@@ -299,6 +402,9 @@ export class Game {
       }
     });
 
+    this.taskManager.reset();
+    this.taskManager.assignTasksForSister(mySisterId, true);
+
     document.getElementById('screen-lobby')?.classList.add('hidden');
     this.camera.setFloor(1);
     this.updateHUDHeader();
@@ -329,7 +435,7 @@ export class Game {
     const trans = document.getElementById("intro-translation");
     const contBtn = document.getElementById("btn-cutscene-continue");
 
-    const mummyData = MUMMIES[this.activeMummyId];
+    const mummyData = MUMMIES[this.activeMummyId] || MUMMIES.RIDDHI_MUMMY;
 
     if (avatar) avatar.innerText = mummyData.avatar;
     if (tagline) tagline.innerText = mummyData.cutsceneArt?.tagline || mummyData.personality;
@@ -351,9 +457,10 @@ export class Game {
   startPlaying() {
     this.state = "PLAYING";
 
-    // Show HUD
+    // Show HUD & Controls
     document.getElementById("game-hud")?.classList.remove("hidden");
     document.getElementById("floor-switcher")?.classList.remove("hidden");
+    document.getElementById("touch-controls")?.classList.remove("hidden");
 
     if (this.player.role === "imposter") {
       document.getElementById("sabotage-bar")?.classList.remove("hidden");

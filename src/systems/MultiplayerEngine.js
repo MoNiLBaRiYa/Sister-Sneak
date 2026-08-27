@@ -1,7 +1,7 @@
 /**
  * Sister Sneak: Phone Locked - Production Online Multiplayer Client Engine
  * Connects directly to the Centralized WebSocket Server (ws:// / wss://).
- * Supports playing with friends worldwide on separate devices and networks!
+ * Supports custom 4-5 digit codes, 1-click WhatsApp shareable invite links, and exit notifications.
  */
 
 export class MultiplayerEngine {
@@ -20,6 +20,7 @@ export class MultiplayerEngine {
     this.onErrorCallback = null;
 
     this.initLocalChannel();
+    this.checkUrlAutoJoin();
   }
 
   initLocalChannel() {
@@ -37,6 +38,28 @@ export class MultiplayerEngine {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.host || 'localhost:8080';
     return `${protocol}//${host}`;
+  }
+
+  getShareableLink(roomCode) {
+    const code = roomCode || this.roomCode;
+    const url = new URL(window.location.href);
+    url.searchParams.set('room', code);
+    return url.toString();
+  }
+
+  checkUrlAutoJoin() {
+    try {
+      const url = new URL(window.location.href);
+      const codeFromUrl = url.searchParams.get('room');
+      if (codeFromUrl) {
+        setTimeout(() => {
+          const tabMulti = document.getElementById('tab-multiplayer');
+          const inputCode = document.getElementById('input-room-code');
+          if (tabMulti) tabMulti.click();
+          if (inputCode) inputCode.value = codeFromUrl.toUpperCase();
+        }, 500);
+      }
+    } catch (e) {}
   }
 
   connectSocket(onConnected, onError) {
@@ -79,11 +102,9 @@ export class MultiplayerEngine {
 
   send(data) {
     data.roomCode = this.roomCode;
-    // 1. Send via online WebSocket
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
       this.socket.send(JSON.stringify(data));
     }
-    // 2. Send via local BroadcastChannel
     if (this.localChannel) {
       try {
         this.localChannel.postMessage(data);
@@ -95,7 +116,7 @@ export class MultiplayerEngine {
     this.send(data);
   }
 
-  createRoom(hostSisterId, mummyId, onRoomCreated) {
+  createRoom(hostSisterId, mummyId, customCode, onRoomCreated) {
     this.isMultiplayer = true;
     this.isHost = true;
     this.onRoomCreatedCallback = onRoomCreated;
@@ -103,13 +124,14 @@ export class MultiplayerEngine {
     this.connectSocket(() => {
       this.send({
         type: 'CREATE_ROOM',
+        customCode: customCode || '',
         sisterId: hostSisterId,
         name: 'Host (You)',
         mummyId: mummyId
       });
     }, (err) => {
       // Local offline fallback
-      this.roomCode = "SNEK" + Math.floor(10 + Math.random() * 90);
+      this.roomCode = (customCode || "1234").toUpperCase();
       this.myPlayerId = "host-" + Math.random().toString(36).substr(2, 4);
       this.lobbyPlayers = [{ id: this.myPlayerId, name: 'Host (You)', sisterId: hostSisterId, isHost: true }];
       if (onRoomCreated) onRoomCreated(this.roomCode);
@@ -120,7 +142,7 @@ export class MultiplayerEngine {
   joinRoom(roomCode, mySisterId, playerName, onJoined, onError) {
     this.isMultiplayer = true;
     this.isHost = false;
-    this.roomCode = roomCode.toUpperCase().trim();
+    this.roomCode = (roomCode || '').toUpperCase().replace(/[^A-Z0-9]/g, '').trim();
     this.onJoinedCallback = onJoined;
     this.onErrorCallback = onError;
 
@@ -143,6 +165,18 @@ export class MultiplayerEngine {
       });
       if (onJoined) onJoined(this.roomCode);
     });
+  }
+
+  exitMatch() {
+    if (this.isMultiplayer) {
+      this.send({
+        type: 'LEAVE_ROOM',
+        senderId: this.myPlayerId
+      });
+    }
+    this.isMultiplayer = false;
+    this.isHost = false;
+    this.roomCode = "";
   }
 
   handleMessage(data) {
@@ -185,6 +219,9 @@ export class MultiplayerEngine {
       case 'CLEANLINESS_SYNC':
         if (!this.isHost) {
           this.game.taskManager.cleanliness = data.cleanliness;
+          if (data.completedTaskId) {
+            this.game.taskManager.markTaskCompleted(data.completedTaskId);
+          }
           this.game.taskManager.updateHUD();
         }
         break;
@@ -209,6 +246,10 @@ export class MultiplayerEngine {
         if (data.senderId !== this.myPlayerId) {
           this.game.meetingEngine.receiveRemoteChatMessage(data);
         }
+        break;
+
+      case 'PLAYER_LEFT':
+        this.game.handleRemotePlayerLeft(data);
         break;
 
       case 'ERROR':
@@ -258,11 +299,13 @@ export class MultiplayerEngine {
     });
   }
 
-  syncCleanliness(cleanliness) {
-    if (!this.isMultiplayer || !this.isHost) return;
+  syncCleanliness(cleanliness, taskId = null) {
+    if (!this.isMultiplayer) return;
     this.send({
       type: 'CLEANLINESS_SYNC',
-      cleanliness: cleanliness
+      cleanliness: cleanliness,
+      completedTaskId: taskId,
+      completedBy: this.game.player?.id
     });
   }
 

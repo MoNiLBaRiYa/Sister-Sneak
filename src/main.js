@@ -1,7 +1,7 @@
 /**
  * Sister Sneak: Phone Locked - Main Application Bootstrap
  * Initializes game engine, lobby character selector, role preferences,
- * and matchmaking connections.
+ * custom room codes, 1-click shareable links, and matchmaking connections.
  */
 
 import { Game } from './core/Game.js';
@@ -14,7 +14,7 @@ window.addEventListener('DOMContentLoaded', () => {
   game.start();
 
   let selectedSister = "RIDDHI";
-  let selectedMummy = "SOHINI";
+  let selectedMummy = "RIDDHI_MUMMY";
 
   // 1. Populate Sister Selection Cards
   const sisterGrid = document.getElementById('sister-cards-grid');
@@ -27,8 +27,8 @@ window.addEventListener('DOMContentLoaded', () => {
       card.innerHTML = `
         <div class="card-avatar">${s.avatar}</div>
         <div class="card-name">${s.name}</div>
-        <div class="card-tagline">${s.tagline}</div>
-        <div class="card-power">⚡ ${s.powerName}</div>
+        <div class="card-tagline">${s.tagline || s.archetype}</div>
+        <div class="card-power">⚡ ${s.innocentPower?.name || 'Power'}</div>
       `;
 
       card.addEventListener('click', () => {
@@ -42,7 +42,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 2. Wire Mummy Selection Cards
+  // 2. Wire Mummy Selection Cards (Strictly Riddhi & Jahanvi's Mummy, NO Sohini)
   const mummyCards = document.querySelectorAll('.mummy-card');
   mummyCards.forEach((mCard) => {
     mCard.addEventListener('click', () => {
@@ -94,13 +94,16 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Multiplayer: Create Room
+  // Multiplayer: Create Room (Supports Custom Code e.g. 1234 or CHAI8)
   const btnCreateRoom = document.getElementById('btn-create-room');
+  const inputCustomHostCode = document.getElementById('input-custom-host-code');
   if (btnCreateRoom) {
     btnCreateRoom.addEventListener('click', () => {
       game.audio.playClick();
       btnCreateRoom.innerText = "Creating Room...";
-      game.multiplayer.createRoom(selectedSister, selectedMummy, (code) => {
+      const customCode = inputCustomHostCode ? inputCustomHostCode.value.trim() : "";
+
+      game.multiplayer.createRoom(selectedSister, selectedMummy, customCode, (code) => {
         btnCreateRoom.innerText = "Generate Room Code & Host";
         panelMulti?.classList.add('hidden');
         panelWaiting?.classList.remove('hidden');
@@ -118,7 +121,7 @@ window.addEventListener('DOMContentLoaded', () => {
     btnJoinRoom.addEventListener('click', () => {
       const code = inputRoomCode.value.trim();
       if (!code) {
-        alert("Please enter a valid room code!");
+        alert("Please enter a valid 4-5 digit room code!");
         return;
       }
       game.audio.playClick();
@@ -145,6 +148,18 @@ window.addEventListener('DOMContentLoaded', () => {
       navigator.clipboard.writeText(code).then(() => {
         btnCopyCode.innerText = "✅ Copied!";
         setTimeout(() => { btnCopyCode.innerText = "📋 Copy Code"; }, 1500);
+      });
+    });
+  }
+
+  // Copy 1-Click WhatsApp / Browser Invite Link Button
+  const btnCopyLink = document.getElementById('btn-copy-invite-link');
+  if (btnCopyLink) {
+    btnCopyLink.addEventListener('click', () => {
+      const link = game.multiplayer.getShareableLink();
+      navigator.clipboard.writeText(link).then(() => {
+        btnCopyLink.innerText = "✅ Link Copied!";
+        setTimeout(() => { btnCopyLink.innerText = "🔗 Share Invite Link"; }, 1500);
       });
     });
   }

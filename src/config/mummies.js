@@ -4,10 +4,10 @@
  */
 
 export const MUMMIES = {
-  SOHINI: {
-    id: "SOHINI",
-    name: "Riddhi & Jahanvi's Mummy (Sohini Mummy)",
-    shortName: "Sohini Mummy",
+  RIDDHI_MUMMY: {
+    id: "RIDDHI_MUMMY",
+    name: "Riddhi & Jahanvi's Mummy",
+    shortName: "Riddhi & Jahanvi's Mummy",
     avatar: "👩‍🦱",
     relation: "Riddhi & Jahanvi's Mummy",
     personality: "Strict on discipline, bedsheet folding & bedroom clutter",

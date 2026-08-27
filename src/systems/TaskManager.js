@@ -1,6 +1,7 @@
 /**
  * Sister Sneak: Phone Locked - Task Manager System
- * 18 Distinct Interactive Chores Across 3 Floors with Balanced Progress.
+ * Manages personal task checklists for each sister (Among Us style),
+ * tracks completion across all 3 floors, and executes multi-step interactive mini-games.
  */
 
 import { ClothesTask } from '../minigames/ClothesTask.js';
@@ -20,14 +21,16 @@ import { KhakhraTask } from '../minigames/KhakhraTask.js';
 import { HomeworkTask } from '../minigames/HomeworkTask.js';
 import { RangoliTask } from '../minigames/RangoliTask.js';
 import { TrunkLockTask } from '../minigames/TrunkLockTask.js';
+import { HOTSPOTS } from '../config/constants.js';
 
 export class TaskManager {
   constructor(game) {
     this.game = game;
-    this.cleanliness = 0; // 0% to 100%
+    this.cleanliness = 0;
     this.tasksCompletedCount = 0;
     this.activeMiniGame = null;
-    this.completedTasks = new Set(); // Stores completed taskId strings
+    this.completedTasks = new Set(); // Global completed taskIds
+    this.assignedTasks = new Set();  // Tasks assigned to this specific sister
 
     this.miniGameMap = {
       // 3F Terrace
@@ -65,12 +68,46 @@ export class TaskManager {
         this.closeMiniGame();
       });
     }
+
+    // Toggle Task Checklist Drawer on HUD
+    const toggleBtn = document.getElementById("btn-toggle-tasklist");
+    const drawer = document.getElementById("tasklist-drawer");
+    if (toggleBtn && drawer) {
+      toggleBtn.addEventListener("click", () => {
+        drawer.classList.toggle("collapsed");
+      });
+    }
+  }
+
+  assignTasksForSister(sisterId, isMultiplayer = false) {
+    this.assignedTasks.clear();
+    const allTaskHotspots = HOTSPOTS.filter(hs => hs.taskId);
+
+    if (!isMultiplayer) {
+      // In Single Player: player can do all tasks across the house
+      allTaskHotspots.forEach(hs => this.assignedTasks.add(hs.taskId));
+    } else {
+      // In Multiplayer: Each sister gets a thematic 4-5 task list
+      const sisterTaskPreferences = {
+        RIDDHI: ["BEDSHEET_TUCK", "CLOTHES_COLLECT", "SNACK_CONTAINER", "PLANT_WATER"],
+        SHRUTI: ["GLASSWARE_ALIGN", "RANGOLI_TOUCHUP", "SPICE_RACK", "SOLAR_PANEL"],
+        JAHANVI: ["TANK_VALVE", "KITE_UNTANGLE", "FOOTWEAR_MATCH", "SWITCHES_OFF"],
+        JISHA: ["HOMEWORK_MATH", "PLANT_WATER", "CHAI_FILTER", "ACHAR_HUNT"],
+        JYEANA: ["SWITCHES_OFF", "TRUNK_LOCK", "PAPAD_DRY", "SOLAR_PANEL"]
+      };
+
+      const myPool = sisterTaskPreferences[sisterId] || ["BEDSHEET_TUCK", "PLANT_WATER", "SWITCHES_OFF", "CLOTHES_COLLECT"];
+      myPool.forEach(t => this.assignedTasks.add(t));
+    }
+
+    this.updateTasklistDrawer();
   }
 
   reset() {
     this.cleanliness = 0;
     this.tasksCompletedCount = 0;
     this.completedTasks.clear();
+    this.assignedTasks.clear();
     this.updateHUD();
   }
 
@@ -80,14 +117,16 @@ export class TaskManager {
 
   markTaskCompleted(taskId) {
     this.completedTasks.add(taskId);
+    this.updateHUD();
+    this.updateTasklistDrawer();
   }
 
-  contributeCleanliness(amount) {
+  contributeCleanliness(amount, taskId = null) {
     this.cleanliness = Math.min(100, Math.max(0, this.cleanliness + amount));
     this.updateHUD();
 
     if (this.game.multiplayer && this.game.multiplayer.isMultiplayer) {
-      this.game.multiplayer.syncCleanliness(this.cleanliness);
+      this.game.multiplayer.syncCleanliness(this.cleanliness, taskId);
     }
 
     if (this.cleanliness >= 100) {
@@ -107,8 +146,34 @@ export class TaskManager {
   updateHUD() {
     const text = document.getElementById("cleanliness-text");
     const fill = document.getElementById("cleanliness-fill");
-    if (text) text.innerText = `${Math.round(this.cleanliness)}% (${this.completedTasks.size} / 17 Chores)`;
+    if (text) text.innerText = `${Math.round(this.cleanliness)}% (${this.completedTasks.size} / ${HOTSPOTS.filter(h => h.taskId).length} Done)`;
     if (fill) fill.style.width = `${Math.round(this.cleanliness)}%`;
+  }
+
+  updateTasklistDrawer() {
+    const listEl = document.getElementById("player-tasks-list");
+    if (!listEl) return;
+    listEl.innerHTML = "";
+
+    const allTaskHotspots = HOTSPOTS.filter(hs => hs.taskId && this.assignedTasks.has(hs.taskId));
+
+    allTaskHotspots.forEach((hs) => {
+      const isDone = this.isTaskCompleted(hs.taskId);
+      const floorLabel = hs.floor === 2 ? "3F" : hs.floor === 1 ? "2F" : "1F";
+
+      const item = document.createElement("div");
+      item.className = `task-checklist-item ${isDone ? 'completed' : ''}`;
+      item.innerHTML = `
+        <span class="task-check-icon">${isDone ? '✅' : '⬜'}</span>
+        <span class="task-check-floor">${floorLabel}</span>
+        <span class="task-check-name">${hs.label}</span>
+      `;
+      listEl.appendChild(item);
+    });
+
+    const myDone = allTaskHotspots.filter(h => this.isTaskCompleted(h.taskId)).length;
+    const countBadge = document.getElementById("my-tasks-count");
+    if (countBadge) countBadge.innerText = `${myDone} / ${allTaskHotspots.length}`;
   }
 
   openTask(taskId) {
@@ -117,13 +182,13 @@ export class TaskManager {
     // Check if task is already completed
     if (this.isTaskCompleted(taskId)) {
       this.game.audio.playClick();
-      alert("✨ This chore is already 100% clean & completed! Look for other pending chores in the house.");
+      alert("✨ This chore is already 100% clean & completed! Check your task list for other chores.");
       return;
     }
 
     // Check if floor is blacked out
     if (this.game.houseMap.isFloorBlackedOut(this.game.player.floor)) {
-      alert("⚡ Power blackout on this floor! Fix the fuse box or wait for power before doing tasks!");
+      alert("⚡ Power blackout on this floor! Turn the fuse box switch on before cleaning!");
       return;
     }
 
@@ -148,18 +213,16 @@ export class TaskManager {
     this.activeMiniGame.start(
       viewport,
       () => {
-        // Task completed successfully
         this.tasksCompletedCount++;
         this.markTaskCompleted(taskId);
         this.game.audio.playTaskComplete();
 
-        // Balanced Cleanliness contribution (~6% per task across 17 tasks)
         let cleanBonus = 6.0;
         if (this.game.player.id === "SHRUTI" && (taskId === "BEDSHEET_TUCK" || taskId === "GLASSWARE_ALIGN" || taskId === "RANGOLI_TOUCHUP")) {
           cleanBonus = 9.0; // Shruti's Artistic Flow perk
         }
 
-        this.contributeCleanliness(cleanBonus);
+        this.contributeCleanliness(cleanBonus, taskId);
         setTimeout(() => {
           this.closeMiniGame();
         }, 500);

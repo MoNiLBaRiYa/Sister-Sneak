@@ -1,7 +1,7 @@
 /**
  * Sister Sneak: Phone Locked - Production Online Multiplayer Server
  * Serves static web app assets and manages real-time WebSocket rooms worldwide.
- * Deployable on Render, Railway, Fly.io, Heroku, AWS, or local Node.js.
+ * Supports custom 4-5 digit codes, shareable URLs, and keep-alive heartbeats.
  */
 
 const http = require('http');
@@ -23,7 +23,7 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon'
 };
 
-// 1. HTTP Server for Static Assets
+// 1. HTTP Server for Static Assets & Health Checks
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -35,7 +35,14 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  let filePath = path.join(__dirname, req.url === '/' ? 'index.html' : req.url.split('?')[0]);
+  // Health ping endpoint for Render / Uptime monitors
+  if (req.url === '/healthz' || req.url === '/ping') {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('OK');
+    return;
+  }
+
+  let filePath = path.join(__dirname, req.url === '/' || req.url.startsWith('/?') ? 'index.html' : req.url.split('?')[0]);
   const ext = path.extname(filePath).toLowerCase();
   const contentType = MIME_TYPES[ext] || 'application/octet-stream';
 
@@ -66,9 +73,8 @@ try {
 const rooms = new Map(); // roomCode -> { hostSocket, players: Map<socket, playerObj>, state }
 
 function generateRoomCode() {
-  const words = ["SNEK", "CHAI", "DADI", "MUMY", "ROTI", "SAAF", "GHEE", "JALE", "KHAK", "KACH"];
-  const code = words[Math.floor(Math.random() * words.length)] + Math.floor(10 + Math.random() * 90);
-  return code;
+  // Generate friendly 4-digit code (e.g. 7482 or CHAI8)
+  return Math.floor(1000 + Math.random() * 9000).toString();
 }
 
 function broadcastToRoom(roomCode, data, excludeSocket = null) {
@@ -86,7 +92,19 @@ function broadcastToRoom(roomCode, data, excludeSocket = null) {
 if (WebSocketServer) {
   const wss = new WebSocketServer({ server });
 
+  // Keep-alive heartbeat interval (pings all sockets every 15s to prevent Render disconnects)
+  setInterval(() => {
+    wss.clients.forEach((ws) => {
+      if (ws.isAlive === false) return ws.terminate();
+      ws.isAlive = false;
+      ws.ping();
+    });
+  }, 15000);
+
   wss.on('connection', (ws) => {
+    ws.isAlive = true;
+    ws.on('pong', () => { ws.isAlive = true; });
+
     let currentRoomCode = null;
     let myPlayerId = 'p-' + Math.random().toString(36).substr(2, 6);
 
@@ -96,7 +114,17 @@ if (WebSocketServer) {
 
         switch (data.type) {
           case 'CREATE_ROOM': {
-            const roomCode = generateRoomCode();
+            // Allow custom code if provided and valid (4-8 chars), else generate random 4-digit code
+            let roomCode = (data.customCode || '').toUpperCase().replace(/[^A-Z0-9]/g, '').trim();
+            if (!roomCode || roomCode.length < 3) {
+              roomCode = generateRoomCode();
+            }
+
+            // If room already exists and has active host, choose unique
+            if (rooms.has(roomCode) && rooms.get(roomCode).players.size > 0) {
+              roomCode = generateRoomCode();
+            }
+
             currentRoomCode = roomCode;
 
             const newRoom = {
@@ -105,7 +133,7 @@ if (WebSocketServer) {
               players: new Map(),
               state: {
                 cleanliness: 0,
-                mummyId: data.mummyId || 'SOHINI',
+                mummyId: data.mummyId || 'RIDDHI_MUMMY',
                 imposterSisterId: null,
                 started: false
               }
@@ -131,13 +159,13 @@ if (WebSocketServer) {
           }
 
           case 'JOIN_ROOM': {
-            const roomCode = (data.roomCode || '').toUpperCase().trim();
+            const roomCode = (data.roomCode || '').toUpperCase().replace(/[^A-Z0-9]/g, '').trim();
             const room = rooms.get(roomCode);
 
             if (!room) {
               ws.send(JSON.stringify({
                 type: 'ERROR',
-                message: `Room "${roomCode}" not found! Check the 4-letter code and try again.`
+                message: `Room "${roomCode}" not found! Check the room code and try again.`
               }));
               return;
             }
@@ -186,7 +214,6 @@ if (WebSocketServer) {
               room.state.imposterSisterId = data.imposterSisterId;
               room.state.mummyId = data.mummyId;
 
-              // Broadcast START_GAME_SYNC to EVERYONE in the room including joiners
               broadcastToRoom(currentRoomCode, {
                 type: 'START_GAME_SYNC',
                 imposterSisterId: data.imposterSisterId,
@@ -222,7 +249,9 @@ if (WebSocketServer) {
                 room.state.cleanliness = data.cleanliness;
                 broadcastToRoom(currentRoomCode, {
                   type: 'CLEANLINESS_SYNC',
-                  cleanliness: data.cleanliness
+                  cleanliness: data.cleanliness,
+                  completedTaskId: data.completedTaskId,
+                  completedBy: data.completedBy
                 }, ws);
               }
             }
@@ -264,6 +293,30 @@ if (WebSocketServer) {
             break;
           }
 
+          case 'LEAVE_ROOM': {
+            if (currentRoomCode && rooms.has(currentRoomCode)) {
+              const room = rooms.get(currentRoomCode);
+              const exitingPlayer = room.players.get(ws);
+              room.players.delete(ws);
+
+              if (exitingPlayer) {
+                broadcastToRoom(currentRoomCode, {
+                  type: 'PLAYER_LEFT',
+                  playerId: exitingPlayer.id,
+                  sisterId: exitingPlayer.sisterId,
+                  playerName: exitingPlayer.name,
+                  remainingPlayers: Array.from(room.players.values())
+                });
+              }
+
+              if (room.players.size === 0) {
+                rooms.delete(currentRoomCode);
+              }
+              currentRoomCode = null;
+            }
+            break;
+          }
+
           default: {
             if (currentRoomCode) {
               broadcastToRoom(currentRoomCode, data, ws);
@@ -278,12 +331,23 @@ if (WebSocketServer) {
     ws.on('close', () => {
       if (currentRoomCode && rooms.has(currentRoomCode)) {
         const room = rooms.get(currentRoomCode);
+        const exitingPlayer = room.players.get(ws);
         room.players.delete(ws);
+
+        if (exitingPlayer) {
+          broadcastToRoom(currentRoomCode, {
+            type: 'PLAYER_LEFT',
+            playerId: exitingPlayer.id,
+            sisterId: exitingPlayer.sisterId,
+            playerName: exitingPlayer.name,
+            remainingPlayers: Array.from(room.players.values())
+          });
+        }
 
         if (room.players.size === 0) {
           rooms.delete(currentRoomCode);
         } else {
-          // If host left, assign new host
+          // If host left, promote next player
           if (room.hostSocket === ws) {
             const nextSocket = room.players.keys().next().value;
             room.hostSocket = nextSocket;
