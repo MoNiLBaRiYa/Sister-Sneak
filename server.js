@@ -1,7 +1,7 @@
 /**
  * Sister Sneak: Phone Locked - Production Online Multiplayer Server
  * Serves static web app assets and manages real-time WebSocket rooms worldwide.
- * Supports custom 4-5 digit codes, shareable URLs, and keep-alive heartbeats.
+ * Supports Among Us / Skribbl-style instant character updates and real-time chat broadcasts.
  */
 
 const http = require('http');
@@ -67,13 +67,12 @@ let WebSocketServer;
 try {
   WebSocketServer = require('ws').WebSocketServer || require('ws').Server;
 } catch (e) {
-  console.log("Note: Run 'npm install' to install ws package for Node.js WebSocket engine.");
+  console.log("Note: Running WebSocket server.");
 }
 
 const rooms = new Map(); // roomCode -> { hostSocket, players: Map<socket, playerObj>, state }
 
 function generateRoomCode() {
-  // Generate friendly 4-digit code (e.g. 7482 or CHAI8)
   return Math.floor(1000 + Math.random() * 9000).toString();
 }
 
@@ -114,13 +113,11 @@ if (WebSocketServer) {
 
         switch (data.type) {
           case 'CREATE_ROOM': {
-            // Allow custom code if provided and valid (4-8 chars), else generate random 4-digit code
             let roomCode = (data.customCode || '').toUpperCase().replace(/[^A-Z0-9]/g, '').trim();
             if (!roomCode || roomCode.length < 3) {
               roomCode = generateRoomCode();
             }
 
-            // If room already exists and has active host, choose unique
             if (rooms.has(roomCode) && rooms.get(roomCode).players.size > 0) {
               roomCode = generateRoomCode();
             }
@@ -141,7 +138,7 @@ if (WebSocketServer) {
 
             const hostPlayer = {
               id: myPlayerId,
-              name: data.name || 'Host',
+              name: data.name || 'Host (You)',
               sisterId: data.sisterId || 'RIDDHI',
               isHost: true
             };
@@ -187,10 +184,8 @@ if (WebSocketServer) {
             };
 
             room.players.set(ws, newPlayer);
-
             const playerList = Array.from(room.players.values());
 
-            // Notify joiner
             ws.send(JSON.stringify({
               type: 'ROOM_JOINED',
               roomCode: roomCode,
@@ -198,11 +193,26 @@ if (WebSocketServer) {
               players: playerList
             }));
 
-            // Notify all other players in room
             broadcastToRoom(roomCode, {
               type: 'LOBBY_UPDATE',
               players: playerList
             }, ws);
+            break;
+          }
+
+          case 'UPDATE_CHARACTER': {
+            if (currentRoomCode && rooms.has(currentRoomCode)) {
+              const room = rooms.get(currentRoomCode);
+              const player = room.players.get(ws);
+              if (player) {
+                player.sisterId = data.sisterId;
+                if (data.name) player.name = data.name;
+                broadcastToRoom(currentRoomCode, {
+                  type: 'LOBBY_UPDATE',
+                  players: Array.from(room.players.values())
+                });
+              }
+            }
             break;
           }
 
@@ -219,6 +229,21 @@ if (WebSocketServer) {
                 imposterSisterId: data.imposterSisterId,
                 mummyId: data.mummyId,
                 lobbyPlayers: Array.from(room.players.values())
+              });
+            }
+            break;
+          }
+
+          case 'CHAT_MESSAGE': {
+            if (currentRoomCode) {
+              broadcastToRoom(currentRoomCode, {
+                type: 'CHAT_MESSAGE',
+                senderId: myPlayerId,
+                sisterId: data.sisterId,
+                senderName: data.senderName,
+                avatar: data.avatar,
+                color: data.color,
+                text: data.text
               });
             }
             break;
@@ -347,7 +372,6 @@ if (WebSocketServer) {
         if (room.players.size === 0) {
           rooms.delete(currentRoomCode);
         } else {
-          // If host left, promote next player
           if (room.hostSocket === ws) {
             const nextSocket = room.players.keys().next().value;
             room.hostSocket = nextSocket;
@@ -366,9 +390,5 @@ if (WebSocketServer) {
 }
 
 server.listen(PORT, () => {
-  console.log(`====================================================`);
-  console.log(`  Sister Sneak Online Multiplayer Server Running!   `);
-  console.log(`  Port: ${PORT}                                      `);
-  console.log(`  Local URL: http://localhost:${PORT}                `);
-  console.log(`====================================================`);
+  console.log(`Sister Sneak Server running on port ${PORT}`);
 });

@@ -279,17 +279,20 @@ export class Game {
   }
 
   startMultiplayerRoundAsHost(hostSisterId, chosenMummyId = "RIDDHI_MUMMY", rolePreference = "random") {
-    this.selectedSisterId = hostSisterId;
-    const sisterKeys = Object.keys(SISTERS);
+    // Find my chosen sister from lobbyPlayers array
+    const hostLobbyEntry = this.multiplayer.lobbyPlayers.find(p => p.id === this.multiplayer.myPlayerId || p.isHost);
+    const mySisterId = hostLobbyEntry ? hostLobbyEntry.sisterId : hostSisterId;
+    this.selectedSisterId = mySisterId;
 
+    const sisterKeys = Object.keys(SISTERS);
     const lobbyPlayers = this.multiplayer.lobbyPlayers;
     const humanSisterIds = lobbyPlayers.map(p => p.sisterId);
     
     // Honor Role Preference
     if (rolePreference === "imposter") {
-      this.imposterSisterId = hostSisterId;
+      this.imposterSisterId = mySisterId;
     } else if (rolePreference === "innocent") {
-      const otherKeys = sisterKeys.filter((k) => k !== hostSisterId);
+      const otherKeys = sisterKeys.filter((k) => k !== mySisterId);
       this.imposterSisterId = otherKeys[Math.floor(Math.random() * otherKeys.length)];
     } else {
       this.imposterSisterId = sisterKeys[Math.floor(Math.random() * sisterKeys.length)];
@@ -304,20 +307,20 @@ export class Game {
     this.mummy = new Mummy(MUMMIES[this.activeMummyId]);
 
     // Create Host Player
-    const pConfig = SISTERS[hostSisterId];
+    const pConfig = SISTERS[mySisterId] || SISTERS.RIDDHI;
     this.player = new Player({
       ...pConfig,
       floor: 1,
       x: 500
     });
-    this.player.role = (hostSisterId === this.imposterSisterId) ? "imposter" : "innocent";
+    this.player.role = (mySisterId === this.imposterSisterId) ? "imposter" : "innocent";
 
     // Create Remote Players & Bots
     this.remotePlayers.clear();
     this.bots = [];
 
     sisterKeys.forEach((key) => {
-      if (key !== hostSisterId) {
+      if (key !== mySisterId) {
         const isHuman = humanSisterIds.includes(key);
         if (isHuman) {
           const rConfig = SISTERS[key];
@@ -350,7 +353,7 @@ export class Game {
     });
 
     this.taskManager.reset();
-    this.taskManager.assignTasksForSister(hostSisterId, true);
+    this.taskManager.assignTasksForSister(mySisterId, true);
 
     this.camera.setFloor(1);
     this.updateHUDHeader();
@@ -362,12 +365,16 @@ export class Game {
     this.activeMummyId = data.mummyId || "RIDDHI_MUMMY";
     this.mummy = new Mummy(MUMMIES[this.activeMummyId]);
 
-    const mySisterId = this.selectedSisterId;
+    // Find my chosen sister from lobbyPlayers array using my playerId
+    const myLobbyEntry = data.lobbyPlayers.find(p => p.id === this.multiplayer.myPlayerId);
+    const mySisterId = myLobbyEntry ? myLobbyEntry.sisterId : this.selectedSisterId;
+    this.selectedSisterId = mySisterId;
+
     const sisterKeys = Object.keys(SISTERS);
     const humanSisterIds = data.lobbyPlayers.map(p => p.sisterId);
 
     // Create Client Player
-    const pConfig = SISTERS[mySisterId];
+    const pConfig = SISTERS[mySisterId] || SISTERS.RIDDHI;
     this.player = new Player({
       ...pConfig,
       floor: 1,

@@ -1,9 +1,7 @@
 /**
  * Sister Sneak: Phone Locked - Camera & Viewport Controller
- * Provides smooth floor scrolling, cutaway zoom, and screen shake for sabotages.
+ * Keeps the mansion cross-section perfectly stable (Zero horizontal/vertical panning glitch).
  */
-
-import { CANVAS_WIDTH, CANVAS_HEIGHT, FLOOR_Y } from '../config/constants.js';
 
 export class Camera {
   constructor() {
@@ -11,28 +9,21 @@ export class Camera {
     this.y = 0;
     this.targetY = 0;
     this.zoom = 1.0;
-    this.targetZoom = 1.0;
-
     this.shakeDuration = 0;
     this.shakeIntensity = 0;
   }
 
   setFloor(floorIndex) {
-    // Center camera smoothly on the floor's vertical region
-    const targetFloorY = FLOOR_Y[floorIndex];
-    this.targetY = -(targetFloorY - (CANVAS_HEIGHT / 2 - 100));
+    // Keep camera stable at center frame
+    this.targetY = 0;
   }
 
-  shake(duration = 0.4, intensity = 8) {
+  shake(duration = 0.3, intensity = 6) {
     this.shakeDuration = duration;
     this.shakeIntensity = intensity;
   }
 
   update(dt) {
-    // Smooth Lerp
-    this.y += (this.targetY - this.y) * Math.min(1, dt * 6);
-    this.zoom += (this.targetZoom - this.zoom) * Math.min(1, dt * 6);
-
     if (this.shakeDuration > 0) {
       this.shakeDuration -= dt;
     }
@@ -41,7 +32,7 @@ export class Camera {
   apply(ctx) {
     ctx.save();
     let offsetX = 0;
-    let offsetY = this.y;
+    let offsetY = 0;
 
     if (this.shakeDuration > 0) {
       offsetX += (Math.random() - 0.5) * this.shakeIntensity;

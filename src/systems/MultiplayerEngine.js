@@ -1,8 +1,10 @@
 /**
  * Sister Sneak: Phone Locked - Production Online Multiplayer Client Engine
  * Connects directly to the Centralized WebSocket Server (ws:// / wss://).
- * Supports custom 4-5 digit codes, 1-click WhatsApp shareable invite links, and exit notifications.
+ * Supports Among Us / Skribbl-style character selection sync and real-time chat broadcasts.
  */
+
+import { SISTERS } from '../config/characters.js';
 
 export class MultiplayerEngine {
   constructor(game) {
@@ -126,14 +128,14 @@ export class MultiplayerEngine {
         type: 'CREATE_ROOM',
         customCode: customCode || '',
         sisterId: hostSisterId,
-        name: 'Host (You)',
+        name: `${SISTERS[hostSisterId]?.name || 'Host'} (You)`,
         mummyId: mummyId
       });
     }, (err) => {
       // Local offline fallback
       this.roomCode = (customCode || "1234").toUpperCase();
       this.myPlayerId = "host-" + Math.random().toString(36).substr(2, 4);
-      this.lobbyPlayers = [{ id: this.myPlayerId, name: 'Host (You)', sisterId: hostSisterId, isHost: true }];
+      this.lobbyPlayers = [{ id: this.myPlayerId, name: `${SISTERS[hostSisterId]?.name || 'Host'} (You)`, sisterId: hostSisterId, isHost: true }];
       if (onRoomCreated) onRoomCreated(this.roomCode);
       this.updateLobbyUI();
     });
@@ -151,7 +153,7 @@ export class MultiplayerEngine {
         type: 'JOIN_ROOM',
         roomCode: this.roomCode,
         sisterId: mySisterId,
-        name: playerName || 'Sister'
+        name: playerName || SISTERS[mySisterId]?.name || 'Sister'
       });
     }, (err) => {
       // Local fallback
@@ -161,9 +163,18 @@ export class MultiplayerEngine {
         roomCode: this.roomCode,
         senderId: this.myPlayerId,
         sisterId: mySisterId,
-        name: playerName || 'Sister'
+        name: playerName || SISTERS[mySisterId]?.name || 'Sister'
       });
       if (onJoined) onJoined(this.roomCode);
+    });
+  }
+
+  updateMyCharacter(sisterId, name) {
+    if (!this.isMultiplayer) return;
+    this.send({
+      type: 'UPDATE_CHARACTER',
+      sisterId: sisterId,
+      name: name || SISTERS[sisterId]?.name || 'Sister'
     });
   }
 
@@ -265,11 +276,17 @@ export class MultiplayerEngine {
     listEl.innerHTML = "";
 
     this.lobbyPlayers.forEach((p) => {
+      const char = SISTERS[p.sisterId] || SISTERS.RIDDHI;
+      const isMe = (p.id === this.myPlayerId);
+
       const item = document.createElement('div');
       item.className = 'mp-player-item';
       item.innerHTML = `
-        <span class="mp-player-icon">${p.isHost ? '👑' : '👧'}</span>
-        <span class="mp-player-name"><strong>${p.name}</strong> (${p.sisterId})</span>
+        <span class="mp-player-avatar">${char.avatar}</span>
+        <div class="mp-player-info">
+          <span class="mp-player-name">${p.isHost ? '👑 ' : ''}<strong>${char.name}</strong> ${isMe ? '(You)' : ''}</span>
+          <span class="mp-player-tagline">${char.archetype}</span>
+        </div>
       `;
       listEl.appendChild(item);
     });

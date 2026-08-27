@@ -1,7 +1,7 @@
 /**
  * Sister Sneak: Phone Locked - Main Application Bootstrap
  * Initializes game engine, lobby character selector, role preferences,
- * custom room codes, 1-click shareable links, and matchmaking connections.
+ * instant character sync across lobby, and matchmaking connections.
  */
 
 import { Game } from './core/Game.js';
@@ -35,6 +35,13 @@ window.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.sister-card').forEach((c) => c.classList.remove('selected'));
         card.classList.add('selected');
         selectedSister = s.id;
+        game.selectedSisterId = s.id;
+
+        // Sync character change to multiplayer lobby in real time
+        if (game.multiplayer && game.multiplayer.isMultiplayer) {
+          game.multiplayer.updateMyCharacter(s.id, s.name);
+        }
+
         game.audio.playClick();
       });
 
@@ -42,7 +49,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 2. Wire Mummy Selection Cards (Strictly Riddhi & Jahanvi's Mummy, NO Sohini)
+  // 2. Wire Mummy Selection Cards
   const mummyCards = document.querySelectorAll('.mummy-card');
   mummyCards.forEach((mCard) => {
     mCard.addEventListener('click', () => {
@@ -94,7 +101,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Multiplayer: Create Room (Supports Custom Code e.g. 1234 or CHAI8)
+  // Multiplayer: Create Room
   const btnCreateRoom = document.getElementById('btn-create-room');
   const inputCustomHostCode = document.getElementById('input-custom-host-code');
   if (btnCreateRoom) {
