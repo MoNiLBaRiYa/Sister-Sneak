@@ -1,7 +1,7 @@
 /**
  * Sister Sneak: Phone Locked - Main Application Bootstrap
- * Initializes game engine, lobby character selector, role preferences,
- * instant character sync across lobby, and matchmaking connections.
+ * Initializes game engine, lobby character selector with custom illustrated avatars,
+ * role preferences, instant character sync across lobby, and matchmaking connections.
  */
 
 import { Game } from './core/Game.js';
@@ -16,7 +16,7 @@ window.addEventListener('DOMContentLoaded', () => {
   let selectedSister = "RIDDHI";
   let selectedMummy = "RIDDHI_MUMMY";
 
-  // 1. Populate Sister Selection Cards
+  // 1. Populate Sister Selection Cards with Custom Avatars
   const sisterGrid = document.getElementById('sister-cards-grid');
   if (sisterGrid) {
     sisterGrid.innerHTML = "";
@@ -25,7 +25,9 @@ window.addEventListener('DOMContentLoaded', () => {
       card.className = `sister-card ${idx === 0 ? 'selected' : ''}`;
       card.setAttribute('data-id', s.id);
       card.innerHTML = `
-        <div class="card-avatar">${s.avatar}</div>
+        <div class="card-avatar-wrapper">
+          <img src="${s.image}" alt="${s.name}" class="card-avatar-img" />
+        </div>
         <div class="card-name">${s.name}</div>
         <div class="card-tagline">${s.tagline || s.archetype}</div>
         <div class="card-power">⚡ ${s.innocentPower?.name || 'Power'}</div>

@@ -282,7 +282,9 @@ export class MultiplayerEngine {
       const item = document.createElement('div');
       item.className = 'mp-player-item';
       item.innerHTML = `
-        <span class="mp-player-avatar">${char.avatar}</span>
+        <div class="mp-player-avatar-wrapper">
+          <img src="${char.image}" alt="${char.name}" class="mp-player-avatar-img" />
+        </div>
         <div class="mp-player-info">
           <span class="mp-player-name">${p.isHost ? '👑 ' : ''}<strong>${char.name}</strong> ${isMe ? '(You)' : ''}</span>
           <span class="mp-player-tagline">${char.archetype}</span>
