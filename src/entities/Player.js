@@ -1,7 +1,7 @@
 /**
  * Sister Sneak: Phone Locked - Controllable Player Entity
- * High-responsiveness physics, animated walking bobs, visual aura particles,
- * and game-feel feedback for character powers (no blocking alert popups).
+ * Integrates direct Task-Solving Super Powers, Vent Shortcuts, Blanket Camouflage,
+ * and Mummy Evasion mechanics.
  */
 
 import { Character } from './Character.js';
@@ -16,15 +16,22 @@ export class Player extends Character {
     this.currentRoom = null;
     this.auraColor = null;
     this.auraTimer = 0;
+    this.abilityCooldown = 0;
+    this.maxAbilityCooldown = 15.0; // 15 seconds cooldown
   }
 
   handleInput(input, dt) {
+    // Cooldown countdown
+    if (this.abilityCooldown > 0) {
+      this.abilityCooldown = Math.max(0, this.abilityCooldown - dt);
+    }
+
     const move = input.getMovementVector();
     let currentSpeed = this.speed;
 
     // Sprint & Buff timers
     if (this.sprintTimer > 0) {
-      currentSpeed *= 1.6;
+      currentSpeed *= 1.8;
       this.sprintTimer = Math.max(0, this.sprintTimer - dt);
     }
     if (this.buffTimer > 0) {
@@ -38,7 +45,7 @@ export class Player extends Character {
       if (this.auraTimer <= 0) this.auraColor = null;
     }
 
-    // Direct WASD / Arrow / Joystick Movement
+    // Movement
     if (Math.abs(move.x) > 0.05 || Math.abs(move.y) > 0.05) {
       this.clickToMove = false;
       this.targetX = null;
@@ -91,87 +98,73 @@ export class Player extends Character {
 
     game.audio.playTaskComplete();
 
-    // 1. Riddhi
+    // 1. 🌸 RIDDHI: Cozy Blanket Stealth / Mummy Camouflage
     if (this.id === "RIDDHI") {
-      if (this.role === "innocent") {
-        this.buffTimer = 8.0;
-        this.sprintTimer = 8.0;
-        this.auraColor = "#F472B6";
-        this.auraTimer = 8.0;
-        game.showTopToast("🌸 Partner Courage Activated! +80% Speed & Task boost for 8s!");
-      } else {
-        this.stealthTimer = 8.0;
-        this.auraColor = "rgba(255,255,255,0.4)";
-        this.auraTimer = 8.0;
-        game.showTopToast("🤫 Blanket Stealth Activated! Hidden under blanket for 8s!");
-      }
+      this.stealthTimer = 10.0;
+      this.auraColor = "#F472B6";
+      this.auraTimer = 10.0;
+      this.suspicion = 0;
+      game.showTopToast("🌸 Riddhi's Cozy Blanket Camouflage! Invisible to Mummy for 10s!");
     }
 
-    // 2. Shruti
+    // 2. 🎨 SHRUTI: Master Artistic Touch (Instant Task Boost & Cleanliness Surge)
     else if (this.id === "SHRUTI") {
-      if (this.role === "innocent") {
+      this.auraColor = "#38BDF8";
+      this.auraTimer = 6.0;
+
+      // If active mini-game is open, instantly solve 60% of it!
+      if (game.taskManager.activeMiniGame) {
+        game.taskManager.activeMiniGame.updateProgress(1.0);
+        game.showTopToast("🎨 Shruti's Artistic Flow AUTO-SOLVED the chore instantly! ✨");
+      } else {
         game.taskManager.contributeCleanliness(20);
-        this.auraColor = "#38BDF8";
-        this.auraTimer = 4.0;
-        game.showTopToast("🎨 Artistic Flow Activated! Instantly generated +20% Cleanliness!");
-      } else {
-        const innocents = game.bots.filter(b => b.role === "innocent");
-        if (innocents.length > 0) {
-          const target = innocents[Math.floor(Math.random() * innocents.length)];
-          target.suspicion = Math.min(100, target.suspicion + 30);
-          game.showTopToast(`🎭 Fake Clue Fabricated! Framed ${target.name}!`);
-        }
+        game.showTopToast("🎨 Shruti's Master Touch! Generated +20% Cleanliness burst!");
       }
     }
 
-    // 3. Jahanvi
+    // 3. 🎒 JAHANVI: Secret Ventilation Shortcut (Teleport across floors & rooms)
     else if (this.id === "JAHANVI") {
-      if (this.role === "innocent") {
-        this.sprintTimer = 6.0;
-        this.auraColor = "#F59E0B";
-        this.auraTimer = 6.0;
-        game.showTopToast("🎒 Shortcut Master Sprint Activated! Super Speed Dash for 6s!");
-      } else {
-        const nextFloor = (this.floor + 1) % 3;
-        this.setFloor(nextFloor);
-        game.camera.setFloor(nextFloor);
-        game.updateFloorButtonsUI(nextFloor);
-        game.showTopToast(`🌀 Floor Teleport Activated! Jumped to Floor ${nextFloor === 2 ? '3F' : nextFloor === 1 ? '2F' : '1F'}!`);
-      }
+      const nextFloor = (this.floor + 1) % 3;
+      this.setFloor(nextFloor, 300 + Math.random() * 600);
+      game.camera.setFloor(nextFloor);
+      game.updateFloorButtonsUI(nextFloor);
+      this.sprintTimer = 6.0;
+      this.auraColor = "#F59E0B";
+      this.auraTimer = 6.0;
+      game.showTopToast(`🌀 Jahanvi's Secret Vent Portal! Teleported to Floor ${nextFloor === 2 ? '3F' : nextFloor === 1 ? '2F' : '1F'} + Super Dash!`);
     }
 
-    // 4. Jisha
+    // 4. 📚 JISHA: Universal Ladli & Genius Solver
     else if (this.id === "JISHA") {
-      if (this.role === "innocent") {
-        this.suspicion = 0;
-        this.auraColor = "#A78BFA";
-        this.auraTimer = 5.0;
-        game.bots.forEach(b => b.suspicion = Math.max(0, b.suspicion - 20));
-        game.showTopToast("📚 Universal Ladli Card Activated! Mummy's suspicion reset to 0%!");
+      this.auraColor = "#A78BFA";
+      this.auraTimer = 8.0;
+      this.suspicion = 0;
+
+      if (game.taskManager.activeMiniGame) {
+        game.taskManager.activeMiniGame.updateProgress(1.0);
+        game.showTopToast("📚 Jisha's Genius Brain AUTO-SOLVED the study riddle! ⭐");
       } else {
-        this.auraColor = "#8B5CF6";
-        this.auraTimer = 8.0;
-        game.showTopToast("🛡️ Innocent Shield Activated! Protected against the next meeting vote!");
+        game.bots.forEach(b => b.suspicion = Math.max(0, b.suspicion - 30));
+        game.showTopToast("📚 Jisha's Universal Ladli Charm! Mummy's suspicion reset to 0%!");
       }
     }
 
-    // 5. Jyeana
+    // 5. ⚡ JYEANA: Overdrive Switch Fixer & Sabotage Rush
     else if (this.id === "JYEANA") {
-      if (this.role === "innocent") {
-        this.sprintTimer = 5.0;
-        this.buffTimer = 5.0;
-        this.auraColor = "#10B981";
-        this.auraTimer = 5.0;
-        game.showTopToast("⚡ Quick Hint & Dash Activated! +40% Speed Dash!");
+      this.sprintTimer = 7.0;
+      this.auraColor = "#10B981";
+      this.auraTimer = 7.0;
+
+      // Fix power blackouts across all floors instantly
+      game.houseMap.blackedOutFloors.clear();
+
+      if (this.role === "imposter" && game.sabotageSystem) {
+        game.sabotageSystem.cooldowns.BLACKOUT = 0;
+        game.sabotageSystem.cooldowns.KUNDI = 0;
+        game.sabotageSystem.cooldowns.MESS = 0;
+        game.showTopToast("⚡ Jyeana's Rapid Saboteur! All sabotage cooldowns reset to 0s!");
       } else {
-        if (game.sabotageSystem) {
-          game.sabotageSystem.cooldowns.BLACKOUT = 0;
-          game.sabotageSystem.cooldowns.KUNDI = 0;
-          game.sabotageSystem.cooldowns.MESS = 0;
-          this.auraColor = "#EF4444";
-          this.auraTimer = 4.0;
-          game.showTopToast("⚡ Rapid Saboteur Activated! All sabotage cooldowns reset to 0s!");
-        }
+        game.showTopToast("⚡ Jyeana's Electric Overdrive! Restored all lights + 7s Hyper Sprint!");
       }
     }
 
@@ -179,16 +172,36 @@ export class Player extends Character {
   }
 
   draw(ctx) {
+    // Draw Stealth Blanket Camouflage Effect
+    if (this.stealthTimer > 0) {
+      ctx.save();
+      ctx.globalAlpha = 0.45;
+      super.draw(ctx);
+      ctx.restore();
+
+      // Draw floating Zzz icon over head
+      ctx.fillStyle = "#F472B6";
+      ctx.font = "bold 14px Fredoka, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("🤫 HIDDEN", this.x, this.y - 45);
+      return;
+    }
+
     // Draw Active Power Glowing Aura
     if (this.auraColor) {
       ctx.save();
       ctx.shadowColor = this.auraColor;
-      ctx.shadowBlur = 18;
+      ctx.shadowBlur = 20;
       ctx.strokeStyle = this.auraColor;
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 3.5;
       ctx.beginPath();
-      ctx.arc(this.x, this.y - 10, 24, 0, Math.PI * 2);
+      ctx.arc(this.x, this.y - 12, 26, 0, Math.PI * 2);
       ctx.stroke();
+
+      ctx.fillStyle = this.auraColor;
+      ctx.font = "bold 10px Fredoka, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("⚡ POWER ACTIVE", this.x, this.y - 42);
       ctx.restore();
     }
 

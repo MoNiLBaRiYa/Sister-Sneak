@@ -70,7 +70,7 @@ export class Mummy {
     // Inspect nearby sisters on same floor
     if (sisters) {
       sisters.forEach((s) => {
-        if (s.floor === this.floor && !s.isHidden && !s.isEjected) {
+        if (s.floor === this.floor && !s.isHidden && !s.isEjected && !(s.stealthTimer > 0)) {
           const dist = Math.abs(s.x - this.x);
           if (dist < 160) {
             // Check triggers
