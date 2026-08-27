@@ -418,6 +418,18 @@ export class Game {
     this.showIntroCutscene();
   }
 
+  handleRemotePowerActivated(data) {
+    const remote = this.remotePlayers.get(data.sisterId);
+    if (remote) {
+      remote.auraColor = data.auraColor;
+      remote.auraTimer = 8.0;
+      if (data.isStealth) {
+        remote.stealthTimer = 10.0;
+      }
+    }
+    this.showTopToast(`⚡ ${data.sisterId} activated ${data.powerName}!`);
+  }
+
   updateRemotePlayerPosition(data) {
     const remote = this.remotePlayers.get(data.sisterId);
     if (remote) {
@@ -428,6 +440,10 @@ export class Game {
       remote.vy = data.vy;
       remote.facing = data.facing;
       remote.isMoving = data.isMoving;
+      if (data.auraColor) remote.auraColor = data.auraColor;
+      if (data.isStealth !== undefined) {
+        remote.stealthTimer = data.isStealth ? 10.0 : 0;
+      }
     }
   }
 

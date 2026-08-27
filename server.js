@@ -1,7 +1,7 @@
 /**
  * Sister Sneak: Phone Locked - Production Online Multiplayer Server
  * Serves static web app assets and manages real-time WebSocket rooms worldwide.
- * Supports Among Us / Skribbl-style instant character updates and real-time chat broadcasts.
+ * Synchronizes character powers, visual auras, positions, and live chat across all devices.
  */
 
 const http = require('http');
@@ -10,7 +10,6 @@ const path = require('path');
 
 const PORT = process.env.PORT || 8080;
 
-// MIME types dictionary
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'application/javascript; charset=utf-8',
@@ -23,7 +22,6 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon'
 };
 
-// 1. HTTP Server for Static Assets & Health Checks
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -35,7 +33,6 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // Health ping endpoint for Render / Uptime monitors
   if (req.url === '/healthz' || req.url === '/ping') {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
     res.end('OK');
@@ -62,7 +59,6 @@ const server = http.createServer((req, res) => {
   });
 });
 
-// 2. Real-Time WebSocket Rooms Manager
 let WebSocketServer;
 try {
   WebSocketServer = require('ws').WebSocketServer || require('ws').Server;
@@ -70,7 +66,7 @@ try {
   console.log("Note: Running WebSocket server.");
 }
 
-const rooms = new Map(); // roomCode -> { hostSocket, players: Map<socket, playerObj>, state }
+const rooms = new Map();
 
 function generateRoomCode() {
   return Math.floor(1000 + Math.random() * 9000).toString();
@@ -82,7 +78,7 @@ function broadcastToRoom(roomCode, data, excludeSocket = null) {
   const payload = JSON.stringify(data);
 
   room.players.forEach((player, socket) => {
-    if (socket !== excludeSocket && socket.readyState === 1) { // 1 = OPEN
+    if (socket !== excludeSocket && socket.readyState === 1) {
       socket.send(payload);
     }
   });
@@ -91,7 +87,6 @@ function broadcastToRoom(roomCode, data, excludeSocket = null) {
 if (WebSocketServer) {
   const wss = new WebSocketServer({ server });
 
-  // Keep-alive heartbeat interval (pings all sockets every 15s to prevent Render disconnects)
   setInterval(() => {
     wss.clients.forEach((ws) => {
       if (ws.isAlive === false) return ws.terminate();
@@ -234,6 +229,20 @@ if (WebSocketServer) {
             break;
           }
 
+          case 'POWER_ACTIVATED': {
+            if (currentRoomCode) {
+              broadcastToRoom(currentRoomCode, {
+                type: 'POWER_ACTIVATED',
+                senderId: myPlayerId,
+                sisterId: data.sisterId,
+                powerName: data.powerName,
+                auraColor: data.auraColor,
+                isStealth: data.isStealth
+              }, ws);
+            }
+            break;
+          }
+
           case 'CHAT_MESSAGE': {
             if (currentRoomCode) {
               broadcastToRoom(currentRoomCode, {
@@ -261,7 +270,9 @@ if (WebSocketServer) {
                 vx: data.vx,
                 vy: data.vy,
                 facing: data.facing,
-                isMoving: data.isMoving
+                isMoving: data.isMoving,
+                auraColor: data.auraColor,
+                isStealth: data.isStealth
               }, ws);
             }
             break;

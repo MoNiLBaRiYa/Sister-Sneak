@@ -166,6 +166,9 @@ export class Player extends Character {
       } else {
         game.showTopToast("⚡ Jyeana's Electric Overdrive! Restored all lights + 7s Hyper Sprint!");
       }
+    // Broadcast power activation event to all players in the room
+    if (game.multiplayer && game.multiplayer.isMultiplayer) {
+      game.multiplayer.syncPowerActivation(this.id, this.name + "'s Power", this.auraColor, this.stealthTimer > 0);
     }
 
     return true;

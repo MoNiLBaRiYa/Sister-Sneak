@@ -259,6 +259,12 @@ export class MultiplayerEngine {
         }
         break;
 
+      case 'POWER_ACTIVATED':
+        if (data.senderId !== this.myPlayerId) {
+          this.game.handleRemotePowerActivated(data);
+        }
+        break;
+
       case 'PLAYER_LEFT':
         this.game.handleRemotePlayerLeft(data);
         break;
@@ -314,7 +320,21 @@ export class MultiplayerEngine {
       vx: player.vx,
       vy: player.vy,
       facing: player.facing,
-      isMoving: player.isMoving
+      isMoving: player.isMoving,
+      auraColor: player.auraColor,
+      isStealth: (player.stealthTimer > 0)
+    });
+  }
+
+  syncPowerActivation(sisterId, powerName, auraColor, isStealth) {
+    if (!this.isMultiplayer) return;
+    this.send({
+      type: 'POWER_ACTIVATED',
+      senderId: this.myPlayerId,
+      sisterId: sisterId,
+      powerName: powerName,
+      auraColor: auraColor,
+      isStealth: isStealth
     });
   }
 
