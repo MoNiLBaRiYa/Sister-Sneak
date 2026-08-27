@@ -430,6 +430,51 @@ export class Game {
     this.showTopToast(`⚡ ${data.sisterId} activated ${data.powerName}!`);
   }
 
+  applyImposterDebuffToInnocents(debuffType, floor) {
+    // 1. Apply to local AI innocent bots
+    this.bots.forEach((b) => {
+      if (b.role === "innocent" && b.floor === floor) {
+        if (debuffType === "SLOW_TRAP") b.sprintTimer = -6.0;
+        if (debuffType === "PAINT_FRAME") b.suspicion = Math.min(100, b.suspicion + 35);
+        if (debuffType === "BLAME_SHIFT") b.suspicion = Math.min(100, b.suspicion + 30);
+      }
+    });
+
+    if (debuffType === "DOOR_SLAM" && this.sabotageSystem) {
+      this.sabotageSystem.triggerSabotage("KUNDI", floor);
+    }
+
+    // 2. Broadcast debuff to all remote innocent human players
+    if (this.multiplayer && this.multiplayer.isMultiplayer) {
+      this.multiplayer.send({
+        type: 'IMPOSTER_DEBUFF',
+        debuffType: debuffType,
+        floor: floor
+      });
+    }
+  }
+
+  handleRemoteImposterDebuff(data) {
+    if (this.player && this.player.role === "innocent") {
+      if (data.debuffType === "SLOW_TRAP") {
+        this.player.slowDebuffTimer = 7.0;
+        this.showTopToast("❄️ Sleep Trap! You are slowed by 50% for 7s!");
+      } else if (data.debuffType === "PAINT_FRAME") {
+        this.player.suspicion = Math.min(100, this.player.suspicion + 35);
+        this.showTopToast("🎨 Framed with Paint Splatter! Mummy Suspicion +35%!");
+      } else if (data.debuffType === "DOOR_SLAM") {
+        this.sabotageSystem.triggerSabotage("KUNDI", data.floor);
+        this.showTopToast("🔒 Doors slammed shut on this floor!");
+      } else if (data.debuffType === "BLAME_SHIFT") {
+        this.player.suspicion = Math.min(100, this.player.suspicion + 30);
+        this.showTopToast("🎭 The Imposter shifted blame onto you!");
+      } else if (data.debuffType === "TASK_FREEZE") {
+        this.player.taskFreezeTimer = 8.0;
+        this.showTopToast("⚡ Electric Surge! Your chores are frozen for 8s!");
+      }
+    }
+  }
+
   updateRemotePlayerPosition(data) {
     const remote = this.remotePlayers.get(data.sisterId);
     if (remote) {

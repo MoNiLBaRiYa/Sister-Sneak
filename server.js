@@ -243,6 +243,18 @@ if (WebSocketServer) {
             break;
           }
 
+          case 'IMPOSTER_DEBUFF': {
+            if (currentRoomCode) {
+              broadcastToRoom(currentRoomCode, {
+                type: 'IMPOSTER_DEBUFF',
+                senderId: myPlayerId,
+                debuffType: data.debuffType,
+                floor: data.floor
+              }, ws);
+            }
+            break;
+          }
+
           case 'CHAT_MESSAGE': {
             if (currentRoomCode) {
               broadcastToRoom(currentRoomCode, {

@@ -1,7 +1,8 @@
 /**
  * Sister Sneak: Phone Locked - Controllable Player Entity
- * Integrates direct Task-Solving Super Powers, Vent Shortcuts, Blanket Camouflage,
- * and Mummy Evasion mechanics.
+ * Implements Asymmetric Power Dynamics:
+ * - Innocent Powers: Self & Team Buffs (Auto-solve, Sprint, Reset Suspicion, Restore Lights)
+ * - Imposter Powers: Direct Sabotage & Debuffs onto Innocent Sisters (Slowdown Traps, Paint Blind, Door Locks, Blame Transfer)
  */
 
 import { Character } from './Character.js';
@@ -17,11 +18,15 @@ export class Player extends Character {
     this.auraColor = null;
     this.auraTimer = 0;
     this.abilityCooldown = 0;
-    this.maxAbilityCooldown = 15.0; // 15 seconds cooldown
+    this.maxAbilityCooldown = 15.0;
+
+    // Debuff timers caused by Imposter powers
+    this.slowDebuffTimer = 0;
+    this.paintBlindTimer = 0;
+    this.taskFreezeTimer = 0;
   }
 
   handleInput(input, dt) {
-    // Cooldown countdown
     if (this.abilityCooldown > 0) {
       this.abilityCooldown = Math.max(0, this.abilityCooldown - dt);
     }
@@ -29,7 +34,19 @@ export class Player extends Character {
     const move = input.getMovementVector();
     let currentSpeed = this.speed;
 
-    // Sprint & Buff timers
+    // Handle Debuffs from Imposter
+    if (this.slowDebuffTimer > 0) {
+      currentSpeed *= 0.5; // 50% Slowdown
+      this.slowDebuffTimer = Math.max(0, this.slowDebuffTimer - dt);
+    }
+    if (this.paintBlindTimer > 0) {
+      this.paintBlindTimer = Math.max(0, this.paintBlindTimer - dt);
+    }
+    if (this.taskFreezeTimer > 0) {
+      this.taskFreezeTimer = Math.max(0, this.taskFreezeTimer - dt);
+    }
+
+    // Handle Self Buffs
     if (this.sprintTimer > 0) {
       currentSpeed *= 1.8;
       this.sprintTimer = Math.max(0, this.sprintTimer - dt);
@@ -80,7 +97,6 @@ export class Player extends Character {
       this.isMoving = false;
     }
 
-    // Apply movement
     this.x += this.vx * dt;
     this.y += this.vy * dt;
     this.update(dt);
@@ -97,76 +113,133 @@ export class Player extends Character {
     this.abilityCooldown = this.maxAbilityCooldown;
 
     game.audio.playTaskComplete();
+    const isImposter = (this.role === "imposter");
 
-    // 1. 🌸 RIDDHI: Cozy Blanket Stealth / Mummy Camouflage
+    // =========================================================================
+    // 1. 🌸 RIDDHI
+    // =========================================================================
     if (this.id === "RIDDHI") {
-      this.stealthTimer = 10.0;
-      this.auraColor = "#F472B6";
-      this.auraTimer = 10.0;
-      this.suspicion = 0;
-      game.showTopToast("🌸 Riddhi's Cozy Blanket Camouflage! Invisible to Mummy for 10s!");
+      if (!isImposter) {
+        // INNOCENT: Self-Camouflage (Mummy ignores for 10s)
+        this.stealthTimer = 10.0;
+        this.auraColor = "#F472B6";
+        this.auraTimer = 10.0;
+        this.suspicion = 0;
+        game.showTopToast("🌸 Riddhi's Cozy Blanket Camouflage! Invisible to Mummy for 10s!");
+      } else {
+        // IMPOSTER: Sleep Cloud Trap (Slows down all innocent sisters by 50% for 7s)
+        this.stealthTimer = 8.0;
+        this.auraColor = "#EF4444";
+        this.auraTimer = 8.0;
+        game.applyImposterDebuffToInnocents("SLOW_TRAP", this.floor);
+        game.showTopToast("😈 Imposter Riddhi threw a Sleep Trap! All innocent sisters slowed by 50%!");
+      }
     }
 
-    // 2. 🎨 SHRUTI: Master Artistic Touch (Instant Task Boost & Cleanliness Surge)
+    // =========================================================================
+    // 2. 🎨 SHRUTI
+    // =========================================================================
     else if (this.id === "SHRUTI") {
-      this.auraColor = "#38BDF8";
-      this.auraTimer = 6.0;
-
-      // If active mini-game is open, instantly solve 60% of it!
-      if (game.taskManager.activeMiniGame) {
-        game.taskManager.activeMiniGame.updateProgress(1.0);
-        game.showTopToast("🎨 Shruti's Artistic Flow AUTO-SOLVED the chore instantly! ✨");
+      if (!isImposter) {
+        // INNOCENT: Self Master Touch (Auto-solves active chore or +20% Cleanliness)
+        this.auraColor = "#38BDF8";
+        this.auraTimer = 6.0;
+        if (game.taskManager.activeMiniGame) {
+          game.taskManager.activeMiniGame.updateProgress(1.0);
+          game.showTopToast("🎨 Shruti's Artistic Flow AUTO-SOLVED the chore! ✨");
+        } else {
+          game.taskManager.contributeCleanliness(20);
+          game.showTopToast("🎨 Shruti's Master Touch! Generated +20% Cleanliness burst!");
+        }
       } else {
-        game.taskManager.contributeCleanliness(20);
-        game.showTopToast("🎨 Shruti's Master Touch! Generated +20% Cleanliness burst!");
+        // IMPOSTER: Fake Evidence Splatter (Raises innocents' suspicion by +35% and blinds vision)
+        this.auraColor = "#DC2626";
+        this.auraTimer = 6.0;
+        game.applyImposterDebuffToInnocents("PAINT_FRAME", this.floor);
+        game.showTopToast("😈 Imposter Shruti splattered Fake Paint! Framed innocent sisters (+35% Suspicion)!");
       }
     }
 
-    // 3. 🎒 JAHANVI: Secret Ventilation Shortcut (Teleport across floors & rooms)
+    // =========================================================================
+    // 3. 🎒 JAHANVI
+    // =========================================================================
     else if (this.id === "JAHANVI") {
-      const nextFloor = (this.floor + 1) % 3;
-      this.setFloor(nextFloor, 300 + Math.random() * 600);
-      game.camera.setFloor(nextFloor);
-      game.updateFloorButtonsUI(nextFloor);
-      this.sprintTimer = 6.0;
-      this.auraColor = "#F59E0B";
-      this.auraTimer = 6.0;
-      game.showTopToast(`🌀 Jahanvi's Secret Vent Portal! Teleported to Floor ${nextFloor === 2 ? '3F' : nextFloor === 1 ? '2F' : '1F'} + Super Dash!`);
+      if (!isImposter) {
+        // INNOCENT: Self-Vent Teleport + Speed Dash to reach chores fast
+        const nextFloor = (this.floor + 1) % 3;
+        this.setFloor(nextFloor, 300 + Math.random() * 600);
+        game.camera.setFloor(nextFloor);
+        game.updateFloorButtonsUI(nextFloor);
+        this.sprintTimer = 6.0;
+        this.auraColor = "#F59E0B";
+        this.auraTimer = 6.0;
+        game.showTopToast(`🌀 Jahanvi's Secret Vent Portal! Jumped to Floor ${nextFloor === 2 ? '3F' : nextFloor === 1 ? '2F' : '1F'} + Super Dash!`);
+      } else {
+        // IMPOSTER: Vent Escape & Door Slam (Locks all doors on floor, trapping innocents)
+        const nextFloor = (this.floor + 1) % 3;
+        this.setFloor(nextFloor, 300 + Math.random() * 600);
+        game.camera.setFloor(nextFloor);
+        game.updateFloorButtonsUI(nextFloor);
+        this.auraColor = "#EF4444";
+        this.auraTimer = 6.0;
+        game.applyImposterDebuffToInnocents("DOOR_SLAM", this.floor);
+        game.showTopToast("😈 Imposter Jahanvi vented away & SLAMMED all doors shut on innocents!");
+      }
     }
 
-    // 4. 📚 JISHA: Universal Ladli & Genius Solver
+    // =========================================================================
+    // 4. 📚 JISHA
+    // =========================================================================
     else if (this.id === "JISHA") {
-      this.auraColor = "#A78BFA";
-      this.auraTimer = 8.0;
-      this.suspicion = 0;
-
-      if (game.taskManager.activeMiniGame) {
-        game.taskManager.activeMiniGame.updateProgress(1.0);
-        game.showTopToast("📚 Jisha's Genius Brain AUTO-SOLVED the study riddle! ⭐");
+      if (!isImposter) {
+        // INNOCENT: Self Study Genius (Auto-solves worksheet) + resets Mummy suspicion
+        this.auraColor = "#A78BFA";
+        this.auraTimer = 8.0;
+        this.suspicion = 0;
+        if (game.taskManager.activeMiniGame) {
+          game.taskManager.activeMiniGame.updateProgress(1.0);
+          game.showTopToast("📚 Jisha's Genius Brain AUTO-SOLVED the study sheet! ⭐");
+        } else {
+          game.bots.forEach(b => b.suspicion = Math.max(0, b.suspicion - 30));
+          game.showTopToast("📚 Jisha's Universal Ladli Charm! Mummy's suspicion reset to 0%!");
+        }
       } else {
-        game.bots.forEach(b => b.suspicion = Math.max(0, b.suspicion - 30));
-        game.showTopToast("📚 Jisha's Universal Ladli Charm! Mummy's suspicion reset to 0%!");
+        // IMPOSTER: Blame Shift (Transfers her suspicion onto innocent sisters)
+        this.auraColor = "#7C3AED";
+        this.auraTimer = 8.0;
+        this.suspicion = 0;
+        game.applyImposterDebuffToInnocents("BLAME_SHIFT", this.floor);
+        game.showTopToast("😈 Imposter Jisha shifted all blame onto innocent sisters!");
       }
     }
 
-    // 5. ⚡ JYEANA: Overdrive Switch Fixer & Sabotage Rush
+    // =========================================================================
+    // 5. ⚡ JYEANA
+    // =========================================================================
     else if (this.id === "JYEANA") {
-      this.sprintTimer = 7.0;
-      this.auraColor = "#10B981";
-      this.auraTimer = 7.0;
-
-      // Fix power blackouts across all floors instantly
-      game.houseMap.blackedOutFloors.clear();
-
-      if (this.role === "imposter" && game.sabotageSystem) {
-        game.sabotageSystem.cooldowns.BLACKOUT = 0;
-        game.sabotageSystem.cooldowns.KUNDI = 0;
-        game.sabotageSystem.cooldowns.MESS = 0;
-        game.showTopToast("⚡ Jyeana's Rapid Saboteur! All sabotage cooldowns reset to 0s!");
-      } else {
+      if (!isImposter) {
+        // INNOCENT: Self Overdrive (Restores blackouts instantly + 7s Hyper Sprint)
+        this.sprintTimer = 7.0;
+        this.auraColor = "#10B981";
+        this.auraTimer = 7.0;
+        game.houseMap.blackedOutFloors.clear();
         game.showTopToast("⚡ Jyeana's Electric Overdrive! Restored all lights + 7s Hyper Sprint!");
+      } else {
+        // IMPOSTER: Electrical Sabotage Surge (Freezes all innocent tasks for 8s + 0s sabotage cooldowns)
+        this.sprintTimer = 7.0;
+        this.auraColor = "#EF4444";
+        this.auraTimer = 7.0;
+        if (game.sabotageSystem) {
+          game.sabotageSystem.cooldowns.BLACKOUT = 0;
+          game.sabotageSystem.cooldowns.KUNDI = 0;
+          game.sabotageSystem.cooldowns.MESS = 0;
+        }
+        game.applyImposterDebuffToInnocents("TASK_FREEZE", this.floor);
+        game.showTopToast("😈 Imposter Jyeana triggered an Electric Surge! All innocent tasks frozen for 8s!");
       }
-    // Broadcast power activation event to all players in the room
+    }
+
+    // Broadcast power activation to multiplayer
     if (game.multiplayer && game.multiplayer.isMultiplayer) {
       game.multiplayer.syncPowerActivation(this.id, this.name + "'s Power", this.auraColor, this.stealthTimer > 0);
     }
@@ -175,14 +248,12 @@ export class Player extends Character {
   }
 
   draw(ctx) {
-    // Draw Stealth Blanket Camouflage Effect
     if (this.stealthTimer > 0) {
       ctx.save();
       ctx.globalAlpha = 0.45;
       super.draw(ctx);
       ctx.restore();
 
-      // Draw floating Zzz icon over head
       ctx.fillStyle = "#F472B6";
       ctx.font = "bold 14px Fredoka, sans-serif";
       ctx.textAlign = "center";
@@ -190,7 +261,6 @@ export class Player extends Character {
       return;
     }
 
-    // Draw Active Power Glowing Aura
     if (this.auraColor) {
       ctx.save();
       ctx.shadowColor = this.auraColor;
@@ -204,7 +274,7 @@ export class Player extends Character {
       ctx.fillStyle = this.auraColor;
       ctx.font = "bold 10px Fredoka, sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("⚡ POWER ACTIVE", this.x, this.y - 42);
+      ctx.fillText(this.role === "imposter" ? "😈 IMPOSTER POWER" : "⚡ INNOCENT POWER", this.x, this.y - 42);
       ctx.restore();
     }
 

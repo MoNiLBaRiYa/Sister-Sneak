@@ -265,6 +265,12 @@ export class MultiplayerEngine {
         }
         break;
 
+      case 'IMPOSTER_DEBUFF':
+        if (data.senderId !== this.myPlayerId) {
+          this.game.handleRemoteImposterDebuff(data);
+        }
+        break;
+
       case 'PLAYER_LEFT':
         this.game.handleRemotePlayerLeft(data);
         break;
