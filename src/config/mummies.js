@@ -1,16 +1,21 @@
 /**
  * Sister Sneak: Phone Locked - 4 Selectable Inspector Mummies
- * Includes customized cutscenes, dialogue scripts, personalities, and triggers.
+ * Strictly:
+ * 1. Riddhi & Jahanvi ni Mummy
+ * 2. Shruti ni Mummy
+ * 3. Jisha ni Mummy
+ * 4. Jyeana ni Mummy
+ * (Completely free of any "Sohini" references)
  */
 
 export const MUMMIES = {
   RIDDHI_MUMMY: {
     id: "RIDDHI_MUMMY",
-    name: "Riddhi & Jahanvi's Mummy",
-    shortName: "Riddhi & Jahanvi's Mummy",
+    name: "Riddhi & Jahanvi ni Mummy",
+    shortName: "Riddhi & Jahanvi ni Mummy",
     avatar: "👩‍🦱",
-    relation: "Riddhi & Jahanvi's Mummy",
-    personality: "Strict on discipline, bedsheet folding & bedroom clutter",
+    relation: "Riddhi & Jahanvi ni Mummy",
+    personality: "Strict on bedroom clutter, bedsheet folding & discipline",
     cutsceneArt: {
       emoji: "📦🔒📱",
       icon: "🧹",
@@ -36,7 +41,7 @@ export const MUMMIES = {
     name: "Shruti ni Mummy",
     shortName: "Shruti ni Mummy",
     avatar: "👩‍🦳",
-    relation: "Shruti's Mummy",
+    relation: "Shruti ni Mummy",
     personality: "Perfectionist about kitchen, spice jars, chai glasses & craft mess",
     cutsceneArt: {
       emoji: "🍳🔒📱",
@@ -62,7 +67,7 @@ export const MUMMIES = {
     name: "Jisha ni Mummy",
     shortName: "Jisha ni Mummy",
     avatar: "👩‍🦰",
-    relation: "Jisha's Mummy",
+    relation: "Jisha ni Mummy",
     personality: "Monitors homework sheets, study desks, books & screen time",
     cutsceneArt: {
       emoji: "📚🔒📱",
@@ -88,7 +93,7 @@ export const MUMMIES = {
     name: "Jyeana ni Mummy",
     shortName: "Jyeana ni Mummy",
     avatar: "👩",
-    relation: "Jyeana's Mummy",
+    relation: "Jyeana ni Mummy",
     personality: "Eagle-eyed; inspects switchboards, empty lights & electricity bills",
     cutsceneArt: {
       emoji: "⚡🔒📱",
