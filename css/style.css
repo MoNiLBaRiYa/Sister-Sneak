@@ -1184,12 +1184,12 @@ html, body {
 }
 
 /* ==========================================================================
-   Mobile Optimization (Under 600px Screen Width)
+   Mobile Optimization (Portrait & Small Screens)
    ========================================================================== */
-@media (max-width: 600px) {
+@media (max-width: 650px) {
   .creator-corner-badge {
     left: 8px !important;
-    bottom: 112px !important;
+    bottom: 110px !important;
     max-width: 250px !important;
     padding: 6px 8px !important;
   }
@@ -1204,10 +1204,10 @@ html, body {
     padding: 3px 6px;
   }
   .hud-room-display {
-    display: none;
+    display: none !important;
   }
   .hud-center {
-    max-width: 140px;
+    max-width: 130px;
   }
   .sister-cards-grid {
     grid-template-columns: repeat(3, 1fr);
@@ -1232,3 +1232,296 @@ html, body {
     padding: 4px 6px;
   }
 }
+
+/* ==========================================================================
+   Mobile Landscape & Short Viewport Optimization (Height <= 550px)
+   ========================================================================== */
+@media (max-height: 550px), ((orientation: landscape) and (max-height: 650px)) {
+  /* 1. Ultra-Compact Top HUD */
+  .hud-layer {
+    top: 4px !important;
+    left: 6px !important;
+    right: 6px !important;
+    padding: 2px 6px !important;
+    gap: 4px !important;
+    height: 32px !important;
+  }
+
+  .hud-left {
+    gap: 4px !important;
+  }
+
+  .hud-badge {
+    font-size: 9px !important;
+    padding: 2px 6px !important;
+    border-radius: 12px !important;
+  }
+
+  .hud-badge .role-icon, .hud-badge .char-avatar {
+    font-size: 11px !important;
+  }
+
+  .hud-power-btn {
+    font-size: 9px !important;
+    padding: 2px 8px !important;
+    border-radius: 12px !important;
+  }
+
+  .hud-center {
+    max-width: 120px !important;
+    flex: none !important;
+  }
+
+  .cleanliness-meter-container {
+    padding: 1px 6px !important;
+    border-radius: 8px !important;
+  }
+
+  .meter-label {
+    font-size: 7.5px !important;
+    margin-bottom: 1px !important;
+  }
+
+  .meter-bar-track {
+    height: 5px !important;
+    border-radius: 3px !important;
+  }
+
+  .hud-room-display {
+    display: none !important;
+  }
+
+  .hud-right {
+    gap: 4px !important;
+  }
+
+  .hud-icon-btn {
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 11px !important;
+  }
+
+  /* 2. Sabotage Bar: Docked to the Left of Touch Buttons (No Overlap) */
+  .sabotage-panel {
+    bottom: 10px !important;
+    right: 126px !important;
+    top: auto !important;
+    max-width: 200px !important;
+    padding: 3px 6px !important;
+    border-radius: 10px !important;
+    border-width: 1.5px !important;
+  }
+
+  .sabotage-title {
+    font-size: 8.5px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .sab-btn {
+    padding: 4px 6px !important;
+    font-size: 8px !important;
+    border-radius: 6px !important;
+  }
+
+  .sab-icon {
+    font-size: 11px !important;
+  }
+
+  /* 3. Compact Touch Controls */
+  .joystick-zone {
+    bottom: 10px !important;
+    left: 10px !important;
+    width: 72px !important;
+    height: 72px !important;
+  }
+
+  .joystick-knob {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .touch-action-group {
+    bottom: 10px !important;
+    right: 10px !important;
+    gap: 8px !important;
+  }
+
+  .touch-action-btn, .touch-power-btn {
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 18px !important;
+    border-width: 2px !important;
+  }
+
+  /* 4. Floor Switcher Fast-Nav (Right Edge) */
+  .floor-nav-panel {
+    right: 4px !important;
+    top: 36% !important;
+    transform: translateY(-50%) !important;
+    gap: 3px !important;
+  }
+
+  .floor-nav-btn {
+    width: 32px !important;
+    padding: 2px 1px !important;
+    font-size: 9px !important;
+    border-radius: 6px !important;
+  }
+
+  .floor-nav-btn small {
+    font-size: 6.5px !important;
+  }
+
+  /* 5. Creator Corner Badge (Brother Monil) - Placed at Top Left (Never blocks joystick) */
+  .creator-corner-badge {
+    left: 8px !important;
+    top: 40px !important;
+    bottom: auto !important;
+    max-width: 260px !important;
+    padding: 4px 8px !important;
+    border-radius: 10px !important;
+  }
+
+  .creator-corner-badge.minimized {
+    max-width: 36px !important;
+    padding: 2px !important;
+  }
+
+  .creator-avatar-wrap {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 14px !important;
+  }
+
+  .creator-header {
+    font-size: 9px !important;
+  }
+
+  .creator-msg {
+    font-size: 8px !important;
+    line-height: 1.25 !important;
+  }
+
+  /* 6. Personal Tasklist Drawer */
+  .tasklist-drawer {
+    top: 38px !important;
+    left: 6px !important;
+    max-width: 170px !important;
+    padding: 4px 6px !important;
+  }
+
+  .tasklist-toggle-btn {
+    font-size: 9px !important;
+  }
+
+  .task-checklist-item {
+    font-size: 8px !important;
+    padding: 1px 3px !important;
+  }
+
+  /* 7. Modal Cards (Lobby, Courtroom, Verdict, Minigames) */
+  .lobby-card, .courtroom-card, .cutscene-card, .minigame-card, .pause-card, .verdict-card, .gameover-card, .help-card {
+    padding: 8px 12px !important;
+    max-height: 96vh !important;
+    border-radius: 12px !important;
+    max-width: 560px !important;
+  }
+
+  .title-banner {
+    margin-bottom: 4px !important;
+  }
+
+  .game-title {
+    font-size: 18px !important;
+  }
+
+  .game-subtitle {
+    font-size: 11px !important;
+  }
+
+  .lobby-story {
+    padding: 4px 6px !important;
+    font-size: 8.5px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .sister-cards-grid, .mummy-cards-grid {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 4px !important;
+    margin: 3px 0 !important;
+  }
+
+  .card-avatar-wrapper {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  .card-name, .m-name {
+    font-size: 9px !important;
+  }
+
+  .card-tagline, .m-trait {
+    font-size: 7px !important;
+  }
+
+  .card-power {
+    font-size: 7px !important;
+  }
+
+  .sisters-debate-grid {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 4px !important;
+  }
+
+  .debate-sister-card {
+    padding: 4px !important;
+  }
+
+  .debate-sister-name {
+    font-size: 9px !important;
+  }
+
+  .courtroom-debate-log {
+    height: 50px !important;
+    font-size: 9px !important;
+  }
+
+  .quick-chat-chips {
+    margin: 3px 0 !important;
+    gap: 3px !important;
+  }
+
+  .qc-chip {
+    padding: 2px 5px !important;
+    font-size: 8px !important;
+  }
+
+  .chat-input-row input {
+    padding: 4px !important;
+    font-size: 9px !important;
+  }
+
+  .chat-input-row button {
+    padding: 4px 8px !important;
+    font-size: 9px !important;
+  }
+
+  .main-cta-btn {
+    padding: 7px !important;
+    font-size: 11px !important;
+    margin-top: 4px !important;
+  }
+
+  .dialogue-box.intro-dialogue {
+    padding: 6px 10px !important;
+  }
+
+  .dialogue-text {
+    font-size: 11px !important;
+  }
+
+  .dialogue-translation {
+    font-size: 9px !important;
+  }
+}
+

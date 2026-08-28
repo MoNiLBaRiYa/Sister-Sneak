@@ -166,19 +166,73 @@ export class MeetingEngine {
     const skipBtn = document.getElementById("btn-skip-vote");
     if (skipBtn) skipBtn.disabled = false;
 
-    // Trigger AI Bots automated votes during voting window
+    // Trigger realistic, fair AI Bots automated votes during voting window
     this.game.bots.forEach((bot, idx) => {
       if (bot.isEjected) return;
       setTimeout(() => {
-        if (this.phase !== "VOTING") return;
-        const candidates = this.getLivingSisters();
-        if (Math.random() < 0.25) {
+        if (this.phase !== "VOTING" || this.votedSisters.has(bot.id)) return;
+
+        // Living other sisters (NEVER vote for self)
+        const others = this.getLivingSisters().filter(s => s.id !== bot.id);
+        if (others.length === 0) {
           this.recordVote(bot.id, "SKIP");
-        } else {
-          candidates.sort((a, b) => b.suspicion - a.suspicion);
-          this.recordVote(bot.id, candidates[0].id);
+          return;
         }
-      }, 1500 + idx * 2000 + Math.random() * 2000);
+
+        const isBotPrankster = (bot.role === "prankster");
+
+        if (isBotPrankster) {
+          // PRANKSTER BOT AI: Tries to blame an innocent sister or skips
+          if (Math.random() < 0.35) {
+            this.recordVote(bot.id, "SKIP");
+          } else {
+            const innocents = others.filter(s => s.id !== bot.id);
+            innocents.sort((a, b) => b.suspicion - a.suspicion);
+            const target = (Math.random() < 0.6 && innocents.length > 0)
+              ? innocents[0]
+              : innocents[Math.floor(Math.random() * innocents.length)];
+            this.recordVote(bot.id, target ? target.id : "SKIP");
+          }
+        } else {
+          // INNOCENT BOT AI: Evaluates evidence objectively
+          const highestSuspicion = Math.max(...others.map(o => o.suspicion || 0), 0);
+
+          // If nobody is strongly suspicious (< 45 suspicion), 70% chance to SKIP
+          if (highestSuspicion < 45) {
+            if (Math.random() < 0.70) {
+              this.recordVote(bot.id, "SKIP");
+              return;
+            }
+          }
+
+          // Weighted probabilistic vote based on suspicion
+          let totalWeight = 0;
+          const weighted = others.map(s => {
+            const baseSusp = Math.max(5, s.suspicion || 0);
+            const w = Math.pow(baseSusp, 1.6);
+            totalWeight += w;
+            return { id: s.id, weight: w };
+          });
+
+          // 25% chance to skip even with suspicion if not 100% sure
+          if (Math.random() < 0.25) {
+            this.recordVote(bot.id, "SKIP");
+            return;
+          }
+
+          let r = Math.random() * totalWeight;
+          let chosenTarget = others[0].id;
+          for (const item of weighted) {
+            if (r <= item.weight) {
+              chosenTarget = item.id;
+              break;
+            }
+            r -= item.weight;
+          }
+
+          this.recordVote(bot.id, chosenTarget);
+        }
+      }, 1200 + idx * 1800 + Math.random() * 1500);
     });
 
     const timerBadge = document.getElementById("meeting-timer");
@@ -278,8 +332,12 @@ export class MeetingEngine {
   tallyVotes() {
     this.phase = "REVEAL";
     const counts = {};
+    let skipVotes = 0;
+
     Object.entries(this.votes).forEach(([voterId, targetId]) => {
-      if (targetId !== "SKIP") {
+      if (targetId === "SKIP") {
+        skipVotes++;
+      } else {
         counts[targetId] = (counts[targetId] || 0) + 1;
       }
     });
@@ -301,11 +359,13 @@ export class MeetingEngine {
     // Jisha's Prankster Shield
     if (ejectedId === "JISHA" && this.game.pranksterSisterId === "JISHA" && !this.jishaShieldUsed) {
       this.jishaShieldUsed = true;
-      ejectedId = null;
+      this.showVerdict(null, "Jisha used her Ladli Shield! Mummy excused her!");
+      return;
     }
 
-    if (tie || !ejectedId || maxVotes < 2) {
-      this.showVerdict(null, "No consensus was reached! (Tie / Skipped)");
+    // Ejection requires: strict lead over skip votes, no tie, and at least 2 votes
+    if (tie || !ejectedId || maxVotes <= skipVotes || maxVotes < 2) {
+      this.showVerdict(null, "No consensus was reached! (Skipped / Tie)");
     } else {
       const allSisters = this.getAllSisters();
       const ejectedChar = allSisters.find((s) => s.id === ejectedId);
