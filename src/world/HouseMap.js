@@ -134,25 +134,23 @@ export class HouseMap {
     this.drawTaskPins(ctx, activeFloor);
   }
 
-  // Among Us Style Blackout Fog-of-War:
-  // Innocents get a tight flashlight circle; Imposters keep 100% full vision!
   drawBlackoutFogOfWar(ctx, player) {
     if (!player) return;
     const isBlackedOut = this.isFloorBlackedOut(player.floor);
     if (!isBlackedOut) return;
 
     ctx.save();
-    const isImposter = (player.role === "imposter");
+    const isPrankster = (player.role === "prankster");
 
-    if (isImposter) {
-      // Imposter Night Vision: Subtle dark red tint with 100% full vision
+    if (isPrankster) {
+      // Prankster Night Vision: Subtle dark red tint with 100% full vision
       ctx.fillStyle = "rgba(185, 28, 28, 0.15)";
       ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
       ctx.fillStyle = "#F87171";
       ctx.font = "bold 14px Fredoka, sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("👁️ IMPOSTER NIGHT VISION (Full Clear View)", CANVAS_WIDTH / 2, FLOOR_Y[player.floor] + 28);
+      ctx.fillText("👁️ PRANKSTER NIGHT VISION (Full Clear View)", CANVAS_WIDTH / 2, FLOOR_Y[player.floor] + 28);
     } else {
       // Innocent Limited Vision: Dark shadow mask with a circular flashlight spotlight around player
       const fogCanvas = document.createElement("canvas");

@@ -126,7 +126,7 @@ if (WebSocketServer) {
               state: {
                 cleanliness: 0,
                 mummyId: data.mummyId || 'RIDDHI_MUMMY',
-                imposterSisterId: null,
+                pranksterSisterId: null,
                 started: false
               }
             };
@@ -216,12 +216,12 @@ if (WebSocketServer) {
             const room = rooms.get(currentRoomCode);
             if (room) {
               room.state.started = true;
-              room.state.imposterSisterId = data.imposterSisterId;
+              room.state.pranksterSisterId = data.pranksterSisterId || data.imposterSisterId;
               room.state.mummyId = data.mummyId;
 
               broadcastToRoom(currentRoomCode, {
                 type: 'START_GAME_SYNC',
-                imposterSisterId: data.imposterSisterId,
+                pranksterSisterId: room.state.pranksterSisterId,
                 mummyId: data.mummyId,
                 lobbyPlayers: Array.from(room.players.values())
               });
@@ -243,10 +243,11 @@ if (WebSocketServer) {
             break;
           }
 
+          case 'PRANKSTER_DEBUFF':
           case 'IMPOSTER_DEBUFF': {
             if (currentRoomCode) {
               broadcastToRoom(currentRoomCode, {
-                type: 'IMPOSTER_DEBUFF',
+                type: 'PRANKSTER_DEBUFF',
                 senderId: myPlayerId,
                 debuffType: data.debuffType,
                 floor: data.floor

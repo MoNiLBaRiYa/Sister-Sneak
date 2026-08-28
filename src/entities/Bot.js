@@ -1,7 +1,6 @@
 /**
  * Sister Sneak: Phone Locked - AI Bot Sister Entity
- * Rule-based pathfinding, task simulation, and imposter decision loop.
- * (Does NOT auto-fill the player's Cleanliness meter so the player gets to play all tasks).
+ * Rule-based pathfinding, task simulation, and prankster decision loop.
  */
 
 import { Character } from './Character.js';
@@ -21,11 +20,10 @@ export class Bot extends Character {
   updateAI(dt, game) {
     this.thinkTimer -= dt;
 
-    if (this.role === "imposter") {
+    if (this.role === "prankster") {
       this.sabotageTimer -= dt;
       if (this.sabotageTimer <= 0 && game.sabotageSystem) {
-        // Trigger a sabotage occasionally if unobserved
-        const sabs = ["BLACKOUT", "KUNDI", "MESS"];
+        const sabs = ["BLACKOUT", "KUNDI"];
         const chosen = sabs[Math.floor(Math.random() * sabs.length)];
         game.sabotageSystem.triggerSabotage(chosen, this.floor);
         this.sabotageTimer = 35.0 + Math.random() * 25.0;
@@ -59,7 +57,6 @@ export class Bot extends Character {
     if (this.state === "DOING_TASK") {
       this.taskTimer -= dt;
       if (this.taskTimer <= 0) {
-        // Bot finishes simulating, does NOT artificially auto-win the game
         this.state = "WANDER";
         this.chooseNextGoal(game);
       }
@@ -70,11 +67,11 @@ export class Bot extends Character {
   }
 
   chooseNextGoal(game) {
-    // 20% chance to switch floor via stairs
+    // 25% chance to switch floor via stairs
     if (Math.random() < 0.25) {
       const otherFloors = [0, 1, 2].filter((f) => f !== this.floor);
       const chosenFloor = otherFloors[Math.floor(Math.random() * otherFloors.length)];
-      this.setFloor(chosenFloor, 1050); // Move near stairs
+      this.setFloor(chosenFloor, 1050);
       this.targetX = 200 + Math.random() * 700;
       this.targetHotspot = null;
       return;
@@ -87,7 +84,6 @@ export class Bot extends Character {
       this.targetHotspot = hs;
       this.targetX = hs.x;
     } else {
-      // Wander to a random x position on current floor
       this.targetHotspot = null;
       this.targetX = 150 + Math.random() * 900;
     }

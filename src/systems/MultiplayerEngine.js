@@ -265,9 +265,10 @@ export class MultiplayerEngine {
         }
         break;
 
+      case 'PRANKSTER_DEBUFF':
       case 'IMPOSTER_DEBUFF':
         if (data.senderId !== this.myPlayerId) {
-          this.game.handleRemoteImposterDebuff(data);
+          this.game.handleRemotePranksterDebuff(data);
         }
         break;
 

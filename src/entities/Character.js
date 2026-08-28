@@ -31,7 +31,7 @@ export class Character {
     this.walkCycle = 0;
     this.walkSpeed = 10;
 
-    this.role = "innocent"; // "innocent" or "imposter"
+    this.role = "innocent"; // "innocent" or "prankster"
     this.isEjected = false;
     this.isHidden = false; // For Riddhi's blanket stealth
     this.isDashing = false;

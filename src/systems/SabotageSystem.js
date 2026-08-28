@@ -1,7 +1,7 @@
 /**
- * Sister Sneak: Phone Locked - Sabotage System (Imposter Abilities)
- * Manages Blackout, Door Kundi, and Floor Mess sabotages with Critical Countdown Timer
- * where Innocents must fix it at the switchboard or Imposter wins.
+ * Sister Sneak: Phone Locked - Sabotage System (Prankster Abilities)
+ * Manages Switchboard Blackout and Door Kundi sabotages with Among Us Style Cooldowns (25s & 15s)
+ * and Critical 35s Countdown Timer where Innocents must fix it at the fuse box or Prankster wins.
  */
 
 import { SABOTAGE_COOLDOWNS } from '../config/constants.js';
@@ -9,10 +9,10 @@ import { SABOTAGE_COOLDOWNS } from '../config/constants.js';
 export class SabotageSystem {
   constructor(game) {
     this.game = game;
+    // Initial 10s warmup cooldown at round start (like Among Us)
     this.cooldowns = {
-      BLACKOUT: 0,
-      KUNDI: 0,
-      MESS: 0
+      BLACKOUT: 10,
+      KUNDI: 10
     };
     this.criticalSabotageActive = false;
     this.criticalTimer = 0;
@@ -22,16 +22,12 @@ export class SabotageSystem {
   bindUI() {
     const btnBlackout = document.getElementById("sab-blackout");
     const btnKundi = document.getElementById("sab-kundi");
-    const btnMess = document.getElementById("sab-mess");
 
     if (btnBlackout) {
       btnBlackout.addEventListener("click", () => this.triggerSabotage("BLACKOUT"));
     }
     if (btnKundi) {
       btnKundi.addEventListener("click", () => this.triggerSabotage("KUNDI"));
-    }
-    if (btnMess) {
-      btnMess.addEventListener("click", () => this.triggerSabotage("MESS"));
     }
   }
 
@@ -49,7 +45,7 @@ export class SabotageSystem {
       const alertEl = document.getElementById("mummy-alert");
       if (alertEl) {
         alertEl.classList.remove("hidden");
-        alertEl.innerHTML = `<span class="pulse-icon">🚨</span><span class="warning-text">CRITICAL SABOTAGE: FUSE OVERHEAT (${Math.ceil(this.criticalTimer)}s)! FIX AT FUSE BOX OR IMPOSTER WINS!</span>`;
+        alertEl.innerHTML = `<span class="pulse-icon">🚨</span><span class="warning-text">CRITICAL SABOTAGE: FUSE OVERHEAT (${Math.ceil(this.criticalTimer)}s)! FIX AT FUSE BOX OR PRANKSTER WINS!</span>`;
       }
 
       if (this.criticalTimer <= 0) {
@@ -64,25 +60,21 @@ export class SabotageSystem {
   updateUI() {
     const cdBlackout = document.getElementById("cd-blackout");
     const cdKundi = document.getElementById("cd-kundi");
-    const cdMess = document.getElementById("cd-mess");
     const btnBlackout = document.getElementById("sab-blackout");
     const btnKundi = document.getElementById("sab-kundi");
-    const btnMess = document.getElementById("sab-mess");
 
     if (btnBlackout) btnBlackout.disabled = this.cooldowns.BLACKOUT > 0;
     if (btnKundi) btnKundi.disabled = this.cooldowns.KUNDI > 0;
-    if (btnMess) btnMess.disabled = this.cooldowns.MESS > 0;
 
     if (cdBlackout) cdBlackout.innerText = this.cooldowns.BLACKOUT > 0 ? `${Math.ceil(this.cooldowns.BLACKOUT)}s` : "";
     if (cdKundi) cdKundi.innerText = this.cooldowns.KUNDI > 0 ? `${Math.ceil(this.cooldowns.KUNDI)}s` : "";
-    if (cdMess) cdMess.innerText = this.cooldowns.MESS > 0 ? `${Math.ceil(this.cooldowns.MESS)}s` : "";
   }
 
   triggerSabotage(type, targetFloor = null) {
     if (this.cooldowns[type] > 0) return;
 
-    const cdMultiplier = (this.game.imposterSisterId === "JYEANA") ? 0.5 : 1.0;
-    this.cooldowns[type] = SABOTAGE_COOLDOWNS[type] * cdMultiplier;
+    const cdMultiplier = (this.game.pranksterSisterId === "JYEANA") ? 0.5 : 1.0;
+    this.cooldowns[type] = (SABOTAGE_COOLDOWNS[type] || 20) * cdMultiplier;
 
     this.game.camera.shake(0.5, 10);
     this.game.audio.playSabotageAlert();
@@ -92,15 +84,12 @@ export class SabotageSystem {
     if (type === "BLACKOUT") {
       this.game.houseMap.setFloorBlackout(floor, true);
       this.criticalSabotageActive = true;
-      this.criticalTimer = 35.0; // 35 seconds to fix or Imposter wins!
+      this.criticalTimer = 35.0; // 35 seconds to fix or Prankster wins!
       this.game.showTopToast(`🚨 CRITICAL SABOTAGE: Blackout on Floor ${floor === 2 ? '3F' : floor === 1 ? '2F' : '1F'} (35s)! Fix it at the Fuse Box!`);
     } else if (type === "KUNDI") {
       const lockedRoom = this.game.houseMap.lockRoomAt(this.game.player ? this.game.player.x : 500, this.game.player ? this.game.player.y : 300, floor, 10.0);
       const roomName = lockedRoom ? lockedRoom.name : "Current Room";
       this.game.showTopToast(`🔒 Door Kundi Locked: ${roomName} (10s)! No one can enter or exit!`);
-    } else if (type === "MESS") {
-      this.game.taskManager.reduceCleanliness(15);
-      this.game.showTopToast("🧹 Imposter spilled junk across the floors (-15% Cleanliness)!");
     }
 
     // Sync sabotage across all multiplayer peers

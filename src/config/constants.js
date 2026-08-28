@@ -416,6 +416,5 @@ export const HOTSPOTS = [
 export const ROUND_DURATION_SEC = 180;
 export const SABOTAGE_COOLDOWNS = {
   BLACKOUT: 25,
-  KUNDI: 20,
-  MESS: 20
+  KUNDI: 15
 };

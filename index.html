@@ -22,7 +22,7 @@
           <span class="role-text">Innocent</span>
         </div>
         <div class="hud-badge char-badge" id="hud-char-badge">
-          <span class="char-avatar" id="hud-char-avatar">👩</span>
+          <span class="char-avatar" id="hud-char-avatar">🌸</span>
           <span class="char-name" id="hud-char-name">Riddhi</span>
         </div>
         <!-- Active Character Power Button with Cooldown -->
@@ -89,24 +89,19 @@
         <button class="floor-nav-btn" data-floor="0" id="floor-btn-0">1F<br><small>Entry</small></button>
       </div>
 
-      <!-- Sabotage Floating Bar (Visible only for Imposter) -->
+      <!-- Sabotage Floating Bar (Visible only for Prankster) -->
       <div id="sabotage-bar" class="sabotage-panel hidden">
-        <div class="sabotage-title">🤫 SECRET SABOTAGE</div>
+        <div class="sabotage-title">🤫 SECRET SABOTAGE (PRANKSTER)</div>
         <div class="sabotage-actions">
-          <button class="sab-btn" id="sab-blackout" title="Switchboard Blackout (Cut lights & freeze tasks on floor)">
+          <button class="sab-btn" id="sab-blackout" title="Switchboard Blackout (Cut lights on floor, 25s CD)">
             <span class="sab-icon">⚡</span>
             <span class="sab-label">Blackout</span>
             <span class="sab-cd" id="cd-blackout"></span>
           </button>
-          <button class="sab-btn" id="sab-kundi" title="Door Kundi (Lock room doors for 8s)">
+          <button class="sab-btn" id="sab-kundi" title="Door Kundi (Lock room doors for 10s, 15s CD)">
             <span class="sab-icon">🔒</span>
             <span class="sab-label">Door Kundi</span>
             <span class="sab-cd" id="cd-kundi"></span>
-          </button>
-          <button class="sab-btn" id="sab-mess" title="Floor Mess (Spill junk, -15% cleanliness)">
-            <span class="sab-icon">🧹</span>
-            <span class="sab-label">Floor Mess</span>
-            <span class="sab-cd" id="cd-mess"></span>
           </button>
         </div>
       </div>
@@ -119,6 +114,22 @@
         <div class="touch-action-group">
           <button id="btn-touch-power" class="touch-power-btn" aria-label="Use Character Power">⚡</button>
           <button id="btn-touch-action" class="touch-action-btn" aria-label="Interact / Do Chore">E</button>
+        </div>
+      </div>
+
+      <!-- Creator Corner Card: Brother Monil's Message -->
+      <div id="creator-corner-badge" class="creator-corner-badge">
+        <div class="creator-avatar-wrap">
+          <span class="creator-avatar-icon">👦💻</span>
+        </div>
+        <div class="creator-bubble">
+          <div class="creator-header">
+            <strong>Monil (Brother & Creator)</strong>
+            <button id="btn-toggle-creator" class="creator-close-btn">&times;</button>
+          </div>
+          <p class="creator-msg">
+            "Hello Sister, this is your brother Monil, the creator of this game, aa game maa bov badthi error and loop holes( bhool ) che je solve karva na baaki, testing bhi baaki che. pan time paas maate rami sako cho. Tame Among Us raimi hase toh kadach thodik maja aave bhi. Bye !!"
+          </p>
         </div>
       </div>
     </div>
@@ -142,7 +153,7 @@
           
           <div class="lobby-story">
             <p><strong>The Crisis:</strong> The On-Duty Mummy locked all five sisters' phones in the heirloom steel box!
-            Nobody gets their phone back until the house is <strong>100% clean</strong>. But one sister is secretly sabotaging chores...</p>
+            Nobody gets their phone back until the house is <strong>100% clean</strong>. But one sister is secretly a <strong>Prankster</strong> sabotaging chores...</p>
           </div>
 
           <div class="character-select-section">
@@ -190,7 +201,7 @@
             <div class="role-preference-bar">
               <label><input type="radio" name="rolePref" value="random" checked> 🎲 Random Role</label>
               <label class="role-innocent-label"><input type="radio" name="rolePref" value="innocent"> 😇 Force Innocent</label>
-              <label class="role-imposter-label"><input type="radio" name="rolePref" value="imposter"> 😈 Force Imposter</label>
+              <label class="role-imposter-label"><input type="radio" name="rolePref" value="prankster"> 😈 Force Prankster</label>
             </div>
           </div>
 
@@ -316,7 +327,7 @@
           <!-- Live Chat / Quick-Chat Section for Emergency Meeting -->
           <div class="meeting-chat-container">
             <div class="courtroom-debate-log" id="debate-log">
-              <div class="log-entry system-entry">⚠️ Emergency Meeting called. Discuss, chat, and vote who the Imposter is!</div>
+              <div class="log-entry system-entry">⚠️ Emergency Meeting called. Discuss, chat, and vote who the Prankster is!</div>
             </div>
 
             <!-- Quick Chat Chips -->
@@ -384,7 +395,7 @@
             <!-- Unlocked phone celebration or punishment mop illustration -->
           </div>
           <div class="gameover-summary" id="gameover-summary">
-            <p><strong>The Imposter was:</strong> <span id="gameover-imposter-reveal">Jyeana</span></p>
+            <p><strong>The Prankster was:</strong> <span id="gameover-imposter-reveal">Jyeana</span></p>
             <p id="gameover-story-outcome">Mummy opened the heirloom lockbox and handed all 5 phones back with kaju katli treats!</p>
           </div>
           <div class="gameover-stats">
@@ -419,11 +430,11 @@
             </div>
             <div class="help-row">
               <span class="help-key">Innocent Goal 😇</span>
-              <span>Finish household chores on your task list to reach 100% Cleanliness, or unmask the secret Imposter in emergency meetings!</span>
+              <span>Finish household chores on your task list to reach 100% Cleanliness, or unmask the secret Prankster in emergency meetings!</span>
             </div>
             <div class="help-row">
-              <span class="help-key">Imposter Goal 😈</span>
-              <span>Trigger universal sabotages (Blackout, Kundi, Mess) and frame other sisters during Emergency Meetings without getting caught!</span>
+              <span class="help-key">Prankster Goal 😈</span>
+              <span>Trigger universal sabotages (Blackout, Door Kundi) and frame other sisters during Emergency Meetings without getting caught!</span>
             </div>
           </div>
         </div>

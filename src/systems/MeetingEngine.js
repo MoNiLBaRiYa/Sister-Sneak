@@ -241,7 +241,7 @@ export class MeetingEngine {
   populateDebateLog() {
     const log = document.getElementById("debate-log");
     if (!log) return;
-    log.innerHTML = `<div class="log-entry system-entry">⚠️ Emergency Meeting called. Discuss and vote who the Imposter is!</div>`;
+    log.innerHTML = `<div class="log-entry system-entry">⚠️ Emergency Meeting called. Discuss and vote who the Prankster is!</div>`;
 
     const livingSisters = this.getLivingSisters();
     livingSisters.forEach((s, idx) => {
@@ -298,8 +298,8 @@ export class MeetingEngine {
       }
     });
 
-    // Jisha's Imposter Shield
-    if (ejectedId === "JISHA" && this.game.imposterSisterId === "JISHA" && !this.jishaShieldUsed) {
+    // Jisha's Prankster Shield
+    if (ejectedId === "JISHA" && this.game.pranksterSisterId === "JISHA" && !this.jishaShieldUsed) {
       this.jishaShieldUsed = true;
       ejectedId = null;
     }
@@ -311,8 +311,8 @@ export class MeetingEngine {
       const ejectedChar = allSisters.find((s) => s.id === ejectedId);
       if (ejectedChar) {
         ejectedChar.isEjected = true;
-        const isImposter = (ejectedChar.id === this.game.imposterSisterId);
-        this.showVerdict(ejectedChar, isImposter ? "Unmasked The Imposter!" : "An Innocent Sister was Punished!");
+        const isPrankster = (ejectedChar.id === this.game.pranksterSisterId);
+        this.showVerdict(ejectedChar, isPrankster ? "Unmasked The Prankster!" : "An Innocent Sister was Punished!");
       }
     }
   }
@@ -329,37 +329,37 @@ export class MeetingEngine {
     if (verdictScreen) verdictScreen.classList.remove("hidden");
 
     if (ejectedSister) {
-      const isImposter = (ejectedSister.id === this.game.imposterSisterId);
+      const isPrankster = (ejectedSister.id === this.game.pranksterSisterId);
       if (title) title.innerText = outcomeText;
       spotlight.innerHTML = `
         <div class="verdict-avatar-circle">
           <img src="${ejectedSister.image || ''}" class="verdict-avatar-img" onerror="this.style.display='none'" />
           <span style="font-size:52px;">${ejectedSister.avatar}</span>
         </div>
-        <h3 class="verdict-name-banner" style="color:${isImposter ? '#10B981' : '#EF4444'};">
-          ${ejectedSister.name} was ${isImposter ? 'THE IMPOSTER! 😈' : 'NOT The Imposter! 😇'}
+        <h3 class="verdict-name-banner" style="color:${isPrankster ? '#10B981' : '#EF4444'};">
+          ${ejectedSister.name} was ${isPrankster ? 'THE PRANKSTER! 😈' : 'NOT The Prankster! 😇'}
         </h3>
         <p class="verdict-sub-status">
-          ${isImposter ? '0 Imposters remain.' : '1 Imposter remains.'}
+          ${isPrankster ? '0 Pranksters remain.' : '1 Prankster remains.'}
         </p>
       `;
       dialogue.innerText = `"${this.game.mummy.dialogues.verdictPunish}"`;
 
-      // 1. INNOCENTS WIN: Imposter was unmasked!
-      if (isImposter) {
+      // 1. INNOCENTS WIN: Prankster was unmasked!
+      if (isPrankster) {
         setTimeout(() => {
           this.closeVerdict();
-          this.game.triggerWin("IMPOSTER_EJECTED");
+          this.game.triggerWin("PRANKSTER_EJECTED");
         }, 3500);
         return;
       }
 
-      // 2. IMPOSTER WINS: Only 1 innocent left alive!
-      const livingInnocents = this.getLivingSisters().filter(s => s.id !== this.game.imposterSisterId);
+      // 2. PRANKSTER WINS: Only 1 innocent left alive!
+      const livingInnocents = this.getLivingSisters().filter(s => s.id !== this.game.pranksterSisterId);
       if (livingInnocents.length <= 1) {
         setTimeout(() => {
           this.closeVerdict();
-          this.game.triggerDefeat("IMPOSTER_MAJORITY");
+          this.game.triggerDefeat("PRANKSTER_MAJORITY");
         }, 3500);
         return;
       }
@@ -368,7 +368,7 @@ export class MeetingEngine {
       spotlight.innerHTML = `
         <div style="font-size:60px;">🤷‍♀️</div>
         <h3 class="verdict-name-banner" style="color:#94A3B8;">No one was ejected. (Skipped / Tie)</h3>
-        <p class="verdict-sub-status">1 Imposter remains.</p>
+        <p class="verdict-sub-status">1 Prankster remains.</p>
       `;
       dialogue.innerText = `"Koi saboot nathi! Badha potpotana kaam par laago!" (No proof! Everyone back to cleaning!)`;
     }

@@ -1,6 +1,6 @@
 /**
  * Sister Sneak: Phone Locked - 5 Sisters Character Definitions
- * Implements Innocent & Imposter abilities, visual traits, and custom avatar artwork.
+ * Implements Innocent & Prankster abilities, visual traits, and custom avatar artwork.
  */
 
 export const SISTERS = {
@@ -17,12 +17,12 @@ export const SISTERS = {
     accessory: "blanket",
     speed: 3.2,
     innocentPower: {
-      name: "Partner Courage",
-      desc: "Tasks 1.5x faster when near another sister."
+      name: "Cozy Camouflage",
+      desc: "Covers under quilt blanket for 10s (completely invisible to Mummy)."
     },
-    imposterPower: {
-      name: "Blanket Stealth",
-      desc: "Hides under blanket for 8s (invisible & untargetable)."
+    pranksterPower: {
+      name: "Sleep Cloud Trap",
+      desc: "Drops sleep smoke slowing all innocent sisters by 55% for 8s."
     }
   },
 
@@ -40,11 +40,11 @@ export const SISTERS = {
     speed: 3.4,
     innocentPower: {
       name: "Artistic Flow",
-      desc: "2x speed on decoration & cleaning tasks (+20% Cleanliness burst)."
+      desc: "Auto-solves active chore or grants +20% Cleanliness burst."
     },
-    imposterPower: {
-      name: "Fake Clue Fabricator",
-      desc: "Plants fake evidence that raises suspicion of innocent sisters."
+    pranksterPower: {
+      name: "Fake Paint Frame",
+      desc: "Shoots red paint blinding innocents and raising their suspicion by +35%."
     }
   },
 
@@ -61,12 +61,12 @@ export const SISTERS = {
     accessory: "sneakers",
     speed: 4.2,
     innocentPower: {
-      name: "Shortcut Master",
-      desc: "+25% movement speed everywhere in the house."
+      name: "Vent Portal Dash",
+      desc: "Instant floor teleport + supersonic speed sprint."
     },
-    imposterPower: {
-      name: "Floor Teleport",
-      desc: "Instant floor jump with zero delay right after a sabotage."
+    pranksterPower: {
+      name: "Vent & Door Slam",
+      desc: "Vents to another floor and slams all room doors shut with Kundi on innocents."
     }
   },
 
@@ -84,11 +84,11 @@ export const SISTERS = {
     speed: 3.5,
     innocentPower: {
       name: "Universal Ladli Card",
-      desc: "Solves study tasks instantly; resets Mummy's suspicion to zero."
+      desc: "Solves math study sheets instantly with gold star and resets suspicion to 0%."
     },
-    imposterPower: {
-      name: "Innocent Shield",
-      desc: "Auto-cancels the first vote cast against her during each meeting."
+    pranksterPower: {
+      name: "Blame Shift Charm",
+      desc: "Mind-tricks Mummy and shifts suspicion directly onto innocent sisters."
     }
   },
 
@@ -105,12 +105,12 @@ export const SISTERS = {
     accessory: "headband",
     speed: 3.6,
     innocentPower: {
-      name: "Quick Hint & Dash",
-      desc: "Visual arrow clues on puzzle tasks + 5s sprint dash."
+      name: "Electric Overdrive",
+      desc: "Instantly restores all blacked-out lights + 7s Hyper Sprint."
     },
-    imposterPower: {
-      name: "Rapid Saboteur",
-      desc: "All sabotage cooldowns reset to 0s instantly."
+    pranksterPower: {
+      name: "Sabotage Surge",
+      desc: "Freezes innocent chores for 8s and resets sabotage cooldowns to 0s."
     }
   }
 };

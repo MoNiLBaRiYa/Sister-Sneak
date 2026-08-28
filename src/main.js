@@ -199,4 +199,14 @@ window.addEventListener('DOMContentLoaded', () => {
       game.state = "LOBBY";
     });
   }
+
+  // Creator Message Toggle (Brother Monil)
+  const btnToggleCreator = document.getElementById('btn-toggle-creator');
+  const creatorBadge = document.getElementById('creator-corner-badge');
+  if (btnToggleCreator && creatorBadge) {
+    btnToggleCreator.addEventListener('click', (e) => {
+      e.stopPropagation();
+      creatorBadge.classList.toggle('minimized');
+    });
+  }
 });

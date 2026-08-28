@@ -2,7 +2,7 @@
  * Sister Sneak: Phone Locked - Controllable Player Entity
  * Implements Asymmetric Power Dynamics & Door Kundi Collision Prevention:
  * - Innocent Powers: Self & Team Buffs (Auto-solve, Sprint, Reset Suspicion, Restore Lights)
- * - Imposter Powers: Direct Sabotage & Debuffs onto Innocent Sisters (Slowdown Traps, Paint Blind, Door Locks, Blame Transfer)
+ * - Prankster Powers: Direct Sabotage & Debuffs onto Innocent Sisters (Slowdown Traps, Paint Blind, Door Locks, Blame Transfer)
  */
 
 import { Character } from './Character.js';
@@ -18,9 +18,9 @@ export class Player extends Character {
     this.auraColor = null;
     this.auraTimer = 0;
     this.abilityCooldown = 0;
-    this.maxAbilityCooldown = 15.0;
+    this.maxAbilityCooldown = 25.0; // Standard 25s cooldown like Among Us
 
-    // Debuff timers caused by Imposter powers
+    // Debuff timers caused by Prankster powers
     this.slowDebuffTimer = 0;
     this.paintBlindTimer = 0;
     this.taskFreezeTimer = 0;
@@ -37,7 +37,7 @@ export class Player extends Character {
     const move = input.getMovementVector();
     let currentSpeed = this.speed;
 
-    // Handle Debuffs from Imposter
+    // Handle Debuffs from Prankster
     if (this.slowDebuffTimer > 0) {
       currentSpeed *= 0.45; // 55% Slowdown
       this.slowDebuffTimer = Math.max(0, this.slowDebuffTimer - dt);
@@ -127,13 +127,13 @@ export class Player extends Character {
     this.abilityCooldown = this.maxAbilityCooldown;
 
     game.audio.playTaskComplete();
-    const isImposter = (this.role === "imposter");
+    const isPrankster = (this.role === "prankster");
 
     // =========================================================================
     // 1. 🌸 RIDDHI
     // =========================================================================
     if (this.id === "RIDDHI") {
-      if (!isImposter) {
+      if (!isPrankster) {
         // INNOCENT: Self-Camouflage (Mummy ignores for 10s)
         this.stealthTimer = 10.0;
         this.auraColor = "#F472B6";
@@ -142,13 +142,13 @@ export class Player extends Character {
         this.suspicion = 0;
         game.showTopToast("🌸 Riddhi's Cozy Blanket Camouflage! Invisible to Mummy for 10s!");
       } else {
-        // IMPOSTER: Sleep Cloud Trap (Slows down all innocent sisters by 50% for 7s)
+        // PRANKSTER: Sleep Cloud Trap (Slows down all innocent sisters by 55% for 8s)
         this.stealthTimer = 8.0;
         this.auraColor = "#EF4444";
         this.auraTimer = 8.0;
         this.activePowerLabel = "😴 SLEEP CLOUD TRAP (8s)";
-        game.applyImposterDebuffToInnocents("SLOW_TRAP", this.floor);
-        game.showTopToast("😈 Imposter Riddhi dropped a Sleep Cloud! All innocent sisters slowed by 50%!");
+        game.applyPranksterDebuffToInnocents("SLOW_TRAP", this.floor);
+        game.showTopToast("😈 Prankster Riddhi dropped a Sleep Cloud! All innocent sisters slowed by 55%!");
       }
     }
 
@@ -156,7 +156,7 @@ export class Player extends Character {
     // 2. 🎨 SHRUTI
     // =========================================================================
     else if (this.id === "SHRUTI") {
-      if (!isImposter) {
+      if (!isPrankster) {
         // INNOCENT: Master Touch (Auto-solves active chore or +20% Cleanliness)
         this.auraColor = "#38BDF8";
         this.auraTimer = 6.0;
@@ -169,12 +169,12 @@ export class Player extends Character {
           game.showTopToast("🎨 Shruti's Master Touch! Generated +20% Cleanliness burst!");
         }
       } else {
-        // IMPOSTER: Fake Evidence Splatter (Raises innocents' suspicion by +35% and blinds vision)
+        // PRANKSTER: Fake Evidence Splatter (Raises innocents' suspicion by +35% and blinds vision)
         this.auraColor = "#DC2626";
         this.auraTimer = 6.0;
         this.activePowerLabel = "🎨 PAINT BLIND (+35% SUSP)";
-        game.applyImposterDebuffToInnocents("PAINT_FRAME", this.floor);
-        game.showTopToast("😈 Imposter Shruti splattered Fake Paint! Framed innocent sisters (+35% Suspicion)!");
+        game.applyPranksterDebuffToInnocents("PAINT_FRAME", this.floor);
+        game.showTopToast("😈 Prankster Shruti splattered Fake Paint! Framed innocent sisters (+35% Suspicion)!");
       }
     }
 
@@ -182,7 +182,7 @@ export class Player extends Character {
     // 3. 🎒 JAHANVI
     // =========================================================================
     else if (this.id === "JAHANVI") {
-      if (!isImposter) {
+      if (!isPrankster) {
         // INNOCENT: Self-Vent Teleport + Speed Dash to reach chores fast
         const nextFloor = (this.floor + 1) % 3;
         this.setFloor(nextFloor, 300 + Math.random() * 600);
@@ -194,7 +194,7 @@ export class Player extends Character {
         this.activePowerLabel = "🌀 VENT DASH (6s)";
         game.showTopToast(`🌀 Jahanvi's Secret Vent Portal! Jumped to Floor ${nextFloor === 2 ? '3F' : nextFloor === 1 ? '2F' : '1F'} + Super Dash!`);
       } else {
-        // IMPOSTER: Vent Escape & Door Slam (Locks all doors on floor, trapping innocents)
+        // PRANKSTER: Vent Escape & Door Slam (Locks all doors on floor, trapping innocents)
         const nextFloor = (this.floor + 1) % 3;
         this.setFloor(nextFloor, 300 + Math.random() * 600);
         game.camera.setFloor(nextFloor);
@@ -202,8 +202,8 @@ export class Player extends Character {
         this.auraColor = "#EF4444";
         this.auraTimer = 6.0;
         this.activePowerLabel = "🚪 VENT & DOOR SLAM";
-        game.applyImposterDebuffToInnocents("DOOR_SLAM", this.floor);
-        game.showTopToast("😈 Imposter Jahanvi vented away & SLAMMED all doors shut on innocents!");
+        game.applyPranksterDebuffToInnocents("DOOR_SLAM", this.floor);
+        game.showTopToast("😈 Prankster Jahanvi vented away & SLAMMED all doors shut on innocents!");
       }
     }
 
@@ -211,7 +211,7 @@ export class Player extends Character {
     // 4. 📚 JISHA
     // =========================================================================
     else if (this.id === "JISHA") {
-      if (!isImposter) {
+      if (!isPrankster) {
         // INNOCENT: Self Study Genius (Auto-solves worksheet) + resets Mummy suspicion
         this.auraColor = "#A78BFA";
         this.auraTimer = 8.0;
@@ -225,13 +225,13 @@ export class Player extends Character {
           game.showTopToast("📚 Jisha's Universal Ladli Charm! Mummy's suspicion reset to 0%!");
         }
       } else {
-        // IMPOSTER: Blame Shift (Transfers her suspicion onto innocent sisters)
+        // PRANKSTER: Blame Shift (Transfers her suspicion onto innocent sisters)
         this.auraColor = "#7C3AED";
         this.auraTimer = 8.0;
         this.activePowerLabel = "🎭 BLAME SHIFT CHARM";
         this.suspicion = 0;
-        game.applyImposterDebuffToInnocents("BLAME_SHIFT", this.floor);
-        game.showTopToast("😈 Imposter Jisha shifted all blame onto innocent sisters!");
+        game.applyPranksterDebuffToInnocents("BLAME_SHIFT", this.floor);
+        game.showTopToast("😈 Prankster Jisha shifted all blame onto innocent sisters!");
       }
     }
 
@@ -239,7 +239,7 @@ export class Player extends Character {
     // 5. ⚡ JYEANA
     // =========================================================================
     else if (this.id === "JYEANA") {
-      if (!isImposter) {
+      if (!isPrankster) {
         // INNOCENT: Self Overdrive (Restores blackouts instantly + 7s Hyper Sprint)
         this.sprintTimer = 7.0;
         this.auraColor = "#10B981";
@@ -249,7 +249,7 @@ export class Player extends Character {
         game.sabotageSystem?.resolveCriticalSabotage();
         game.showTopToast("⚡ Jyeana's Electric Overdrive! Restored all lights + 7s Hyper Sprint!");
       } else {
-        // IMPOSTER: Electrical Sabotage Surge (Freezes all innocent tasks for 8s + 0s sabotage cooldowns)
+        // PRANKSTER: Electrical Sabotage Surge (Freezes all innocent tasks for 8s + 0s sabotage cooldowns)
         this.sprintTimer = 7.0;
         this.auraColor = "#EF4444";
         this.auraTimer = 7.0;
@@ -257,10 +257,9 @@ export class Player extends Character {
         if (game.sabotageSystem) {
           game.sabotageSystem.cooldowns.BLACKOUT = 0;
           game.sabotageSystem.cooldowns.KUNDI = 0;
-          game.sabotageSystem.cooldowns.MESS = 0;
         }
-        game.applyImposterDebuffToInnocents("TASK_FREEZE", this.floor);
-        game.showTopToast("😈 Imposter Jyeana triggered an Electric Surge! All innocent tasks frozen for 8s!");
+        game.applyPranksterDebuffToInnocents("TASK_FREEZE", this.floor);
+        game.showTopToast("😈 Prankster Jyeana triggered an Electric Surge! All innocent tasks frozen for 8s!");
       }
     }
 
@@ -299,7 +298,7 @@ export class Player extends Character {
       ctx.fillStyle = this.auraColor;
       ctx.font = "bold 11px Fredoka, sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText(this.activePowerLabel || (this.role === "imposter" ? "😈 IMPOSTER POWER" : "⚡ INNOCENT POWER"), this.x, this.y - 45);
+      ctx.fillText(this.activePowerLabel || (this.role === "prankster" ? "😈 PRANKSTER POWER" : "⚡ INNOCENT POWER"), this.x, this.y - 45);
       ctx.restore();
     }
 

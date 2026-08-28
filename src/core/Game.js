@@ -224,14 +224,14 @@ export class Game {
     this.selectedSisterId = playerSisterId;
     const sisterKeys = Object.keys(SISTERS);
 
-    // Pick Imposter
-    if (rolePreference === "imposter") {
-      this.imposterSisterId = playerSisterId;
+    // Pick Prankster
+    if (rolePreference === "prankster") {
+      this.pranksterSisterId = playerSisterId;
     } else if (rolePreference === "innocent") {
       const otherKeys = sisterKeys.filter((k) => k !== playerSisterId);
-      this.imposterSisterId = otherKeys[Math.floor(Math.random() * otherKeys.length)];
+      this.pranksterSisterId = otherKeys[Math.floor(Math.random() * otherKeys.length)];
     } else {
-      this.imposterSisterId = sisterKeys[Math.floor(Math.random() * sisterKeys.length)];
+      this.pranksterSisterId = sisterKeys[Math.floor(Math.random() * sisterKeys.length)];
     }
 
     // Pick Mummy
@@ -250,7 +250,7 @@ export class Game {
       floor: 1,
       x: 500
     });
-    this.player.role = (playerSisterId === this.imposterSisterId) ? "imposter" : "innocent";
+    this.player.role = (playerSisterId === this.pranksterSisterId) ? "prankster" : "innocent";
 
     // Create 4 AI Bots
     this.bots = [];
@@ -262,7 +262,7 @@ export class Game {
           floor: Math.floor(Math.random() * 3),
           x: 200 + Math.random() * 800
         });
-        bot.role = (key === this.imposterSisterId) ? "imposter" : "innocent";
+        bot.role = (key === this.pranksterSisterId) ? "prankster" : "innocent";
         this.bots.push(bot);
       }
     });
@@ -289,13 +289,13 @@ export class Game {
     const humanSisterIds = lobbyPlayers.map(p => p.sisterId);
     
     // Honor Role Preference
-    if (rolePreference === "imposter") {
-      this.imposterSisterId = mySisterId;
+    if (rolePreference === "prankster") {
+      this.pranksterSisterId = mySisterId;
     } else if (rolePreference === "innocent") {
       const otherKeys = sisterKeys.filter((k) => k !== mySisterId);
-      this.imposterSisterId = otherKeys[Math.floor(Math.random() * otherKeys.length)];
+      this.pranksterSisterId = otherKeys[Math.floor(Math.random() * otherKeys.length)];
     } else {
-      this.imposterSisterId = sisterKeys[Math.floor(Math.random() * sisterKeys.length)];
+      this.pranksterSisterId = sisterKeys[Math.floor(Math.random() * sisterKeys.length)];
     }
 
     const mummyKeys = ["RIDDHI_MUMMY", "SHRUTI_MUMMY", "JISHA_MUMMY", "JYEANA_MUMMY"];
@@ -313,7 +313,7 @@ export class Game {
       floor: 1,
       x: 500
     });
-    this.player.role = (mySisterId === this.imposterSisterId) ? "imposter" : "innocent";
+    this.player.role = (mySisterId === this.pranksterSisterId) ? "prankster" : "innocent";
 
     // Create Remote Players & Bots
     this.remotePlayers.clear();
@@ -329,7 +329,7 @@ export class Game {
             floor: 1,
             x: 600
           });
-          remotePlayer.role = (key === this.imposterSisterId) ? "imposter" : "innocent";
+          remotePlayer.role = (key === this.pranksterSisterId) ? "prankster" : "innocent";
           this.remotePlayers.set(key, remotePlayer);
         } else {
           const bConfig = SISTERS[key];
@@ -338,7 +338,7 @@ export class Game {
             floor: Math.floor(Math.random() * 3),
             x: 200 + Math.random() * 800
           });
-          bot.role = (key === this.imposterSisterId) ? "imposter" : "innocent";
+          bot.role = (key === this.pranksterSisterId) ? "prankster" : "innocent";
           this.bots.push(bot);
         }
       }
@@ -347,7 +347,7 @@ export class Game {
     // Broadcast START to all peers
     this.multiplayer.broadcast({
       type: 'START_GAME_SYNC',
-      imposterSisterId: this.imposterSisterId,
+      pranksterSisterId: this.pranksterSisterId,
       mummyId: this.activeMummyId,
       lobbyPlayers: this.multiplayer.lobbyPlayers
     });
@@ -361,7 +361,7 @@ export class Game {
   }
 
   startMultiplayerRoundAsClient(data) {
-    this.imposterSisterId = data.imposterSisterId;
+    this.pranksterSisterId = data.pranksterSisterId;
     this.activeMummyId = data.mummyId || "RIDDHI_MUMMY";
     this.mummy = new Mummy(MUMMIES[this.activeMummyId]);
 
@@ -380,7 +380,7 @@ export class Game {
       floor: 1,
       x: 550
     });
-    this.player.role = (mySisterId === this.imposterSisterId) ? "imposter" : "innocent";
+    this.player.role = (mySisterId === this.pranksterSisterId) ? "prankster" : "innocent";
 
     this.remotePlayers.clear();
     this.bots = [];
@@ -394,7 +394,7 @@ export class Game {
             floor: 1,
             x: 600
           });
-          remotePlayer.role = (key === this.imposterSisterId) ? "imposter" : "innocent";
+          remotePlayer.role = (key === this.pranksterSisterId) ? "prankster" : "innocent";
           this.remotePlayers.set(key, remotePlayer);
         } else {
           const bConfig = SISTERS[key];
@@ -403,7 +403,7 @@ export class Game {
             floor: 1,
             x: 300 + Math.random() * 600
           });
-          bot.role = (key === this.imposterSisterId) ? "imposter" : "innocent";
+          bot.role = (key === this.pranksterSisterId) ? "prankster" : "innocent";
           this.bots.push(bot);
         }
       }
@@ -430,7 +430,7 @@ export class Game {
     this.showTopToast(`⚡ ${data.sisterId} activated ${data.powerName}!`);
   }
 
-  applyImposterDebuffToInnocents(debuffType, floor) {
+  applyPranksterDebuffToInnocents(debuffType, floor) {
     // 1. Apply to local AI innocent bots
     this.bots.forEach((b) => {
       if (b.role === "innocent" && b.floor === floor) {
@@ -447,14 +447,14 @@ export class Game {
     // 2. Broadcast debuff to all remote innocent human players
     if (this.multiplayer && this.multiplayer.isMultiplayer) {
       this.multiplayer.send({
-        type: 'IMPOSTER_DEBUFF',
+        type: 'PRANKSTER_DEBUFF',
         debuffType: debuffType,
         floor: floor
       });
     }
   }
 
-  handleRemoteImposterDebuff(data) {
+  handleRemotePranksterDebuff(data) {
     if (this.player && this.player.role === "innocent") {
       if (data.debuffType === "SLOW_TRAP") {
         this.player.slowDebuffTimer = 7.0;
@@ -467,7 +467,7 @@ export class Game {
         this.showTopToast("🔒 Doors slammed shut on this floor!");
       } else if (data.debuffType === "BLAME_SHIFT") {
         this.player.suspicion = Math.min(100, this.player.suspicion + 30);
-        this.showTopToast("🎭 The Imposter shifted blame onto you!");
+        this.showTopToast("🎭 The Prankster shifted blame onto you!");
       } else if (data.debuffType === "TASK_FREEZE") {
         this.player.taskFreezeTimer = 8.0;
         this.showTopToast("⚡ Electric Surge! Your chores are frozen for 8s!");
@@ -530,7 +530,7 @@ export class Game {
     document.getElementById("floor-switcher")?.classList.remove("hidden");
     document.getElementById("touch-controls")?.classList.remove("hidden");
 
-    if (this.player.role === "imposter") {
+    if (this.player.role === "prankster") {
       document.getElementById("sabotage-bar")?.classList.remove("hidden");
     } else {
       document.getElementById("sabotage-bar")?.classList.add("hidden");
@@ -554,9 +554,9 @@ export class Game {
     const powerName = document.getElementById("hud-power-name");
 
     if (roleBadge) {
-      if (this.player.role === "imposter") {
+      if (this.player.role === "prankster") {
         roleBadge.className = "hud-badge role-badge imposter";
-        roleBadge.innerHTML = `<span class="role-icon">😈</span><span class="role-text">Secret Imposter</span>`;
+        roleBadge.innerHTML = `<span class="role-icon">😈</span><span class="role-text">Secret Prankster</span>`;
       } else {
         roleBadge.className = "hud-badge role-badge";
         roleBadge.innerHTML = `<span class="role-icon">😇</span><span class="role-text">Innocent Sister</span>`;
@@ -567,8 +567,8 @@ export class Game {
     if (charName) charName.innerText = this.player.name;
 
     if (powerName) {
-      if (this.player.role === "imposter") {
-        powerName.innerText = this.player.imposterPower?.name || "Sabotage Power";
+      if (this.player.role === "prankster") {
+        powerName.innerText = this.player.pranksterPower?.name || "Sabotage Power";
       } else {
         powerName.innerText = this.player.innocentPower?.name || "Power";
       }
@@ -680,7 +680,7 @@ export class Game {
     const powerNameEl = document.getElementById("hud-power-name");
 
     if (this.player) {
-      const activePower = (this.player.role === "imposter") ? this.player.imposterPower : this.player.innocentPower;
+      const activePower = (this.player.role === "prankster") ? this.player.pranksterPower : this.player.innocentPower;
       if (powerNameEl && activePower) {
         powerNameEl.innerText = activePower.name;
       }
@@ -764,22 +764,22 @@ export class Game {
     const screen = document.getElementById("screen-gameover");
     const banner = document.getElementById("gameover-banner");
     const sub = document.getElementById("gameover-subtitle");
-    const imposterReveal = document.getElementById("gameover-imposter-reveal");
+    const pranksterReveal = document.getElementById("gameover-imposter-reveal");
     const outcome = document.getElementById("gameover-story-outcome");
     const statTasks = document.getElementById("stat-tasks-done");
     const statClean = document.getElementById("stat-clean-pct");
 
     if (banner) banner.innerText = "🎉 INNOCENTS WIN! 🎉";
-    if (reason === "IMPOSTER_EJECTED") {
-      if (sub) sub.innerText = "The Secret Imposter Was Unmasked!";
-      if (outcome) outcome.innerText = "Mummy caught the Imposter and returned everyone's phones with fresh jalebis & kaju katli!";
+    if (reason === "PRANKSTER_EJECTED") {
+      if (sub) sub.innerText = "The Secret Prankster Was Unmasked!";
+      if (outcome) outcome.innerText = "Mummy caught the Prankster and returned everyone's phones with fresh jalebis & kaju katli!";
     } else {
       if (sub) sub.innerText = "The House is 100% Sparkling Clean!";
       if (outcome) outcome.innerText = "Mummy inspected all 3 floors and returned all 5 phones on time!";
     }
 
-    const imposterChar = SISTERS[this.imposterSisterId];
-    if (imposterReveal && imposterChar) imposterReveal.innerText = imposterChar.name;
+    const pranksterChar = SISTERS[this.pranksterSisterId];
+    if (pranksterReveal && pranksterChar) pranksterReveal.innerText = pranksterChar.name;
     if (statTasks) statTasks.innerText = this.taskManager.tasksCompletedCount;
     if (statClean) statClean.innerText = `${Math.round(this.taskManager.cleanliness)}%`;
 
@@ -794,20 +794,20 @@ export class Game {
     const screen = document.getElementById("screen-gameover");
     const banner = document.getElementById("gameover-banner");
     const sub = document.getElementById("gameover-subtitle");
-    const imposterReveal = document.getElementById("gameover-imposter-reveal");
+    const pranksterReveal = document.getElementById("gameover-imposter-reveal");
     const outcome = document.getElementById("gameover-story-outcome");
 
-    if (banner) banner.innerText = "😈 IMPOSTER WINS! 😈";
+    if (banner) banner.innerText = "😈 PRANKSTER WINS! 😈";
     if (reason === "CRITICAL_SABOTAGE_EXPIRED") {
       if (sub) sub.innerText = "Critical Sabotage Expired (Fuse Overheat)!";
-      if (outcome) outcome.innerText = "Innocents failed to repair the switchboard! Mummy blamed the innocent sisters while the Imposter won!";
+      if (outcome) outcome.innerText = "Innocents failed to repair the switchboard! Mummy blamed the innocent sisters while the Prankster won!";
     } else {
-      if (sub) sub.innerText = "The Imposter Framed the Innocent Sisters!";
-      if (outcome) outcome.innerText = "The Imposter tricked Mummy! The framed innocent sister gets deep-cleaning chore punishment while the Imposter relaxes!";
+      if (sub) sub.innerText = "The Prankster Framed the Innocent Sisters!";
+      if (outcome) outcome.innerText = "The Prankster tricked Mummy! The framed innocent sister gets deep-cleaning chore punishment while the Prankster relaxes!";
     }
 
-    const imposterChar = SISTERS[this.imposterSisterId];
-    if (imposterReveal && imposterChar) imposterReveal.innerText = imposterChar.name;
+    const pranksterChar = SISTERS[this.pranksterSisterId];
+    if (pranksterReveal && pranksterChar) pranksterReveal.innerText = pranksterChar.name;
 
     screen.classList.remove("hidden");
   }
@@ -838,7 +838,7 @@ export class Game {
       this.player.draw(this.ctx);
     }
 
-    // 6. Draw Among Us Blackout Fog of War (Spotlight vision for innocents, night vision for imposter)
+    // 6. Draw Among Us Blackout Fog of War (Spotlight vision for innocents, night vision for prankster)
     if (this.player) {
       this.houseMap.drawBlackoutFogOfWar(this.ctx, this.player);
     }
