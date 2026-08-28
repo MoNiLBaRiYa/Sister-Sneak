@@ -1,6 +1,6 @@
 /**
  * Sister Sneak: Phone Locked - Controllable Player Entity
- * Implements Asymmetric Power Dynamics:
+ * Implements Asymmetric Power Dynamics & Door Kundi Collision Prevention:
  * - Innocent Powers: Self & Team Buffs (Auto-solve, Sprint, Reset Suspicion, Restore Lights)
  * - Imposter Powers: Direct Sabotage & Debuffs onto Innocent Sisters (Slowdown Traps, Paint Blind, Door Locks, Blame Transfer)
  */
@@ -24,9 +24,12 @@ export class Player extends Character {
     this.slowDebuffTimer = 0;
     this.paintBlindTimer = 0;
     this.taskFreezeTimer = 0;
+
+    // Active power label text
+    this.activePowerLabel = null;
   }
 
-  handleInput(input, dt) {
+  handleInput(input, dt, game = null) {
     if (this.abilityCooldown > 0) {
       this.abilityCooldown = Math.max(0, this.abilityCooldown - dt);
     }
@@ -36,7 +39,7 @@ export class Player extends Character {
 
     // Handle Debuffs from Imposter
     if (this.slowDebuffTimer > 0) {
-      currentSpeed *= 0.5; // 50% Slowdown
+      currentSpeed *= 0.45; // 55% Slowdown
       this.slowDebuffTimer = Math.max(0, this.slowDebuffTimer - dt);
     }
     if (this.paintBlindTimer > 0) {
@@ -48,7 +51,7 @@ export class Player extends Character {
 
     // Handle Self Buffs
     if (this.sprintTimer > 0) {
-      currentSpeed *= 1.8;
+      currentSpeed *= 1.85;
       this.sprintTimer = Math.max(0, this.sprintTimer - dt);
     }
     if (this.buffTimer > 0) {
@@ -59,10 +62,13 @@ export class Player extends Character {
     }
     if (this.auraTimer > 0) {
       this.auraTimer = Math.max(0, this.auraTimer - dt);
-      if (this.auraTimer <= 0) this.auraColor = null;
+      if (this.auraTimer <= 0) {
+        this.auraColor = null;
+        this.activePowerLabel = null;
+      }
     }
 
-    // Movement
+    // Movement calculation
     if (Math.abs(move.x) > 0.05 || Math.abs(move.y) > 0.05) {
       this.clickToMove = false;
       this.targetX = null;
@@ -97,7 +103,15 @@ export class Player extends Character {
       this.isMoving = false;
     }
 
-    this.x += this.vx * dt;
+    // Check Door Kundi collision before applying movement
+    const nextX = this.x + this.vx * dt;
+    if (game && game.houseMap && game.houseMap.checkDoorCollision(this.x, nextX, this.floor)) {
+      this.vx = 0;
+      game.showTopToast("🔒 This room's door is locked with KUNDI from outside!");
+    } else {
+      this.x = nextX;
+    }
+
     this.y += this.vy * dt;
     this.update(dt);
   }
@@ -124,6 +138,7 @@ export class Player extends Character {
         this.stealthTimer = 10.0;
         this.auraColor = "#F472B6";
         this.auraTimer = 10.0;
+        this.activePowerLabel = "🛌 COZY CAMOUFLAGE (10s)";
         this.suspicion = 0;
         game.showTopToast("🌸 Riddhi's Cozy Blanket Camouflage! Invisible to Mummy for 10s!");
       } else {
@@ -131,8 +146,9 @@ export class Player extends Character {
         this.stealthTimer = 8.0;
         this.auraColor = "#EF4444";
         this.auraTimer = 8.0;
+        this.activePowerLabel = "😴 SLEEP CLOUD TRAP (8s)";
         game.applyImposterDebuffToInnocents("SLOW_TRAP", this.floor);
-        game.showTopToast("😈 Imposter Riddhi threw a Sleep Trap! All innocent sisters slowed by 50%!");
+        game.showTopToast("😈 Imposter Riddhi dropped a Sleep Cloud! All innocent sisters slowed by 50%!");
       }
     }
 
@@ -141,9 +157,10 @@ export class Player extends Character {
     // =========================================================================
     else if (this.id === "SHRUTI") {
       if (!isImposter) {
-        // INNOCENT: Self Master Touch (Auto-solves active chore or +20% Cleanliness)
+        // INNOCENT: Master Touch (Auto-solves active chore or +20% Cleanliness)
         this.auraColor = "#38BDF8";
         this.auraTimer = 6.0;
+        this.activePowerLabel = "✨ ARTISTIC FLOW (+20%)";
         if (game.taskManager.activeMiniGame) {
           game.taskManager.activeMiniGame.updateProgress(1.0);
           game.showTopToast("🎨 Shruti's Artistic Flow AUTO-SOLVED the chore! ✨");
@@ -155,6 +172,7 @@ export class Player extends Character {
         // IMPOSTER: Fake Evidence Splatter (Raises innocents' suspicion by +35% and blinds vision)
         this.auraColor = "#DC2626";
         this.auraTimer = 6.0;
+        this.activePowerLabel = "🎨 PAINT BLIND (+35% SUSP)";
         game.applyImposterDebuffToInnocents("PAINT_FRAME", this.floor);
         game.showTopToast("😈 Imposter Shruti splattered Fake Paint! Framed innocent sisters (+35% Suspicion)!");
       }
@@ -173,6 +191,7 @@ export class Player extends Character {
         this.sprintTimer = 6.0;
         this.auraColor = "#F59E0B";
         this.auraTimer = 6.0;
+        this.activePowerLabel = "🌀 VENT DASH (6s)";
         game.showTopToast(`🌀 Jahanvi's Secret Vent Portal! Jumped to Floor ${nextFloor === 2 ? '3F' : nextFloor === 1 ? '2F' : '1F'} + Super Dash!`);
       } else {
         // IMPOSTER: Vent Escape & Door Slam (Locks all doors on floor, trapping innocents)
@@ -182,6 +201,7 @@ export class Player extends Character {
         game.updateFloorButtonsUI(nextFloor);
         this.auraColor = "#EF4444";
         this.auraTimer = 6.0;
+        this.activePowerLabel = "🚪 VENT & DOOR SLAM";
         game.applyImposterDebuffToInnocents("DOOR_SLAM", this.floor);
         game.showTopToast("😈 Imposter Jahanvi vented away & SLAMMED all doors shut on innocents!");
       }
@@ -195,6 +215,7 @@ export class Player extends Character {
         // INNOCENT: Self Study Genius (Auto-solves worksheet) + resets Mummy suspicion
         this.auraColor = "#A78BFA";
         this.auraTimer = 8.0;
+        this.activePowerLabel = "⭐ GENIUS LADLI (0% SUSP)";
         this.suspicion = 0;
         if (game.taskManager.activeMiniGame) {
           game.taskManager.activeMiniGame.updateProgress(1.0);
@@ -207,6 +228,7 @@ export class Player extends Character {
         // IMPOSTER: Blame Shift (Transfers her suspicion onto innocent sisters)
         this.auraColor = "#7C3AED";
         this.auraTimer = 8.0;
+        this.activePowerLabel = "🎭 BLAME SHIFT CHARM";
         this.suspicion = 0;
         game.applyImposterDebuffToInnocents("BLAME_SHIFT", this.floor);
         game.showTopToast("😈 Imposter Jisha shifted all blame onto innocent sisters!");
@@ -222,13 +244,16 @@ export class Player extends Character {
         this.sprintTimer = 7.0;
         this.auraColor = "#10B981";
         this.auraTimer = 7.0;
+        this.activePowerLabel = "⚡ HYPER SPRINT (7s)";
         game.houseMap.blackedOutFloors.clear();
+        game.sabotageSystem?.resolveCriticalSabotage();
         game.showTopToast("⚡ Jyeana's Electric Overdrive! Restored all lights + 7s Hyper Sprint!");
       } else {
         // IMPOSTER: Electrical Sabotage Surge (Freezes all innocent tasks for 8s + 0s sabotage cooldowns)
         this.sprintTimer = 7.0;
         this.auraColor = "#EF4444";
         this.auraTimer = 7.0;
+        this.activePowerLabel = "⚡ SABOTAGE SURGE (0s CD)";
         if (game.sabotageSystem) {
           game.sabotageSystem.cooldowns.BLACKOUT = 0;
           game.sabotageSystem.cooldowns.KUNDI = 0;
@@ -239,9 +264,9 @@ export class Player extends Character {
       }
     }
 
-    // Broadcast power activation to multiplayer
+    // Broadcast power activation to multiplayer peers
     if (game.multiplayer && game.multiplayer.isMultiplayer) {
-      game.multiplayer.syncPowerActivation(this.id, this.name + "'s Power", this.auraColor, this.stealthTimer > 0);
+      game.multiplayer.syncPowerActivation(this.id, this.activePowerLabel || this.name + "'s Power", this.auraColor, this.stealthTimer > 0);
     }
 
     return true;
@@ -250,31 +275,31 @@ export class Player extends Character {
   draw(ctx) {
     if (this.stealthTimer > 0) {
       ctx.save();
-      ctx.globalAlpha = 0.45;
+      ctx.globalAlpha = 0.38;
       super.draw(ctx);
       ctx.restore();
 
       ctx.fillStyle = "#F472B6";
-      ctx.font = "bold 14px Fredoka, sans-serif";
+      ctx.font = "bold 13px Fredoka, sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("🤫 HIDDEN", this.x, this.y - 45);
+      ctx.fillText("🛌 COZY CAMOUFLAGE (Hidden)", this.x, this.y - 45);
       return;
     }
 
     if (this.auraColor) {
       ctx.save();
       ctx.shadowColor = this.auraColor;
-      ctx.shadowBlur = 20;
+      ctx.shadowBlur = 22;
       ctx.strokeStyle = this.auraColor;
       ctx.lineWidth = 3.5;
       ctx.beginPath();
-      ctx.arc(this.x, this.y - 12, 26, 0, Math.PI * 2);
+      ctx.arc(this.x, this.y - 12, 28, 0, Math.PI * 2);
       ctx.stroke();
 
       ctx.fillStyle = this.auraColor;
-      ctx.font = "bold 10px Fredoka, sans-serif";
+      ctx.font = "bold 11px Fredoka, sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText(this.role === "imposter" ? "😈 IMPOSTER POWER" : "⚡ INNOCENT POWER", this.x, this.y - 42);
+      ctx.fillText(this.activePowerLabel || (this.role === "imposter" ? "😈 IMPOSTER POWER" : "⚡ INNOCENT POWER"), this.x, this.y - 45);
       ctx.restore();
     }
 

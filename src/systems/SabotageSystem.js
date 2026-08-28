@@ -49,7 +49,7 @@ export class SabotageSystem {
       const alertEl = document.getElementById("mummy-alert");
       if (alertEl) {
         alertEl.classList.remove("hidden");
-        alertEl.innerHTML = `<span class="pulse-icon">🚨</span><span class="warning-text">CRITICAL SABOTAGE: FUSE OVERHEAT (${Math.ceil(this.criticalTimer)}s)! FIX AT SWITCHBOARD OR IMPOSTER WINS!</span>`;
+        alertEl.innerHTML = `<span class="pulse-icon">🚨</span><span class="warning-text">CRITICAL SABOTAGE: FUSE OVERHEAT (${Math.ceil(this.criticalTimer)}s)! FIX AT FUSE BOX OR IMPOSTER WINS!</span>`;
       }
 
       if (this.criticalTimer <= 0) {
@@ -93,33 +93,29 @@ export class SabotageSystem {
       this.game.houseMap.setFloorBlackout(floor, true);
       this.criticalSabotageActive = true;
       this.criticalTimer = 35.0; // 35 seconds to fix or Imposter wins!
-      this.game.showTopToast("🚨 CRITICAL SABOTAGE: Switchboard Blackout (35s)! Fix it at 1F Power Board!");
+      this.game.showTopToast(`🚨 CRITICAL SABOTAGE: Blackout on Floor ${floor === 2 ? '3F' : floor === 1 ? '2F' : '1F'} (35s)! Fix it at the Fuse Box!`);
+    } else if (type === "KUNDI") {
+      const lockedRoom = this.game.houseMap.lockRoomAt(this.game.player ? this.game.player.x : 500, this.game.player ? this.game.player.y : 300, floor, 10.0);
+      const roomName = lockedRoom ? lockedRoom.name : "Current Room";
+      this.game.showTopToast(`🔒 Door Kundi Locked: ${roomName} (10s)! No one can enter or exit!`);
     } else if (type === "MESS") {
       this.game.taskManager.reduceCleanliness(15);
       this.game.showTopToast("🧹 Imposter spilled junk across the floors (-15% Cleanliness)!");
-    } else if (type === "KUNDI") {
-      this.game.showTopToast("🔒 Imposter locked bedroom doors for 8s!");
     }
 
     // Sync sabotage across all multiplayer peers
     if (this.game.multiplayer && this.game.multiplayer.isMultiplayer) {
       this.game.multiplayer.syncSabotage(type, floor);
     }
-
-    if (this.game.player && this.game.player.role === "imposter" && this.game.player.id === "JAHANVI") {
-      const nextFloor = (this.game.player.floor + 1) % 3;
-      this.game.player.setFloor(nextFloor);
-      this.game.camera.setFloor(nextFloor);
-    }
   }
 
   resolveCriticalSabotage() {
-    if (this.criticalSabotageActive) {
+    if (this.criticalSabotageActive || this.game.houseMap.blackedOutFloors.size > 0) {
       this.criticalSabotageActive = false;
       this.game.houseMap.blackedOutFloors.clear();
       const alertEl = document.getElementById("mummy-alert");
       if (alertEl) alertEl.classList.add("hidden");
-      this.game.showTopToast("✨ Critical Sabotage Resolved! Power restored! ✨");
+      this.game.showTopToast("✨ Blown Fuse Repaired! Power & Lights 100% Restored! ✨");
     }
   }
 }

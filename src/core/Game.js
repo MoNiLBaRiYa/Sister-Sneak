@@ -618,7 +618,7 @@ export class Game {
         if (click) {
           this.player.moveToPoint(click.x, click.y);
         }
-        this.player.handleInput(this.input, dt);
+        this.player.handleInput(this.input, dt, this);
 
         // Update Power Button cooldown UI
         this.updatePowerUI();
@@ -677,16 +677,24 @@ export class Game {
     const powerBtn = document.getElementById("btn-use-power");
     const cdLabel = document.getElementById("hud-power-cd");
     const touchPowerBtn = document.getElementById("btn-touch-power");
+    const powerNameEl = document.getElementById("hud-power-name");
 
-    if (this.player && powerBtn) {
-      if (this.player.abilityCooldown > 0) {
-        powerBtn.disabled = true;
-        if (cdLabel) cdLabel.innerText = `(${Math.ceil(this.player.abilityCooldown)}s)`;
-        if (touchPowerBtn) touchPowerBtn.style.opacity = "0.5";
-      } else {
-        powerBtn.disabled = false;
-        if (cdLabel) cdLabel.innerText = "(READY)";
-        if (touchPowerBtn) touchPowerBtn.style.opacity = "1";
+    if (this.player) {
+      const activePower = (this.player.role === "imposter") ? this.player.imposterPower : this.player.innocentPower;
+      if (powerNameEl && activePower) {
+        powerNameEl.innerText = activePower.name;
+      }
+
+      if (powerBtn) {
+        if (this.player.abilityCooldown > 0) {
+          powerBtn.disabled = true;
+          if (cdLabel) cdLabel.innerText = `(${Math.ceil(this.player.abilityCooldown)}s)`;
+          if (touchPowerBtn) touchPowerBtn.style.opacity = "0.5";
+        } else {
+          powerBtn.disabled = false;
+          if (cdLabel) cdLabel.innerText = "(READY)";
+          if (touchPowerBtn) touchPowerBtn.style.opacity = "1";
+        }
       }
     }
   }
@@ -828,6 +836,11 @@ export class Game {
     // 5. Draw Controllable Local Player
     if (this.player) {
       this.player.draw(this.ctx);
+    }
+
+    // 6. Draw Among Us Blackout Fog of War (Spotlight vision for innocents, night vision for imposter)
+    if (this.player) {
+      this.houseMap.drawBlackoutFogOfWar(this.ctx, this.player);
     }
 
     // Restore Camera

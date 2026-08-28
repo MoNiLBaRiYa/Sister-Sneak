@@ -1,6 +1,6 @@
 /**
  * Sister Sneak: Phone Locked - Game Constants & Hotspots Configurations
- * 18 Distinct Interactive Chores Across 3 Floors with Balanced Progress.
+ * 20 Distinct Interactive Chores & Fuse Boxes Across all 3 Floors with Balanced Progress.
  */
 
 export const CANVAS_WIDTH = 1280;
@@ -145,7 +145,7 @@ export const HOTSPOTS = [
   {
     id: "HS_CLOTHES",
     floor: 2,
-    x: 200,
+    x: 180,
     y: FLOOR_Y[2] + 120,
     radius: 36,
     taskId: "CLOTHES_COLLECT",
@@ -155,7 +155,7 @@ export const HOTSPOTS = [
   {
     id: "HS_KITE",
     floor: 2,
-    x: 360,
+    x: 340,
     y: FLOOR_Y[2] + 120,
     radius: 36,
     taskId: "KITE_UNTANGLE",
@@ -185,12 +185,23 @@ export const HOTSPOTS = [
   {
     id: "HS_SOLAR",
     floor: 2,
-    x: 880,
+    x: 850,
     y: FLOOR_Y[2] + 120,
     radius: 36,
     taskId: "SOLAR_PANEL",
     label: "Wipe Solar Panels",
     icon: "☀️"
+  },
+  {
+    id: "HS_FUSE_3F",
+    floor: 2,
+    x: 480,
+    y: FLOOR_Y[2] + 120,
+    radius: 38,
+    taskId: "SWITCHES_OFF",
+    isFuseBox: true,
+    label: "3F Solar Inverter & Fuse Box",
+    icon: "⚡"
   },
   {
     id: "HS_STAIRS_T",
@@ -211,7 +222,7 @@ export const HOTSPOTS = [
   {
     id: "HS_BALCONY",
     floor: 1,
-    x: 140,
+    x: 130,
     y: FLOOR_Y[1] + 120,
     radius: 36,
     taskId: "PLANT_WATER",
@@ -221,7 +232,7 @@ export const HOTSPOTS = [
   {
     id: "HS_BED_1",
     floor: 1,
-    x: 310,
+    x: 290,
     y: FLOOR_Y[1] + 120,
     radius: 36,
     taskId: "BEDSHEET_TUCK",
@@ -231,7 +242,7 @@ export const HOTSPOTS = [
   {
     id: "HS_HOMEWORK",
     floor: 1,
-    x: 410,
+    x: 390,
     y: FLOOR_Y[1] + 120,
     radius: 36,
     taskId: "HOMEWORK_MATH",
@@ -247,6 +258,17 @@ export const HOTSPOTS = [
     isEmergencyButton: true,
     label: "Phone Lockbox (Call Meeting)",
     icon: "🚨"
+  },
+  {
+    id: "HS_FUSE_2F",
+    floor: 1,
+    x: 480,
+    y: FLOOR_Y[1] + 120,
+    radius: 38,
+    taskId: "SWITCHES_OFF",
+    isFuseBox: true,
+    label: "2F Main Hall Switchboard",
+    icon: "⚡"
   },
   {
     id: "HS_SPICE",
@@ -371,9 +393,10 @@ export const HOTSPOTS = [
     floor: 0,
     x: 910,
     y: FLOOR_Y[0] + 120,
-    radius: 36,
+    radius: 38,
     taskId: "SWITCHES_OFF",
-    label: "Turn Off Power Switches",
+    isFuseBox: true,
+    label: "1F Ground Power Board",
     icon: "💡"
   },
   {
@@ -392,7 +415,7 @@ export const HOTSPOTS = [
 
 export const ROUND_DURATION_SEC = 180;
 export const SABOTAGE_COOLDOWNS = {
-  BLACKOUT: 30,
+  BLACKOUT: 25,
   KUNDI: 20,
-  MESS: 25
+  MESS: 20
 };
