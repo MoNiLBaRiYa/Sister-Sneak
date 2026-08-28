@@ -19,18 +19,18 @@ export class ChaiTask extends MiniGameBase {
 
   render() {
     this.container.innerHTML = `
-      <div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:#FFEDD5;">
-        <div style="display:flex; align-items:center; gap:16px;">
-          <div style="font-size:42px;">🫖</div>
-          <button id="btn-strain" style="background:#78350F; color:#FEF3C7; border:3px solid #451A03; border-radius:14px; padding:12px 20px; font-weight:800; font-size:14px; cursor:pointer; display:flex; align-items:center; gap:8px; box-shadow:0 6px 14px rgba(0,0,0,0.15); transition:transform 0.1s;">
-            ☕ TAP TO STRAIN CHAI
+      <div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; background:#FFEDD5; padding:6px; border-radius:10px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="font-size:30px;">🫖</div>
+          <button id="btn-strain" style="background:#78350F; color:#FEF3C7; border:2.5px solid #451A03; border-radius:10px; padding:8px 14px; font-weight:800; font-size:11px; cursor:pointer; display:flex; align-items:center; gap:4px; box-shadow:0 4px 10px rgba(0,0,0,0.15); transition:transform 0.1s;">
+            ☕ TAP TO STRAIN
           </button>
-          <div style="font-size:38px;">🥛</div>
+          <div style="font-size:26px;">🥛</div>
         </div>
-        <div style="width:180px; height:16px; background:#FED7AA; border-radius:8px; border:2px solid #C2410C; overflow:hidden;">
-          <div id="chai-fill" style="width:0%; height:100%; background:linear-gradient(90deg, #EA580C, #9A3412); transition:width 0.2s;"></div>
+        <div style="width:140px; height:12px; background:#FED7AA; border-radius:6px; border:1.5px solid #C2410C; overflow:hidden;">
+          <div id="chai-fill" style="width:0%; height:100%; background:linear-gradient(90deg, #EA580C, #9A3412); transition:width 0.15s;"></div>
         </div>
-        <div id="chai-status" style="font-size:11px; font-weight:700; color:#7C2D12;">Straining ginger & cardamom pods (0 / 5)</div>
+        <div id="chai-status" style="font-size:9.5px; font-weight:700; color:#7C2D12;">Straining ginger & cardamom (${this.strainedClicks} / 5)</div>
       </div>
     `;
 

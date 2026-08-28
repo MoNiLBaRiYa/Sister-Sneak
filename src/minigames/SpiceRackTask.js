@@ -26,16 +26,16 @@ export class SpiceRackTask extends MiniGameBase {
 
   render() {
     this.container.innerHTML = `
-      <div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; background:#FFFBEB;">
-        <div style="font-size:12px; font-weight:700; color:#78350F;">🥘 Place all 6 spices in the heirloom brass container:</div>
-        <div style="background:#78350F; border:4px solid #451A03; border-radius:50%; width:210px; height:210px; display:grid; grid-template-columns:repeat(3, 1fr); padding:16px; gap:8px; align-items:center; justify-items:center; box-shadow:0 8px 20px rgba(0,0,0,0.25);">
+      <div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; background:#FFFBEB; padding:4px; border-radius:10px;">
+        <div style="font-size:10.5px; font-weight:700; color:#78350F; text-align:center;">🥘 Place all 6 spices in the brass container:</div>
+        <div style="background:#78350F; border:3px solid #451A03; border-radius:50%; width:140px; height:140px; display:grid; grid-template-columns:repeat(3, 1fr); padding:8px; gap:4px; align-items:center; justify-items:center; box-shadow:0 6px 14px rgba(0,0,0,0.25);">
           ${this.spices.map((s, idx) => `
-            <button class="spice-btn" data-idx="${idx}" style="width:48px; height:48px; border-radius:50%; background:#FFF; border:2px solid #D97706; cursor:pointer; font-size:14px; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:all 0.2s;">
+            <button class="spice-btn" data-idx="${idx}" style="width:34px; height:34px; border-radius:50%; background:#FFF; border:1.5px solid #D97706; cursor:pointer; font-size:11px; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:all 0.15s;">
               ${s.emoji}
             </button>
           `).join('')}
         </div>
-        <div id="spice-status" style="font-size:11px; font-weight:700; color:#B45309;">Tap an empty spice cup!</div>
+        <div id="spice-status" style="font-size:9.5px; font-weight:700; color:#B45309;">Tap an empty spice cup!</div>
       </div>
     `;
 

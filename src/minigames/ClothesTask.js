@@ -26,18 +26,17 @@ export class ClothesTask extends MiniGameBase {
 
   render() {
     this.container.innerHTML = `
-      <div style="width:100%; height:100%; position:relative; background:linear-gradient(to bottom, #BAE6FD, #E0F2FE); display:flex; flex-direction:column; align-items:center; justify-content:space-around; padding:12px;">
-        <div style="position:absolute; top:35px; width:92%; height:4px; background:#475569; border-radius:2px;"></div>
-        <div style="font-size:11px; font-weight:800; color:#0369A1;">☀️ Tap each fluttering cloth to fold into basket (0 / 6)</div>
-        <div id="clothes-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; z-index:2; margin-top:10px;">
+      <div style="width:100%; height:100%; position:relative; background:linear-gradient(to bottom, #BAE6FD, #E0F2FE); display:flex; flex-direction:column; align-items:center; justify-content:space-around; padding:6px; border-radius:10px;">
+        <div style="font-size:10px; font-weight:800; color:#0369A1;">☀️ Tap each fluttering cloth to fold (0 / 6)</div>
+        <div id="clothes-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; z-index:2; max-width:280px; width:95%;">
           ${this.clothes.map(c => `
-            <button class="cloth-item-btn" data-id="${c.id}" style="background:#FFF; border:2px solid ${c.color}; border-radius:12px; padding:8px 12px; cursor:pointer; font-size:24px; display:flex; flex-direction:column; align-items:center; gap:2px; box-shadow:0 4px 10px rgba(0,0,0,0.1); transition:transform 0.15s;">
+            <button class="cloth-item-btn" data-id="${c.id}" style="background:#FFF; border:1.5px solid ${c.color}; border-radius:8px; padding:4px 6px; cursor:pointer; font-size:18px; display:flex; flex-direction:column; align-items:center; gap:1px; box-shadow:0 2px 6px rgba(0,0,0,0.1); transition:transform 0.15s;">
               ${c.emoji}
-              <span style="font-size:8px; font-weight:800; color:#334155;">${c.name}</span>
+              <span style="font-size:7px; font-weight:800; color:#334155;">${c.name}</span>
             </button>
           `).join('')}
         </div>
-        <div style="font-size:32px; margin-top:6px;">🧺</div>
+        <div style="font-size:24px; margin-top:2px;">🧺</div>
       </div>
     `;
 

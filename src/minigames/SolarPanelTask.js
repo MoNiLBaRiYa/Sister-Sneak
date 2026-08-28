@@ -20,19 +20,19 @@ export class SolarPanelTask extends MiniGameBase {
 
   render() {
     this.container.innerHTML = `
-      <div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:#0F172A;">
-        <div style="font-size:12px; font-weight:700; color:#38BDF8;">⚡ Clean all 3 solar battery panels:</div>
-        <div style="display:flex; gap:16px;">
+      <div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; background:#0F172A; padding:6px; border-radius:10px;">
+        <div style="font-size:10.5px; font-weight:700; color:#38BDF8;">⚡ Clean all 3 solar battery panels:</div>
+        <div style="display:flex; gap:10px;">
           ${[0, 1, 2].map((i) => `
-            <div class="solar-panel" data-idx="${i}" style="width:90px; height:130px; background:repeating-linear-gradient(0deg, #1E293B, #1E293B 10px, #0F172A 10px, #0F172A 20px); border:3px solid #64748B; border-radius:8px; cursor:pointer; position:relative; overflow:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-              <div class="dust-layer" style="position:absolute; inset:0; background:rgba(180, 83, 9, 0.7); display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:800; color:#FEF3C7; transition:opacity 0.2s;">
+            <div class="solar-panel" data-idx="${i}" style="width:68px; height:90px; background:repeating-linear-gradient(0deg, #1E293B, #1E293B 8px, #0F172A 8px, #0F172A 16px); border:2.5px solid #64748B; border-radius:6px; cursor:pointer; position:relative; overflow:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+              <div class="dust-layer" style="position:absolute; inset:0; background:rgba(180, 83, 9, 0.7); display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:800; color:#FEF3C7; transition:opacity 0.2s;">
                 🏜️
               </div>
-              <span style="font-size:10px; font-weight:800; color:#38BDF8; z-index:2; margin-top:60px;">Panel #${i+1}</span>
+              <span style="font-size:8.5px; font-weight:800; color:#38BDF8; z-index:2; margin-top:45px;">Panel #${i+1}</span>
             </div>
           `).join('')}
         </div>
-        <div id="solar-status" style="font-size:11px; font-weight:700; color:#94A3B8;">Tap a panel to scrub!</div>
+        <div id="solar-status" style="font-size:9.5px; font-weight:700; color:#94A3B8;">Tap a panel to scrub!</div>
       </div>
     `;
 
@@ -55,7 +55,7 @@ export class SolarPanelTask extends MiniGameBase {
             dust.style.background = "rgba(56, 189, 248, 0.3)";
             dust.style.opacity = "1";
             p.style.borderColor = "#38BDF8";
-            p.style.boxShadow = "0 0 12px #38BDF8";
+            p.style.boxShadow = "0 0 10px #38BDF8";
           }
         }
 

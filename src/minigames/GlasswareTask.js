@@ -18,15 +18,15 @@ export class GlasswareTask extends MiniGameBase {
 
   render() {
     this.container.innerHTML = `
-      <div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; background:#FAE8FF;">
-        <div style="background:#451A03; border:4px solid #78350F; border-radius:12px; padding:16px 24px; display:flex; gap:16px; align-items:center;">
+      <div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; background:#FAE8FF; padding:6px; border-radius:10px;">
+        <div style="background:#451A03; border:3px solid #78350F; border-radius:10px; padding:10px 16px; display:flex; gap:10px; align-items:center;">
           ${[0, 1, 2, 3].map((i) => `
-            <button class="glass-btn" data-idx="${i}" style="width:45px; height:65px; background:linear-gradient(to top, rgba(255,255,255,0.8), rgba(200,230,255,0.6)); border:2px solid #94A3B8; border-radius:4px; font-size:18px; cursor:pointer; transform:rotate(${i % 2 === 0 ? -18 : 22}deg); transition:transform 0.2s;">
+            <button class="glass-btn" data-idx="${i}" style="width:36px; height:50px; background:linear-gradient(to top, rgba(255,255,255,0.85), rgba(200,230,255,0.65)); border:1.5px solid #94A3B8; border-radius:4px; font-size:14px; cursor:pointer; transform:rotate(${i % 2 === 0 ? -18 : 22}deg); transition:transform 0.15s;">
               🥛
             </button>
           `).join('')}
         </div>
-        <div style="font-size:12px; font-weight:700; color:#701A75;">Straighten all 4 tilted glasses!</div>
+        <div style="font-size:10px; font-weight:700; color:#701A75;">Straighten all 4 tilted glasses!</div>
       </div>
     `;
 

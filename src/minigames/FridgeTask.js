@@ -20,17 +20,17 @@ export class FridgeTask extends MiniGameBase {
 
   render() {
     this.container.innerHTML = `
-      <div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; background:#F8FAFC;">
-        <div style="width:70px; height:160px; border:4px solid #475569; border-radius:12px; position:relative; background:#E2E8F0; overflow:hidden;">
+      <div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; background:#F8FAFC; padding:4px; border-radius:10px;">
+        <div style="width:52px; height:105px; border:3px solid #475569; border-radius:8px; position:relative; background:#E2E8F0; overflow:hidden;">
           <!-- Target Zone (75% to 95%) -->
           <div style="position:absolute; bottom:75%; width:100%; height:20%; background:rgba(34, 197, 94, 0.4); border-top:2px dashed #16A34A; border-bottom:2px dashed #16A34A;"></div>
           <!-- Water Fill -->
           <div id="bottle-water" style="position:absolute; bottom:0; width:100%; height:0%; background:linear-gradient(to top, #0284C7, #38BDF8); transition:height 0.05s;"></div>
         </div>
-        <button id="btn-fill-water" style="background:#0284C7; color:#FFF; border:none; padding:10px 24px; border-radius:10px; font-weight:700; font-size:14px; cursor:pointer;">
+        <button id="btn-fill-water" style="background:#0284C7; color:#FFF; border:none; padding:6px 18px; border-radius:8px; font-weight:700; font-size:11px; cursor:pointer;">
           💧 HOLD TO FILL
         </button>
-        <div id="water-status" style="font-size:12px; color:#475569; font-weight:600;">Fill between the green dashed lines</div>
+        <div id="water-status" style="font-size:9.5px; color:#475569; font-weight:600;">Fill between the green dashed lines</div>
       </div>
     `;
 
@@ -44,7 +44,7 @@ export class FridgeTask extends MiniGameBase {
       if (this.interval) clearInterval(this.interval);
       this.interval = setInterval(() => {
         if (!this.isFilling) return;
-        this.fillLevel = Math.min(100, this.fillLevel + 2);
+        this.fillLevel = Math.min(100, this.fillLevel + 2.5);
         water.style.height = `${this.fillLevel}%`;
         if (this.fillLevel >= 100) {
           status.innerText = "❌ Spilled! Emptying bottle...";
