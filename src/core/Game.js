@@ -706,10 +706,16 @@ export class Game {
     const prompt = document.getElementById("action-prompt");
     if (!prompt) return;
 
-    if (this.activeNearbyHotspot) {
+    if (this.activeNearbyHotspot && this.canvas) {
       prompt.classList.remove("hidden");
-      prompt.style.left = `${this.activeNearbyHotspot.x}px`;
-      prompt.style.top = `${this.activeNearbyHotspot.y - 15}px`;
+      const rect = this.canvas.getBoundingClientRect();
+      const scaleX = rect.width / this.canvas.width;
+      const scaleY = rect.height / this.canvas.height;
+      const screenX = rect.left + this.activeNearbyHotspot.x * scaleX;
+      const screenY = rect.top + (this.activeNearbyHotspot.y - 15) * scaleY;
+
+      prompt.style.left = `${screenX}px`;
+      prompt.style.top = `${screenY}px`;
 
       const pText = prompt.querySelector(".prompt-text");
       const kBadge = prompt.querySelector(".key-badge");

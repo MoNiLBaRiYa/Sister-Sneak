@@ -1,7 +1,7 @@
 /**
  * Sister Sneak: Phone Locked - Among Us Style Tactical Dark Theme
- * 100% Mobile Responsive (Portrait & Landscape), Zero Page Drag / Drift,
- * Clean Non-Overlapping HUD, and Among Us 2-Phase Emergency Meeting UI.
+ * 100% Mobile Responsive, Zero Map Shift / Zero Page Drift,
+ * Fixed Screen Overlays, and Among Us 2-Phase Emergency Meeting UI.
  */
 
 :root {
@@ -49,7 +49,7 @@ html, body {
   align-items: center;
   justify-content: center;
   background-color: var(--deep-bg);
-  overflow: hidden;
+  overflow: hidden !important;
   touch-action: none !important;
 }
 
@@ -62,22 +62,87 @@ html, body {
   object-fit: contain;
   background: #111827;
   touch-action: none !important;
+  flex-shrink: 0;
+}
+
+/* All In-Game Overlays (Must never affect canvas flex layout) */
+#in-game-overlays {
+  position: fixed !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  z-index: 30 !important;
+}
+
+/* ==========================================================================
+   Mummy Warning Radar Flash (Centered at Top)
+   ========================================================================== */
+.mummy-warning-banner {
+  position: fixed !important;
+  top: 50px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  background: rgba(220, 38, 38, 0.95) !important;
+  color: #FFF !important;
+  padding: 5px 14px !important;
+  border-radius: 20px !important;
+  border: 2px solid #FEF08A !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  box-shadow: 0 0 16px rgba(220, 38, 38, 0.8) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  z-index: 60 !important;
+  pointer-events: none !important;
+  white-space: nowrap !important;
+  animation: pulse-red 0.8s infinite alternate !important;
+}
+
+@keyframes pulse-red {
+  from { box-shadow: 0 0 8px rgba(220, 38, 38, 0.6); transform: translateX(-50%) scale(0.98); }
+  to { box-shadow: 0 0 20px rgba(239, 68, 68, 1); transform: translateX(-50%) scale(1.02); }
+}
+
+/* Action Key Prompt Bubble */
+.action-bubble {
+  position: fixed !important;
+  transform: translate(-50%, -100%) !important;
+  background: rgba(15, 23, 42, 0.94) !important;
+  color: #FFF !important;
+  padding: 4px 8px !important;
+  border-radius: 10px !important;
+  border: 1.5px solid var(--primary-cyan) !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  pointer-events: none !important;
+  z-index: 35 !important;
+}
+
+.action-bubble .key-badge {
+  background: var(--primary-cyan);
+  color: #0F172A;
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-weight: 900;
 }
 
 /* ==========================================================================
    Top HUD Header (Among Us Tactical Style - Compact & Non-Overlapping)
    ========================================================================== */
 .hud-layer {
-  position: fixed;
-  top: 8px;
-  left: 8px;
-  right: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  z-index: 50;
-  pointer-events: none;
+  position: fixed !important;
+  top: 8px !important;
+  left: 8px !important;
+  right: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 6px !important;
+  z-index: 50 !important;
+  pointer-events: none !important;
 }
 
 .hud-left, .hud-right {
@@ -139,7 +204,7 @@ html, body {
   cursor: not-allowed;
 }
 
-/* Cleanliness Progress Bar (Among Us Green Task Bar Style) */
+/* Cleanliness Progress Bar */
 .cleanliness-meter-container {
   background: rgba(15, 23, 42, 0.94);
   border: 1.5px solid #334155;
@@ -203,18 +268,19 @@ html, body {
    Personal Task Checklist Drawer (Top-Left under HUD)
    ========================================================================== */
 .tasklist-drawer {
-  position: fixed;
-  top: 50px;
-  left: 8px;
-  z-index: 45;
-  background: rgba(15, 23, 42, 0.96);
-  border: 1.5px solid var(--primary-cyan);
-  border-radius: 10px;
-  padding: 6px 10px;
-  max-width: 220px;
-  color: #FFF;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  position: fixed !important;
+  top: 50px !important;
+  left: 8px !important;
+  z-index: 45 !important;
+  background: rgba(15, 23, 42, 0.96) !important;
+  border: 1.5px solid var(--primary-cyan) !important;
+  border-radius: 10px !important;
+  padding: 6px 10px !important;
+  max-width: 220px !important;
+  color: #FFF !important;
+  backdrop-filter: blur(8px) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5) !important;
+  pointer-events: auto !important;
 }
 
 .tasklist-toggle-btn {
@@ -268,14 +334,15 @@ html, body {
    Floor Switcher Fast-Nav (Right Edge - Compact Pill Style)
    ========================================================================== */
 .floor-nav-panel {
-  position: fixed;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  z-index: 40;
+  position: fixed !important;
+  right: 8px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  z-index: 40 !important;
+  pointer-events: auto !important;
 }
 
 .floor-nav-btn {
@@ -309,15 +376,16 @@ html, body {
    Sabotage Panel (Imposter Only - Floating Above Action Buttons)
    ========================================================================== */
 .sabotage-panel {
-  position: fixed;
-  bottom: 86px;
-  right: 12px;
-  background: rgba(30, 10, 10, 0.96);
-  border: 2px solid var(--danger-red);
-  border-radius: 14px;
-  padding: 6px 8px;
-  z-index: 40;
-  max-width: 250px;
+  position: fixed !important;
+  bottom: 86px !important;
+  right: 12px !important;
+  background: rgba(30, 10, 10, 0.96) !important;
+  border: 2px solid var(--danger-red) !important;
+  border-radius: 14px !important;
+  padding: 6px 8px !important;
+  z-index: 40 !important;
+  max-width: 250px !important;
+  pointer-events: auto !important;
 }
 
 .sabotage-title {
@@ -361,25 +429,25 @@ html, body {
    Mobile Touch Controls (Ergonomic Split)
    ========================================================================== */
 .touch-layer {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 35;
+  position: fixed !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  z-index: 35 !important;
 }
 
 .joystick-zone {
-  position: fixed;
-  bottom: 16px;
-  left: 16px;
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  background: rgba(15, 23, 42, 0.65);
-  border: 2px solid rgba(255, 255, 255, 0.35);
-  pointer-events: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: fixed !important;
+  bottom: 16px !important;
+  left: 16px !important;
+  width: 90px !important;
+  height: 90px !important;
+  border-radius: 50% !important;
+  background: rgba(15, 23, 42, 0.65) !important;
+  border: 2px solid rgba(255, 255, 255, 0.35) !important;
+  pointer-events: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   touch-action: none !important;
 }
 
@@ -393,12 +461,12 @@ html, body {
 }
 
 .touch-action-group {
-  position: fixed;
-  bottom: 16px;
-  right: 16px;
-  display: flex;
-  gap: 10px;
-  pointer-events: auto;
+  position: fixed !important;
+  bottom: 16px !important;
+  right: 16px !important;
+  display: flex !important;
+  gap: 10px !important;
+  pointer-events: auto !important;
 }
 
 .touch-action-btn, .touch-power-btn {
@@ -431,8 +499,8 @@ html, body {
 .modal-layer {
   position: fixed !important;
   inset: 0 !important;
-  z-index: 100;
-  pointer-events: none;
+  z-index: 100 !important;
+  pointer-events: none !important;
 }
 
 .screen-view {
