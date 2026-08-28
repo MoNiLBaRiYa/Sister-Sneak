@@ -62,7 +62,14 @@ export class Bot extends Character {
       }
     }
 
-    this.x += this.vx * dt;
+    const nextX = this.x + this.vx * dt;
+    if (game && game.houseMap && game.houseMap.checkDoorCollision(this.x, nextX, this.floor)) {
+      this.vx = 0;
+      this.isMoving = false;
+      this.chooseNextGoal(game);
+    } else {
+      this.x = nextX;
+    }
     this.update(dt);
   }
 

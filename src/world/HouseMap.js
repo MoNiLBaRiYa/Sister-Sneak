@@ -55,20 +55,60 @@ export class HouseMap {
     }
   }
 
-  lockRoomAt(x, y, floor, duration = 10.0) {
-    const room = this.getRoomAt(x, y, floor);
-    if (room) {
-      room.lock(duration);
-      return room;
+  lockNextRoom(currentX, currentY, floor, facing = 'right', duration = 10.0) {
+    const currentRoom = this.getRoomAt(currentX, currentY, floor);
+
+    // Get all valid candidate rooms on this floor (excluding stairs and excluding the room player is currently standing in)
+    const otherRooms = this.rooms.filter(r => r.floor === floor && !r.isStairs && (!currentRoom || r.id !== currentRoom.id));
+
+    if (otherRooms.length === 0) {
+      // If only one room exists on this floor and player is not inside it, lock it
+      const anyNonStairRoom = this.rooms.filter(r => r.floor === floor && !r.isStairs);
+      if (anyNonStairRoom.length > 0 && (!currentRoom || anyNonStairRoom[0].id !== currentRoom.id)) {
+        anyNonStairRoom[0].lock(duration);
+        return anyNonStairRoom[0];
+      }
+      return null;
     }
-    // If not directly in a room, lock the closest room on that floor
-    const floorRooms = this.rooms.filter(r => r.floor === floor && !r.isStairs);
-    if (floorRooms.length > 0) {
-      floorRooms.sort((a, b) => Math.abs((a.bounds.x + a.bounds.w / 2) - x) - Math.abs((b.bounds.x + b.bounds.w / 2) - x));
-      floorRooms[0].lock(duration);
-      return floorRooms[0];
+
+    // Direction vector: 1 for right, -1 for left
+    const dir = facing === 'left' ? -1 : 1;
+
+    // Filter rooms located in the direction the player is facing
+    const inDirectionRooms = otherRooms.filter(r => {
+      const roomMidX = r.bounds.x + r.bounds.w / 2;
+      return (roomMidX - currentX) * dir > 0;
+    });
+
+    let targetRoom = null;
+
+    if (inDirectionRooms.length > 0) {
+      // Pick the closest adjacent room in the facing direction
+      inDirectionRooms.sort((a, b) => {
+        const distA = Math.abs((a.bounds.x + a.bounds.w / 2) - currentX);
+        const distB = Math.abs((b.bounds.x + b.bounds.w / 2) - currentX);
+        return distA - distB;
+      });
+      targetRoom = inDirectionRooms[0];
+    } else {
+      // If no room is ahead in the facing direction, pick the nearest adjacent room on the floor
+      otherRooms.sort((a, b) => {
+        const distA = Math.abs((a.bounds.x + a.bounds.w / 2) - currentX);
+        const distB = Math.abs((b.bounds.x + b.bounds.w / 2) - currentX);
+        return distA - distB;
+      });
+      targetRoom = otherRooms[0];
+    }
+
+    if (targetRoom) {
+      targetRoom.lock(duration);
+      return targetRoom;
     }
     return null;
+  }
+
+  lockRoomAt(x, y, floor, duration = 10.0) {
+    return this.lockNextRoom(x, y, floor, 'right', duration);
   }
 
   checkDoorCollision(fromX, toX, floor) {

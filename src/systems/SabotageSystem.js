@@ -87,9 +87,13 @@ export class SabotageSystem {
       this.criticalTimer = 35.0; // 35 seconds to fix or Prankster wins!
       this.game.showTopToast(`🚨 CRITICAL SABOTAGE: Blackout on Floor ${floor === 2 ? '3F' : floor === 1 ? '2F' : '1F'} (35s)! Fix it at the Fuse Box!`);
     } else if (type === "KUNDI") {
-      const lockedRoom = this.game.houseMap.lockRoomAt(this.game.player ? this.game.player.x : 500, this.game.player ? this.game.player.y : 300, floor, 10.0);
-      const roomName = lockedRoom ? lockedRoom.name : "Current Room";
-      this.game.showTopToast(`🔒 Door Kundi Locked: ${roomName} (10s)! No one can enter or exit!`);
+      const player = this.game.player;
+      const px = player ? player.x : 500;
+      const py = player ? player.y : 300;
+      const facing = player ? player.facing : 'right';
+      const lockedRoom = this.game.houseMap.lockNextRoom(px, py, floor, facing, 10.0);
+      const roomName = lockedRoom ? lockedRoom.name : "Adjacent Room";
+      this.game.showTopToast(`🔒 Door Kundi: ${roomName} has been locked from outside (10s)!`);
     }
 
     // Sync sabotage across all multiplayer peers
