@@ -1,6 +1,7 @@
 /**
  * Sister Sneak: Phone Locked - Among Us Style Tactical Dark Theme
- * 100% Mobile Responsive, No Noodle Distortions, No Horizontal Panning.
+ * 100% Mobile Responsive (Portrait & Landscape), Zero Page Drag / Drift,
+ * Clean Non-Overlapping HUD, and Among Us 2-Phase Emergency Meeting UI.
  */
 
 :root {
@@ -26,30 +27,30 @@
 }
 
 html, body {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  overflow: hidden !important;
   background-color: var(--deep-bg);
   font-family: 'Fredoka', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: var(--text-white);
-  touch-action: none;
-  overscroll-behavior: none;
+  touch-action: none !important;
+  overscroll-behavior: none !important;
   -webkit-overflow-scrolling: none;
 }
 
 #game-container {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: var(--deep-bg);
   overflow: hidden;
-  touch-action: none;
+  touch-action: none !important;
 }
 
 #gameCanvas {
@@ -60,21 +61,21 @@ html, body {
   max-height: 100vh;
   object-fit: contain;
   background: #111827;
-  touch-action: none;
+  touch-action: none !important;
 }
 
 /* ==========================================================================
-   Top HUD Header (Among Us Tactical Style)
+   Top HUD Header (Among Us Tactical Style - Compact & Non-Overlapping)
    ========================================================================== */
 .hud-layer {
   position: fixed;
-  top: 10px;
-  left: 12px;
-  right: 12px;
+  top: 8px;
+  left: 8px;
+  right: 8px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 6px;
   z-index: 50;
   pointer-events: none;
 }
@@ -82,29 +83,30 @@ html, body {
 .hud-left, .hud-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   pointer-events: auto;
 }
 
 .hud-center {
   flex: 1;
-  max-width: 380px;
+  max-width: 320px;
   pointer-events: auto;
 }
 
 .hud-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: rgba(15, 23, 42, 0.92);
+  gap: 4px;
+  background: rgba(15, 23, 42, 0.94);
   color: #FFF;
-  padding: 6px 12px;
-  border-radius: 20px;
-  border: 2px solid var(--primary-cyan);
-  font-size: 13px;
+  padding: 5px 10px;
+  border-radius: 16px;
+  border: 1.5px solid var(--primary-cyan);
+  font-size: 12px;
   font-weight: 800;
   backdrop-filter: blur(6px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  white-space: nowrap;
 }
 
 .role-badge.imposter {
@@ -116,17 +118,17 @@ html, body {
 .hud-power-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   background: linear-gradient(135deg, #06B6D4, #0284C7);
   color: #FFF;
-  border: 2px solid #FFF;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 12px;
+  border: 1.5px solid #FFF;
+  padding: 5px 10px;
+  border-radius: 16px;
+  font-size: 11px;
   font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 0 14px rgba(6, 182, 212, 0.5);
-  transition: transform 0.1s, opacity 0.2s;
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+  white-space: nowrap;
 }
 
 .hud-power-btn:disabled {
@@ -137,34 +139,30 @@ html, body {
   cursor: not-allowed;
 }
 
-.hud-power-btn:active {
-  transform: scale(0.95);
-}
-
 /* Cleanliness Progress Bar (Among Us Green Task Bar Style) */
 .cleanliness-meter-container {
-  background: rgba(15, 23, 42, 0.92);
-  border: 2px solid #334155;
-  border-radius: 14px;
-  padding: 6px 12px;
+  background: rgba(15, 23, 42, 0.94);
+  border: 1.5px solid #334155;
+  border-radius: 12px;
+  padding: 4px 10px;
   backdrop-filter: blur(6px);
 }
 
 .meter-label {
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   color: #E2E8F0;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .meter-bar-track {
   width: 100%;
-  height: 12px;
+  height: 10px;
   background: #1E293B;
-  border: 1.5px solid #475569;
-  border-radius: 6px;
+  border: 1px solid #475569;
+  border-radius: 5px;
   overflow: hidden;
 }
 
@@ -177,13 +175,13 @@ html, body {
 }
 
 .hud-icon-btn {
-  background: rgba(15, 23, 42, 0.92);
+  background: rgba(15, 23, 42, 0.94);
   color: #FFF;
-  border: 2px solid #475569;
+  border: 1.5px solid #475569;
   border-radius: 50%;
-  width: 38px;
-  height: 38px;
-  font-size: 16px;
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -191,38 +189,39 @@ html, body {
 }
 
 .hud-room-display {
-  background: rgba(15, 23, 42, 0.92);
+  background: rgba(15, 23, 42, 0.94);
   color: #38BDF8;
-  border: 2px solid var(--primary-cyan);
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
+  border: 1.5px solid var(--primary-cyan);
+  padding: 4px 8px;
+  border-radius: 14px;
+  font-size: 11px;
   font-weight: 800;
+  white-space: nowrap;
 }
 
 /* ==========================================================================
-   Personal Task Checklist Drawer (Among Us Top-Left Task List)
+   Personal Task Checklist Drawer (Top-Left under HUD)
    ========================================================================== */
 .tasklist-drawer {
   position: fixed;
-  top: 60px;
-  left: 12px;
+  top: 50px;
+  left: 8px;
   z-index: 45;
-  background: rgba(15, 23, 42, 0.95);
-  border: 2px solid var(--primary-cyan);
-  border-radius: 12px;
-  padding: 8px 12px;
-  max-width: 260px;
+  background: rgba(15, 23, 42, 0.96);
+  border: 1.5px solid var(--primary-cyan);
+  border-radius: 10px;
+  padding: 6px 10px;
+  max-width: 220px;
   color: #FFF;
   backdrop-filter: blur(8px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
 }
 
 .tasklist-toggle-btn {
   background: none;
   border: none;
   color: var(--primary-cyan);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
   cursor: pointer;
   display: flex;
@@ -231,23 +230,23 @@ html, body {
 }
 
 .tasklist-body {
-  margin-top: 6px;
+  margin-top: 4px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  max-height: 160px;
+  gap: 3px;
+  max-height: 140px;
   overflow-y: auto;
 }
 
 .task-checklist-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 11px;
+  gap: 4px;
+  font-size: 10px;
   font-weight: 700;
   color: #E2E8F0;
-  padding: 3px 6px;
-  border-radius: 6px;
+  padding: 2px 4px;
+  border-radius: 4px;
   background: rgba(255, 255, 255, 0.05);
 }
 
@@ -260,88 +259,102 @@ html, body {
 .task-check-floor {
   background: #0369A1;
   color: #FFF;
-  padding: 1px 4px;
-  border-radius: 4px;
-  font-size: 9px;
+  padding: 1px 3px;
+  border-radius: 3px;
+  font-size: 8px;
 }
 
 /* ==========================================================================
-   Vertical Floor Switcher (Right Side)
+   Floor Switcher Fast-Nav (Right Edge - Compact Pill Style)
    ========================================================================== */
 .floor-nav-panel {
   position: fixed;
-  right: 12px;
+  right: 8px;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   z-index: 40;
 }
 
 .floor-nav-btn {
-  background: rgba(15, 23, 42, 0.92);
+  background: rgba(15, 23, 42, 0.94);
   color: #94A3B8;
-  border: 2px solid #475569;
-  border-radius: 12px;
-  padding: 8px 12px;
-  font-size: 13px;
+  border: 1.5px solid #475569;
+  border-radius: 10px;
+  padding: 6px 4px;
+  width: 44px;
+  font-size: 11px;
   font-weight: 800;
   cursor: pointer;
   text-align: center;
+  line-height: 1.1;
   transition: all 0.15s;
+}
+
+.floor-nav-btn small {
+  font-size: 8px;
+  display: block;
 }
 
 .floor-nav-btn.active {
   background: var(--primary-cyan);
   color: #0F172A;
   border-color: #FFF;
-  box-shadow: 0 0 16px rgba(6, 182, 212, 0.8);
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.8);
 }
 
 /* ==========================================================================
-   Sabotage Panel (Imposter Only)
+   Sabotage Panel (Imposter Only - Floating Above Action Buttons)
    ========================================================================== */
 .sabotage-panel {
   position: fixed;
-  bottom: 16px;
-  right: 16px;
-  background: rgba(30, 10, 10, 0.95);
+  bottom: 86px;
+  right: 12px;
+  background: rgba(30, 10, 10, 0.96);
   border: 2px solid var(--danger-red);
-  border-radius: 16px;
-  padding: 8px 12px;
+  border-radius: 14px;
+  padding: 6px 8px;
   z-index: 40;
+  max-width: 250px;
 }
 
 .sabotage-title {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   color: #FCA5A5;
   text-align: center;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .sabotage-actions {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .sab-btn {
   background: #450A0A;
   color: #FFF;
-  border: 2px solid var(--danger-red);
-  border-radius: 12px;
-  padding: 8px 12px;
+  border: 1.5px solid var(--danger-red);
+  border-radius: 8px;
+  padding: 6px 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 9px;
   font-weight: 800;
+  flex: 1;
+}
+
+.sab-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .sab-icon {
-  font-size: 18px;
+  font-size: 14px;
 }
 
 /* ==========================================================================
@@ -356,23 +369,23 @@ html, body {
 
 .joystick-zone {
   position: fixed;
-  bottom: 24px;
-  left: 24px;
-  width: 100px;
-  height: 100px;
+  bottom: 16px;
+  left: 16px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
-  background: rgba(15, 23, 42, 0.6);
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(15, 23, 42, 0.65);
+  border: 2px solid rgba(255, 255, 255, 0.35);
   pointer-events: auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  touch-action: none;
+  touch-action: none !important;
 }
 
 .joystick-knob {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: radial-gradient(circle, #38BDF8, #0284C7);
   box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
@@ -381,27 +394,27 @@ html, body {
 
 .touch-action-group {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
+  bottom: 16px;
+  right: 16px;
   display: flex;
-  gap: 12px;
+  gap: 10px;
   pointer-events: auto;
 }
 
 .touch-action-btn, .touch-power-btn {
-  width: 62px;
-  height: 62px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  border: 3px solid #FFF;
-  font-size: 24px;
+  border: 2.5px solid #FFF;
+  font-size: 20px;
   font-weight: 800;
   color: #FFF;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
-  touch-action: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  touch-action: none !important;
 }
 
 .touch-action-btn {
@@ -416,8 +429,8 @@ html, body {
    Full Screen Modals & Screens (Fixed Fullscreen Overlays)
    ========================================================================== */
 .modal-layer {
-  position: fixed;
-  inset: 0;
+  position: fixed !important;
+  inset: 0 !important;
   z-index: 100;
   pointer-events: none;
 }
@@ -431,9 +444,9 @@ html, body {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  background: rgba(11, 15, 25, 0.88) !important;
+  background: rgba(11, 15, 25, 0.90) !important;
   backdrop-filter: blur(8px) !important;
-  padding: 16px !important;
+  padding: 12px !important;
   overflow-y: auto !important;
   pointer-events: auto !important;
 }
@@ -441,13 +454,13 @@ html, body {
 /* Among Us Style Cards */
 .lobby-card, .courtroom-card, .cutscene-card, .minigame-card, .pause-card, .verdict-card, .gameover-card, .help-card {
   background: #1E293B;
-  border: 3px solid #334155;
-  border-radius: 20px;
-  padding: 20px;
+  border: 2.5px solid #334155;
+  border-radius: 18px;
+  padding: 16px;
   width: 95%;
   max-width: 580px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
-  max-height: 90vh;
+  max-height: 92vh;
   overflow-y: auto;
   color: #FFF;
   margin: auto;
@@ -456,11 +469,11 @@ html, body {
 /* Title Banner */
 .title-banner {
   text-align: center;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .title-tag {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   color: var(--primary-cyan);
   letter-spacing: 1px;
@@ -468,7 +481,7 @@ html, body {
 }
 
 .game-title {
-  font-size: 30px;
+  font-size: 26px;
   font-weight: 900;
   color: #FFF;
   line-height: 1.1;
@@ -476,36 +489,36 @@ html, body {
 }
 
 .game-subtitle {
-  font-size: 15px;
+  font-size: 14px;
   color: var(--primary-gold);
 }
 
 .lobby-story {
   background: rgba(15, 23, 42, 0.6);
-  border: 1.5px solid #334155;
-  border-radius: 12px;
-  padding: 10px;
-  font-size: 11px;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 8px;
+  font-size: 10px;
   color: #CBD5E1;
-  margin-bottom: 12px;
-  line-height: 1.4;
+  margin-bottom: 10px;
+  line-height: 1.35;
 }
 
 /* Mode Tabs */
 .mode-tabs {
   display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 6px;
+  margin-bottom: 10px;
 }
 
 .mode-tab {
   flex: 1;
-  padding: 10px;
-  border: 2px solid #334155;
-  border-radius: 12px;
+  padding: 8px;
+  border: 1.5px solid #334155;
+  border-radius: 10px;
   background: #0F172A;
   font-weight: 800;
-  font-size: 12px;
+  font-size: 11px;
   cursor: pointer;
   color: #94A3B8;
   transition: all 0.15s;
@@ -517,26 +530,26 @@ html, body {
   border-color: #FFF;
 }
 
-/* Character Selection Grid */
+/* Character Selection Grid with Custom Avatars */
 .character-select-section h3, .mummy-select-section h3, .role-preference-section h3 {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
   color: var(--primary-cyan);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .sister-cards-grid, .mummy-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
-  gap: 8px;
-  margin: 8px 0;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 6px;
+  margin: 6px 0;
 }
 
 .sister-card, .mummy-card {
   background: #0F172A;
   border: 2px solid #334155;
   border-radius: 12px;
-  padding: 8px;
+  padding: 6px;
   text-align: center;
   cursor: pointer;
   transition: all 0.15s;
@@ -545,18 +558,18 @@ html, body {
 .sister-card.selected, .mummy-card.selected {
   border-color: var(--primary-cyan);
   background: rgba(6, 182, 212, 0.15);
-  box-shadow: 0 0 12px rgba(6, 182, 212, 0.4);
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.4);
   transform: translateY(-2px);
 }
 
 .card-avatar-wrapper {
-  width: 64px;
-  height: 64px;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
   overflow: hidden;
-  margin: 0 auto 6px auto;
+  margin: 0 auto 4px auto;
   border: 2px solid var(--primary-cyan);
-  box-shadow: 0 0 10px rgba(6, 182, 212, 0.4);
+  box-shadow: 0 0 8px rgba(6, 182, 212, 0.4);
 }
 
 .card-avatar-img {
@@ -566,9 +579,27 @@ html, body {
   display: block;
 }
 
+.card-name, .m-name {
+  font-weight: 800;
+  font-size: 11px;
+  color: #FFF;
+}
+
+.card-tagline, .m-trait {
+  font-size: 8px;
+  color: #94A3B8;
+}
+
+.card-power {
+  font-size: 8px;
+  font-weight: 700;
+  color: #38BDF8;
+  margin-top: 2px;
+}
+
 .mp-player-avatar-wrapper {
-  width: 38px;
-  height: 38px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   overflow: hidden;
   border: 2px solid var(--primary-cyan);
@@ -582,43 +613,21 @@ html, body {
   display: block;
 }
 
-.card-avatar, .m-avatar {
-  font-size: 26px;
-}
-
-.card-name, .m-name {
-  font-weight: 800;
-  font-size: 12px;
-  color: #FFF;
-}
-
-.card-tagline, .m-trait {
-  font-size: 9px;
-  color: #94A3B8;
-}
-
-.card-power {
-  font-size: 9px;
-  font-weight: 700;
-  color: #38BDF8;
-  margin-top: 2px;
-}
-
 /* Role Preference */
 .role-preference-section {
-  margin: 10px 0;
-  padding: 8px;
+  margin: 8px 0;
+  padding: 6px;
   background: rgba(15, 23, 42, 0.6);
-  border-radius: 12px;
-  border: 2px solid #334155;
+  border-radius: 10px;
+  border: 1.5px solid #334155;
   text-align: center;
 }
 
 .role-preference-bar {
   display: flex;
   justify-content: center;
-  gap: 14px;
-  font-size: 12px;
+  gap: 12px;
+  font-size: 11px;
   font-weight: 700;
 }
 
@@ -631,21 +640,17 @@ html, body {
   background: linear-gradient(135deg, #06B6D4, #0284C7);
   color: #FFF;
   border: 2px solid #FFF;
-  border-radius: 14px;
-  padding: 14px;
+  border-radius: 12px;
+  padding: 12px;
   font-weight: 800;
-  font-size: 15px;
+  font-size: 14px;
   cursor: pointer;
-  box-shadow: 0 0 16px rgba(6, 182, 212, 0.4);
+  box-shadow: 0 0 14px rgba(6, 182, 212, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.main-cta-btn:active {
-  transform: scale(0.98);
+  gap: 6px;
+  margin-top: 8px;
 }
 
 .secondary-btn {
@@ -653,10 +658,10 @@ html, body {
   background: #334155;
   color: #FFF;
   border: 2px solid #475569;
-  border-radius: 12px;
-  padding: 12px;
+  border-radius: 10px;
+  padding: 10px;
   font-weight: 800;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
 }
 
@@ -670,46 +675,46 @@ html, body {
 .mp-room-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: 6px;
 }
 
 .mp-box {
   background: #0F172A;
-  border: 2px solid #334155;
-  border-radius: 12px;
-  padding: 10px;
+  border: 1.5px solid #334155;
+  border-radius: 10px;
+  padding: 8px;
   text-align: center;
 }
 
 .mp-box h4 {
   color: #FFF;
-  font-size: 13px;
-  margin-bottom: 4px;
+  font-size: 12px;
+  margin-bottom: 3px;
 }
 
 .mp-box p {
-  font-size: 10px;
+  font-size: 9px;
   color: #94A3B8;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
 }
 
 .mp-input-row {
   display: flex;
-  gap: 6px;
+  gap: 4px;
 }
 
 .mp-input-row input {
   flex: 1;
-  padding: 8px;
+  padding: 6px;
   background: #1E293B;
-  border: 2px solid var(--primary-cyan);
-  border-radius: 8px;
+  border: 1.5px solid var(--primary-cyan);
+  border-radius: 6px;
   font-family: inherit;
   font-weight: 800;
   text-align: center;
   color: #FFF;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .mp-action-btn {
@@ -717,10 +722,10 @@ html, body {
   background: #0284C7;
   color: #FFF;
   border: none;
-  border-radius: 8px;
-  padding: 10px;
+  border-radius: 6px;
+  padding: 8px;
   font-weight: 800;
-  font-size: 12px;
+  font-size: 11px;
   cursor: pointer;
 }
 
@@ -732,19 +737,19 @@ html, body {
 
 .room-code-banner {
   background: #0F172A;
-  border: 2px solid var(--primary-cyan);
-  border-radius: 12px;
-  padding: 10px 14px;
+  border: 1.5px solid var(--primary-cyan);
+  border-radius: 10px;
+  padding: 8px 12px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 10px;
+  gap: 6px;
+  margin-bottom: 8px;
 }
 
 .code-val {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 900;
   color: #38BDF8;
   letter-spacing: 2px;
@@ -752,17 +757,17 @@ html, body {
 
 .code-btn-group {
   display: flex;
-  gap: 6px;
+  gap: 4px;
 }
 
 .copy-code-btn {
   background: var(--primary-gold);
   color: #0F172A;
   border: none;
-  border-radius: 8px;
-  padding: 6px 12px;
+  border-radius: 6px;
+  padding: 5px 10px;
   font-weight: 800;
-  font-size: 11px;
+  font-size: 10px;
   cursor: pointer;
 }
 
@@ -773,27 +778,23 @@ html, body {
 
 .mp-players-list {
   background: #0F172A;
-  border: 2px solid #334155;
-  border-radius: 12px;
-  padding: 8px;
-  margin: 8px 0;
+  border: 1.5px solid #334155;
+  border-radius: 10px;
+  padding: 6px;
+  margin: 6px 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .mp-player-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 12px;
+  gap: 8px;
+  font-size: 11px;
   background: rgba(255, 255, 255, 0.05);
-  padding: 6px 10px;
-  border-radius: 8px;
-}
-
-.mp-player-avatar {
-  font-size: 22px;
+  padding: 5px 8px;
+  border-radius: 6px;
 }
 
 .mp-player-info {
@@ -807,16 +808,16 @@ html, body {
 }
 
 .mp-player-tagline {
-  font-size: 10px;
+  font-size: 9px;
   color: #94A3B8;
 }
 
 /* ==========================================================================
-   Courtroom & Real-Time Meeting Chat (Among Us Debate Layout)
+   Courtroom & Real-Time Meeting Chat (Among Us 2-Phase Debate Layout)
    ========================================================================== */
 .courtroom-header {
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .courtroom-badge {
@@ -827,14 +828,14 @@ html, body {
 
 .sisters-debate-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
   gap: 6px;
-  margin: 10px 0;
+  margin: 8px 0;
 }
 
 .debate-sister-card {
   background: #0F172A;
-  border: 2px solid #334155;
+  border: 1.5px solid #334155;
   border-radius: 10px;
   padding: 6px;
   text-align: center;
@@ -843,29 +844,64 @@ html, body {
   justify-content: space-between;
 }
 
+.debate-sister-card.voted-state {
+  border-color: var(--clean-green);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.debate-sister-card.ejected {
+  opacity: 0.4;
+  filter: grayscale(1);
+}
+
+.debate-sister-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.debate-sister-name {
+  font-weight: 800;
+  font-size: 11px;
+}
+
+.voted-indicator {
+  font-size: 9px;
+  font-weight: 800;
+  color: #86EFAC;
+  display: block;
+}
+
 .btn-vote-sister {
   background: var(--danger-red);
   color: #FFF;
   border: none;
   border-radius: 6px;
   padding: 6px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   cursor: pointer;
   margin-top: 4px;
 }
 
+.btn-vote-sister:disabled {
+  background: #334155;
+  color: #94A3B8;
+  cursor: not-allowed;
+}
+
 .courtroom-debate-log {
   background: #0F172A;
-  border: 2px solid #334155;
-  border-radius: 12px;
-  padding: 8px;
-  height: 110px;
+  border: 1.5px solid #334155;
+  border-radius: 10px;
+  padding: 6px;
+  height: 95px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  font-size: 11px;
+  gap: 3px;
+  font-size: 10px;
 }
 
 .log-entry {
@@ -876,40 +912,40 @@ html, body {
 
 .my-chat-entry {
   background: rgba(6, 182, 212, 0.15);
-  padding: 2px 6px;
-  border-radius: 6px;
+  padding: 2px 4px;
+  border-radius: 4px;
 }
 
 .quick-chat-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  margin: 6px 0;
+  margin: 5px 0;
 }
 
 .qc-chip {
   background: #0F172A;
   border: 1px solid #475569;
   color: #E2E8F0;
-  border-radius: 12px;
-  padding: 4px 8px;
-  font-size: 10px;
+  border-radius: 10px;
+  padding: 3px 6px;
+  font-size: 9px;
   font-weight: 700;
   cursor: pointer;
 }
 
 .chat-input-row {
   display: flex;
-  gap: 6px;
+  gap: 4px;
 }
 
 .chat-input-row input {
   flex: 1;
-  padding: 8px;
+  padding: 6px;
   background: #0F172A;
-  border: 2px solid var(--primary-cyan);
-  border-radius: 8px;
-  font-size: 11px;
+  border: 1.5px solid var(--primary-cyan);
+  border-radius: 6px;
+  font-size: 10px;
   color: #FFF;
   font-family: inherit;
 }
@@ -918,29 +954,79 @@ html, body {
   background: var(--primary-cyan);
   color: #0F172A;
   border: none;
-  border-radius: 8px;
-  padding: 8px 12px;
+  border-radius: 6px;
+  padding: 6px 10px;
   font-weight: 800;
   cursor: pointer;
+}
+
+.courtroom-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.skip-vote-btn {
+  background: #334155;
+  color: #FFF;
+  border: 1.5px solid #475569;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-weight: 800;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.skip-vote-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.vote-timer {
+  font-size: 12px;
+  font-weight: 800;
+  color: #FBBF24;
+}
+
+/* Verdict & Ejection Spotlight */
+.verdict-card {
+  text-align: center;
+}
+
+.verdict-character-spotlight {
+  margin: 16px 0;
+}
+
+.verdict-name-banner {
+  font-size: 22px;
+  font-weight: 900;
+  margin-top: 8px;
+}
+
+.verdict-sub-status {
+  font-size: 13px;
+  color: #94A3B8;
+  margin-top: 4px;
 }
 
 /* Toast Banner */
 .game-toast-banner {
   position: fixed;
-  top: 14px;
+  top: 12px;
   left: 50%;
   transform: translateX(-50%) translateY(-120px);
   background: rgba(15, 23, 42, 0.95);
   color: #38BDF8;
   border: 2px solid var(--primary-cyan);
-  padding: 8px 16px;
-  border-radius: 20px;
+  padding: 6px 14px;
+  border-radius: 16px;
   font-weight: 800;
-  font-size: 12px;
+  font-size: 11px;
   z-index: 200;
   transition: transform 0.3s ease;
   pointer-events: none;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
   text-align: center;
   max-width: 90vw;
 }
@@ -955,26 +1041,42 @@ html, body {
 }
 
 /* ==========================================================================
-   Mobile Optimization (Under 600px)
+   Mobile Optimization (Under 600px Screen Width)
    ========================================================================== */
 @media (max-width: 600px) {
   .mp-room-actions {
     grid-template-columns: 1fr;
   }
   .hud-badge {
-    font-size: 11px;
-    padding: 4px 8px;
+    font-size: 10px;
+    padding: 3px 6px;
   }
   .hud-room-display {
     display: none;
   }
   .hud-center {
-    max-width: 170px;
+    max-width: 140px;
   }
   .sister-cards-grid {
     grid-template-columns: repeat(3, 1fr);
   }
   .mummy-cards-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+  .sisters-debate-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .floor-nav-panel {
+    right: 4px;
+  }
+  .floor-nav-btn {
+    width: 38px;
+    padding: 4px 2px;
+    font-size: 10px;
+  }
+  .sabotage-panel {
+    bottom: 80px;
+    right: 8px;
+    padding: 4px 6px;
   }
 }

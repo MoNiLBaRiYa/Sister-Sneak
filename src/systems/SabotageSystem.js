@@ -1,6 +1,7 @@
 /**
  * Sister Sneak: Phone Locked - Sabotage System (Imposter Abilities)
- * Manages Blackout, Door Kundi, and Floor Mess sabotages with multiplayer sync.
+ * Manages Blackout, Door Kundi, and Floor Mess sabotages with Critical Countdown Timer
+ * where Innocents must fix it at the switchboard or Imposter wins.
  */
 
 import { SABOTAGE_COOLDOWNS } from '../config/constants.js';
@@ -13,7 +14,8 @@ export class SabotageSystem {
       KUNDI: 0,
       MESS: 0
     };
-    this.activeBlackouts = {};
+    this.criticalSabotageActive = false;
+    this.criticalTimer = 0;
     this.bindUI();
   }
 
@@ -41,6 +43,21 @@ export class SabotageSystem {
       }
     });
 
+    // Update Critical Sabotage Countdown
+    if (this.criticalSabotageActive) {
+      this.criticalTimer -= dt;
+      const alertEl = document.getElementById("mummy-alert");
+      if (alertEl) {
+        alertEl.classList.remove("hidden");
+        alertEl.innerHTML = `<span class="pulse-icon">🚨</span><span class="warning-text">CRITICAL SABOTAGE: FUSE OVERHEAT (${Math.ceil(this.criticalTimer)}s)! FIX AT SWITCHBOARD OR IMPOSTER WINS!</span>`;
+      }
+
+      if (this.criticalTimer <= 0) {
+        this.criticalSabotageActive = false;
+        this.game.triggerDefeat("CRITICAL_SABOTAGE_EXPIRED");
+      }
+    }
+
     this.updateUI();
   }
 
@@ -64,7 +81,6 @@ export class SabotageSystem {
   triggerSabotage(type, targetFloor = null) {
     if (this.cooldowns[type] > 0) return;
 
-    // Jyeana rapid saboteur passive
     const cdMultiplier = (this.game.imposterSisterId === "JYEANA") ? 0.5 : 1.0;
     this.cooldowns[type] = SABOTAGE_COOLDOWNS[type] * cdMultiplier;
 
@@ -75,14 +91,14 @@ export class SabotageSystem {
 
     if (type === "BLACKOUT") {
       this.game.houseMap.setFloorBlackout(floor, true);
-      // Auto-restore after 12s
-      setTimeout(() => {
-        this.game.houseMap.setFloorBlackout(floor, false);
-      }, 12000);
+      this.criticalSabotageActive = true;
+      this.criticalTimer = 35.0; // 35 seconds to fix or Imposter wins!
+      this.game.showTopToast("🚨 CRITICAL SABOTAGE: Switchboard Blackout (35s)! Fix it at 1F Power Board!");
     } else if (type === "MESS") {
       this.game.taskManager.reduceCleanliness(15);
+      this.game.showTopToast("🧹 Imposter spilled junk across the floors (-15% Cleanliness)!");
     } else if (type === "KUNDI") {
-      // Lock room doors temporarily
+      this.game.showTopToast("🔒 Imposter locked bedroom doors for 8s!");
     }
 
     // Sync sabotage across all multiplayer peers
@@ -90,11 +106,20 @@ export class SabotageSystem {
       this.game.multiplayer.syncSabotage(type, floor);
     }
 
-    // If Jahanvi is Imposter -> Floor Teleport ability
     if (this.game.player && this.game.player.role === "imposter" && this.game.player.id === "JAHANVI") {
       const nextFloor = (this.game.player.floor + 1) % 3;
       this.game.player.setFloor(nextFloor);
       this.game.camera.setFloor(nextFloor);
+    }
+  }
+
+  resolveCriticalSabotage() {
+    if (this.criticalSabotageActive) {
+      this.criticalSabotageActive = false;
+      this.game.houseMap.blackedOutFloors.clear();
+      const alertEl = document.getElementById("mummy-alert");
+      if (alertEl) alertEl.classList.add("hidden");
+      this.game.showTopToast("✨ Critical Sabotage Resolved! Power restored! ✨");
     }
   }
 }

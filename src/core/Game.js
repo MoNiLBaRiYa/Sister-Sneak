@@ -642,9 +642,14 @@ export class Game {
         this.activeNearbyHotspot = this.houseMap.getHotspotNear(this.player.x, this.player.y, this.player.floor);
         this.updateActionPrompt();
 
-        // Handle interaction press
+        // Handle interaction press (E / Enter / Action Button)
         if (this.input.consumeInteract() && this.activeNearbyHotspot) {
           this.handleHotspotInteraction(this.activeNearbyHotspot);
+        }
+
+        // Handle power ability press (Q / Space / Power Button)
+        if (this.input.consumeAction()) {
+          this.player.useAbility(this);
         }
       }
 
@@ -738,6 +743,7 @@ export class Game {
   }
 
   triggerWin(reason) {
+    if (this.state === "GAMEOVER") return;
     this.state = "GAMEOVER";
     this.audio.playVictory();
 
@@ -750,10 +756,16 @@ export class Game {
     const statClean = document.getElementById("stat-clean-pct");
 
     if (banner) banner.innerText = "🎉 INNOCENTS WIN! 🎉";
-    if (sub) sub.innerText = "The House is 100% Sparkling Clean!";
-    if (imposterReveal) imposterReveal.innerText = SISTERS[this.imposterSisterId].name;
-    if (outcome) outcome.innerText = "Mummy opened the heirloom lockbox and returned all 5 phones with fresh jalebis & kaju katli!";
+    if (reason === "IMPOSTER_EJECTED") {
+      if (sub) sub.innerText = "The Secret Imposter Was Unmasked!";
+      if (outcome) outcome.innerText = "Mummy caught the Imposter and returned everyone's phones with fresh jalebis & kaju katli!";
+    } else {
+      if (sub) sub.innerText = "The House is 100% Sparkling Clean!";
+      if (outcome) outcome.innerText = "Mummy inspected all 3 floors and returned all 5 phones on time!";
+    }
 
+    const imposterChar = SISTERS[this.imposterSisterId];
+    if (imposterReveal && imposterChar) imposterReveal.innerText = imposterChar.name;
     if (statTasks) statTasks.innerText = this.taskManager.tasksCompletedCount;
     if (statClean) statClean.innerText = `${Math.round(this.taskManager.cleanliness)}%`;
 
@@ -761,6 +773,7 @@ export class Game {
   }
 
   triggerDefeat(reason) {
+    if (this.state === "GAMEOVER") return;
     this.state = "GAMEOVER";
     this.audio.playDefeat();
 
@@ -771,9 +784,16 @@ export class Game {
     const outcome = document.getElementById("gameover-story-outcome");
 
     if (banner) banner.innerText = "😈 IMPOSTER WINS! 😈";
-    if (sub) sub.innerText = "The Imposter Framed the Innocent Sisters!";
-    if (imposterReveal) imposterReveal.innerText = SISTERS[this.imposterSisterId].name;
-    if (outcome) outcome.innerText = "The Imposter tricked Mummy! The framed innocent sister gets deep-cleaning chore punishment while the Imposter relaxes!";
+    if (reason === "CRITICAL_SABOTAGE_EXPIRED") {
+      if (sub) sub.innerText = "Critical Sabotage Expired (Fuse Overheat)!";
+      if (outcome) outcome.innerText = "Innocents failed to repair the switchboard! Mummy blamed the innocent sisters while the Imposter won!";
+    } else {
+      if (sub) sub.innerText = "The Imposter Framed the Innocent Sisters!";
+      if (outcome) outcome.innerText = "The Imposter tricked Mummy! The framed innocent sister gets deep-cleaning chore punishment while the Imposter relaxes!";
+    }
+
+    const imposterChar = SISTERS[this.imposterSisterId];
+    if (imposterReveal && imposterChar) imposterReveal.innerText = imposterChar.name;
 
     screen.classList.remove("hidden");
   }

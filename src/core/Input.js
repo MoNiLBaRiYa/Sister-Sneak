@@ -1,7 +1,7 @@
 /**
  * Sister Sneak: Phone Locked - Advanced Input System
- * Supports Keyboard (WASD/Arrows/E/Space), Mouse click-to-move,
- * and Mobile Multi-Touch Virtual Joystick + Action Buttons for Android and iOS.
+ * Zero Page-Drift, Zero Horizontal Drag Glitches, Multi-Touch Virtual Joystick,
+ * and Responsive Action Buttons for Android & iOS.
  */
 
 export class InputManager {
@@ -12,7 +12,6 @@ export class InputManager {
     this.interactPressed = false;
     this.actionPressed = false;
 
-    // Mobile Touch State
     this.isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
     this.joystick = {
       active: false,
@@ -23,11 +22,24 @@ export class InputManager {
       currentY: 0,
       vectorX: 0,
       vectorY: 0,
-      radius: 45
+      radius: 40
     };
 
     this.initDOMControls();
     this.bindEvents();
+    this.preventBrowserScroll();
+  }
+
+  preventBrowserScroll() {
+    // Prevent mobile browser swipe-to-scroll gestures completely
+    document.addEventListener('touchmove', (e) => {
+      // Allow scrolling only inside chat logs or modal lists
+      const target = e.target;
+      if (target && (target.closest('.courtroom-debate-log') || target.closest('.tasklist-body') || target.closest('.mp-players-list') || target.closest('.minigame-body') || target.closest('.lobby-card'))) {
+        return; // Allow internal modal scroll
+      }
+      e.preventDefault();
+    }, { passive: false });
   }
 
   initDOMControls() {
@@ -35,8 +47,8 @@ export class InputManager {
     this.joystickZone = document.getElementById('virtual-joystick');
     this.joystickKnob = this.joystickZone ? this.joystickZone.querySelector('.joystick-knob') : null;
     this.touchActionBtn = document.getElementById('btn-touch-action');
+    this.touchPowerBtn = document.getElementById('btn-touch-power');
 
-    // Show touch controls automatically if mobile / touch device
     if (this.isTouchDevice && this.touchLayer) {
       this.touchLayer.classList.remove('hidden');
     }
@@ -47,10 +59,22 @@ export class InputManager {
         e.stopPropagation();
         this.interactPressed = true;
         this.touchActionBtn.classList.add('pressed');
-        setTimeout(() => this.touchActionBtn.classList.remove('pressed'), 150);
+        setTimeout(() => this.touchActionBtn.classList.remove('pressed'), 120);
       };
       this.touchActionBtn.addEventListener('touchstart', triggerInteract, { passive: false });
       this.touchActionBtn.addEventListener('click', triggerInteract);
+    }
+
+    if (this.touchPowerBtn) {
+      const triggerPower = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.actionPressed = true;
+        this.touchPowerBtn.classList.add('pressed');
+        setTimeout(() => this.touchPowerBtn.classList.remove('pressed'), 120);
+      };
+      this.touchPowerBtn.addEventListener('touchstart', triggerPower, { passive: false });
+      this.touchPowerBtn.addEventListener('click', triggerPower);
     }
   }
 
@@ -61,7 +85,7 @@ export class InputManager {
       if (e.code === 'KeyE' || e.code === 'Enter') {
         this.interactPressed = true;
       }
-      if (e.code === 'Space') {
+      if (e.code === 'Space' || e.code === 'KeyQ') {
         this.actionPressed = true;
       }
     });
@@ -97,6 +121,7 @@ export class InputManager {
     if (this.joystickZone) {
       this.joystickZone.addEventListener('touchstart', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         if (e.touches.length > 0) {
           const touch = e.touches[0];
           const rect = this.joystickZone.getBoundingClientRect();
@@ -141,7 +166,7 @@ export class InputManager {
 
     // Canvas Tap-to-move for touchscreens
     this.canvas.addEventListener('touchstart', (e) => {
-      // If user tapped directly on canvas outside joystick
+      e.preventDefault();
       for (let i = 0; i < e.changedTouches.length; i++) {
         const t = e.changedTouches[i];
         if (t.identifier !== this.joystick.touchId) {
@@ -153,7 +178,7 @@ export class InputManager {
           this.mouse.clicked = true;
         }
       }
-    }, { passive: true });
+    }, { passive: false });
   }
 
   updateJoystick(touchX, touchY) {
@@ -172,7 +197,6 @@ export class InputManager {
       this.joystickKnob.style.transform = `translate(${knobX}px, ${knobY}px)`;
     }
 
-    // Normalized vector (-1 to 1)
     this.joystick.vectorX = knobX / maxR;
     this.joystick.vectorY = knobY / maxR;
   }
@@ -181,23 +205,22 @@ export class InputManager {
     let dx = 0;
     let dy = 0;
 
-    // 1. Keyboard Controls
+    // 1. Keyboard
     if (this.keys['KeyA'] || this.keys['ArrowLeft']) dx -= 1;
     if (this.keys['KeyD'] || this.keys['ArrowRight']) dx += 1;
     if (this.keys['KeyW'] || this.keys['ArrowUp']) dy -= 1;
     if (this.keys['KeyS'] || this.keys['ArrowDown']) dy += 1;
 
-    // 2. Mobile Touch Joystick (Priority on Mobile)
+    // 2. Mobile Joystick
     if (this.joystick.active) {
       dx = this.joystick.vectorX;
       dy = this.joystick.vectorY;
       const mag = Math.hypot(dx, dy);
-      if (mag > 0.1) {
+      if (mag > 0.08) {
         return { x: dx, y: dy, active: true };
       }
     }
 
-    // Normalize keyboard vector
     const mag = Math.hypot(dx, dy);
     if (mag > 0.001) {
       return { x: dx / mag, y: dy / mag, active: true };
@@ -209,6 +232,12 @@ export class InputManager {
     const p = this.interactPressed;
     this.interactPressed = false;
     return p;
+  }
+
+  consumeAction() {
+    const a = this.actionPressed;
+    this.actionPressed = false;
+    return a;
   }
 
   consumeClick() {
