@@ -71,6 +71,32 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Portal Navigation Tabs (Play, Powers, Mummy Guide, Lore)
+  const portalTabs = [
+    { btn: 'tab-portal-play', panel: 'portal-panel-play' },
+    { btn: 'tab-portal-powers', panel: 'portal-panel-powers' },
+    { btn: 'tab-portal-mummy', panel: 'portal-panel-mummy' },
+    { btn: 'tab-portal-lore', panel: 'portal-panel-lore' }
+  ];
+
+  portalTabs.forEach(tab => {
+    const btnEl = document.getElementById(tab.btn);
+    const panelEl = document.getElementById(tab.panel);
+    if (btnEl && panelEl) {
+      btnEl.addEventListener('click', () => {
+        portalTabs.forEach(t => {
+          document.getElementById(t.btn)?.classList.remove('active');
+          document.getElementById(t.panel)?.classList.add('hidden');
+          document.getElementById(t.panel)?.classList.remove('active');
+        });
+        btnEl.classList.add('active');
+        panelEl.classList.remove('hidden');
+        panelEl.classList.add('active');
+        game.audio.playClick();
+      });
+    }
+  });
+
   // Single Player vs Multiplayer Tabs
   const tabSingle = document.getElementById('tab-singleplayer');
   const tabMulti = document.getElementById('tab-multiplayer');

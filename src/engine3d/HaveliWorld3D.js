@@ -1,9 +1,7 @@
 /**
- * Sister Sneak 3D - Joint-Family Haveli Mansion 3D Architecture
- * 3-Floor Haveli with Indian Architectural elements:
- * - Floor 0 (Ground): Grand Foyer, Living Hall (Baithak), Grand Kitchen (Rasoi), Steel Lock Box
- * - Floor 1 (Middle): Study Room (Abhyas Khand), Sisters' Bedroom, Dressing Room
- * - Floor 2 (Top): Sunlit Terrace (Agasi), Solar Panels, Water Tank, Balcony with Tulsi plant
+ * Sister Sneak 3D - Haveli Mansion Environment & 3D Interactive Task Stations
+ * Renders 3-floor architectural Haveli with terracotta tiles, marble courtyard,
+ * animated bouncing 3D chore task markers, and dynamic floor culling.
  */
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
@@ -12,202 +10,239 @@ export class HaveliWorld3D {
   constructor(scene, lighting) {
     this.scene = scene;
     this.lighting = lighting;
-    this.rooms = [];
-    this.lockedDoors = new Map();
+
+    this.floorGroups = [];
+    this.taskMarkers = [];
+    this.activeFloor = 1;
+    this.markerTime = 0;
+
     this.buildMansion();
+    this.createTaskMarkers();
   }
 
   buildMansion() {
-    this.group = new THREE.Group();
-    this.scene.add(this.group);
+    // Materials
+    const floor0Mat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.2 }); // Ground Marble
+    const floor1Mat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.7 }); // Terracotta
+    const floor2Mat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.8 }); // Terrace Stone
+    const wallMat = new THREE.MeshStandardMaterial({ color: 0xfef3c7, roughness: 0.6 });   // Warm Cream Walls
+    const railingMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.5 }); // Carved Wood Railing
 
-    // Common Materials
-    this.materials = {
-      terracottaFloor: new THREE.MeshStandardMaterial({ color: 0xba5d39, roughness: 0.6, metalness: 0.1 }),
-      marbleFloor: new THREE.MeshStandardMaterial({ color: 0xede8d0, roughness: 0.3, metalness: 0.2 }),
-      terraceFloor: new THREE.MeshStandardMaterial({ color: 0xc47b58, roughness: 0.8 }),
-      wallExterior: new THREE.MeshStandardMaterial({ color: 0xfdf6e2, roughness: 0.7 }),
-      wallInterior: new THREE.MeshStandardMaterial({ color: 0xfff9eb, roughness: 0.8 }),
-      woodTrim: new THREE.MeshStandardMaterial({ color: 0x5c3317, roughness: 0.5 }),
-      brassGold: new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.3, metalness: 0.8 }),
-      steelLockBox: new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.2, metalness: 0.9 }),
-      clothBlue: new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.9 }),
-      clothPink: new THREE.MeshStandardMaterial({ color: 0xf472b6, roughness: 0.9 }),
-      solarBlue: new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.1, metalness: 0.7 })
-    };
+    const floorHeights = [0, 7.5, 15];
+    const width = 28;
+    const depth = 14;
 
-    // Build 3 Floors
-    this.buildGroundFloor(0);
-    this.buildFirstFloor(8);
-    this.buildTerraceFloor(16);
-  }
-
-  buildGroundFloor(y) {
-    const floorG = new THREE.Group();
-    floorG.position.y = y;
-
-    // Floor Base (32 x 20)
-    const baseGeo = new THREE.BoxGeometry(34, 0.6, 20);
-    const baseMesh = new THREE.Mesh(baseGeo, this.materials.terracottaFloor);
-    baseMesh.position.y = -0.3;
-    baseMesh.receiveShadow = true;
-    floorG.add(baseMesh);
-
-    // Decorative Central Marble Rangoli Courtyard
-    const rangoliGeo = new THREE.BoxGeometry(10, 0.62, 10);
-    const rangoliMesh = new THREE.Mesh(rangoliGeo, this.materials.marbleFloor);
-    rangoliMesh.position.set(0, -0.3, 0);
-    rangoliMesh.receiveShadow = true;
-    floorG.add(rangoliMesh);
-
-    // Steel Phone Lock Box in Central Hall
-    const boxGeo = new THREE.BoxGeometry(1.6, 1.4, 1.2);
-    const boxMesh = new THREE.Mesh(boxGeo, this.materials.steelLockBox);
-    boxMesh.position.set(0, 0.7, -4);
-    boxMesh.castShadow = true;
-    boxMesh.receiveShadow = true;
-    floorG.add(boxMesh);
-
-    // Gold Padlock on Lockbox
-    const lockGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.4, 16);
-    const lockMesh = new THREE.Mesh(lockGeo, this.materials.brassGold);
-    lockMesh.position.set(0, 1.4, -3.4);
-    lockMesh.castShadow = true;
-    floorG.add(lockMesh);
-
-    // Kitchen Counter & Gas Stove (Left Room)
-    const counterGeo = new THREE.BoxGeometry(6, 1.2, 2.5);
-    const counterMesh = new THREE.Mesh(counterGeo, this.materials.woodTrim);
-    counterMesh.position.set(-11, 0.6, -5);
-    counterMesh.castShadow = true;
-    floorG.add(counterMesh);
-
-    // Living Room Sofa (Right Room)
-    const sofaGeo = new THREE.BoxGeometry(5, 1.0, 2.2);
-    const sofaMesh = new THREE.Mesh(sofaGeo, this.materials.clothBlue);
-    sofaMesh.position.set(11, 0.5, -4);
-    sofaMesh.castShadow = true;
-    floorG.add(sofaMesh);
-
-    // Low Cutaway Boundary Walls (Back & Sides only, front open for isometric view)
-    this.createCutawayWalls(floorG, 34, 20, 3.5);
-
-    // Room Lamp Lights
-    this.lighting.addRoomLight(0, y + 3.2, 0, 0xffe6b3, 1.3, 16);
-    this.lighting.addRoomLight(-11, y + 3.2, 0, 0xffd180, 1.1, 12);
-    this.lighting.addRoomLight(11, y + 3.2, 0, 0xffe0b2, 1.1, 12);
-
-    this.group.add(floorG);
-  }
-
-  buildFirstFloor(y) {
-    const floorG = new THREE.Group();
-    floorG.position.y = y;
-
-    // Floor Base (34 x 20)
-    const baseGeo = new THREE.BoxGeometry(34, 0.6, 20);
-    const baseMesh = new THREE.Mesh(baseGeo, this.materials.marbleFloor);
-    baseMesh.position.y = -0.3;
-    baseMesh.receiveShadow = true;
-    floorG.add(baseMesh);
-
-    // Study Desk & Books (Left - Jisha's Study Zone)
-    const deskGeo = new THREE.BoxGeometry(4.5, 1.1, 2.2);
-    const deskMesh = new THREE.Mesh(deskGeo, this.materials.woodTrim);
-    deskMesh.position.set(-11, 0.55, -4);
-    deskMesh.castShadow = true;
-    floorG.add(deskMesh);
-
-    // 4-Poster Wooden Bed (Right - Sisters' Bedroom)
-    const bedGeo = new THREE.BoxGeometry(5.5, 1.0, 4.5);
-    const bedMesh = new THREE.Mesh(bedGeo, this.materials.clothPink);
-    bedMesh.position.set(10, 0.5, -3);
-    bedMesh.castShadow = true;
-    floorG.add(bedMesh);
-
-    this.createCutawayWalls(floorG, 34, 20, 3.5);
-
-    this.lighting.addRoomLight(0, y + 3.2, 0, 0xffe6b3, 1.2, 14);
-    this.lighting.addRoomLight(-11, y + 3.2, 0, 0x93c5fd, 1.2, 12);
-    this.lighting.addRoomLight(11, y + 3.2, 0, 0xfbcfe8, 1.2, 12);
-
-    this.group.add(floorG);
-  }
-
-  buildTerraceFloor(y) {
-    const floorG = new THREE.Group();
-    floorG.position.y = y;
-
-    // Terrace Base (34 x 20)
-    const baseGeo = new THREE.BoxGeometry(34, 0.6, 20);
-    const baseMesh = new THREE.Mesh(baseGeo, this.materials.terraceFloor);
-    baseMesh.position.y = -0.3;
-    baseMesh.receiveShadow = true;
-    floorG.add(baseMesh);
-
-    // Solar Panel Grid (Left Terrace)
-    const solarGeo = new THREE.BoxGeometry(6, 0.3, 4);
-    const solarMesh = new THREE.Mesh(solarGeo, this.materials.solarBlue);
-    solarMesh.rotation.x = 0.25;
-    solarMesh.position.set(-10, 0.8, -4);
-    solarMesh.castShadow = true;
-    floorG.add(solarMesh);
-
-    // Terrace Clothesline Poles & Fluttering Clothes
-    const pole1Geo = new THREE.CylinderGeometry(0.08, 0.08, 2.5);
-    const pole1 = new THREE.Mesh(pole1Geo, this.materials.woodTrim);
-    pole1.position.set(6, 1.25, -5);
-    pole1.castShadow = true;
-    floorG.add(pole1);
-
-    const pole2 = new THREE.Mesh(pole1Geo, this.materials.woodTrim);
-    pole2.position.set(13, 1.25, -5);
-    pole2.castShadow = true;
-    floorG.add(pole2);
-
-    // Fluttering Saree Cloth
-    const clothGeo = new THREE.PlaneGeometry(5, 1.4);
-    const clothMesh = new THREE.Mesh(clothGeo, this.materials.clothPink);
-    clothMesh.position.set(9.5, 1.6, -5);
-    clothMesh.castShadow = true;
-    floorG.add(clothMesh);
-
-    // Terrace Railing (Parapet)
-    this.createCutawayWalls(floorG, 34, 20, 1.4);
-
-    this.lighting.addRoomLight(0, y + 3.5, 0, 0xffedd5, 1.4, 18);
-
-    this.group.add(floorG);
-  }
-
-  createCutawayWalls(group, width, depth, height) {
-    const wallMat = this.materials.wallExterior;
-    const halfW = width / 2;
-    const halfD = depth / 2;
-    const thick = 0.5;
+    // Floor 0: Ground Floor (Entry Foyer, Kitchen, Store Room)
+    const g0 = new THREE.Group();
+    const slab0 = new THREE.Mesh(new THREE.BoxGeometry(width, 0.4, depth), floor0Mat);
+    slab0.position.y = -0.2;
+    slab0.receiveShadow = true;
+    g0.add(slab0);
 
     // Back Wall
-    const backGeo = new THREE.BoxGeometry(width, height, thick);
-    const backMesh = new THREE.Mesh(backGeo, wallMat);
-    backMesh.position.set(0, height / 2, -halfD);
-    backMesh.receiveShadow = true;
-    backMesh.castShadow = true;
-    group.add(backMesh);
+    const backWall0 = new THREE.Mesh(new THREE.BoxGeometry(width, 4.0, 0.4), wallMat);
+    backWall0.position.set(0, 2.0, -depth / 2);
+    backWall0.receiveShadow = true;
+    g0.add(backWall0);
 
-    // Left Wall
-    const leftGeo = new THREE.BoxGeometry(thick, height, depth);
-    const leftMesh = new THREE.Mesh(leftGeo, wallMat);
-    leftMesh.position.set(-halfW, height / 2, 0);
-    leftMesh.receiveShadow = true;
-    leftMesh.castShadow = true;
-    group.add(leftMesh);
+    // Room Partitions
+    const wall0A = new THREE.Mesh(new THREE.BoxGeometry(0.3, 3.8, depth), wallMat);
+    wall0A.position.set(-5, 1.9, 0);
+    g0.add(wall0A);
 
-    // Right Wall
-    const rightGeo = new THREE.BoxGeometry(thick, height, depth);
-    const rightMesh = new THREE.Mesh(rightGeo, wallMat);
-    rightMesh.position.set(halfW, height / 2, 0);
-    rightMesh.receiveShadow = true;
-    rightMesh.castShadow = true;
-    group.add(rightMesh);
+    const wall0B = new THREE.Mesh(new THREE.BoxGeometry(0.3, 3.8, depth), wallMat);
+    wall0B.position.set(5, 1.9, 0);
+    g0.add(wall0B);
+
+    // Kitchen Counter & Gas Stove
+    const kitchenCounter = new THREE.Mesh(new THREE.BoxGeometry(3.5, 1.0, 1.4), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.3 }));
+    kitchenCounter.position.set(-9, 0.5, -4.5);
+    g0.add(kitchenCounter);
+
+    // Heirloom Steel Phone Lock Box
+    const steelBox = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.2, 1.2), new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.9, roughness: 0.2 }));
+    steelBox.position.set(0, 0.6, -4.5);
+    steelBox.castShadow = true;
+    g0.add(steelBox);
+
+    this.scene.add(g0);
+    this.floorGroups.push(g0);
+
+    // Floor 1: Middle Floor (Living Hall, Sisters' Bedroom, Study Room)
+    const g1 = new THREE.Group();
+    g1.position.y = floorHeights[1];
+
+    const slab1 = new THREE.Mesh(new THREE.BoxGeometry(width, 0.4, depth), floor1Mat);
+    slab1.position.y = -0.2;
+    slab1.receiveShadow = true;
+    g1.add(slab1);
+
+    const backWall1 = new THREE.Mesh(new THREE.BoxGeometry(width, 4.0, 0.4), wallMat);
+    backWall1.position.set(0, 2.0, -depth / 2);
+    backWall1.receiveShadow = true;
+    g1.add(backWall1);
+
+    const wall1A = new THREE.Mesh(new THREE.BoxGeometry(0.3, 3.8, depth), wallMat);
+    wall1A.position.set(-4.5, 1.9, 0);
+    g1.add(wall1A);
+
+    const wall1B = new THREE.Mesh(new THREE.BoxGeometry(0.3, 3.8, depth), wallMat);
+    wall1B.position.set(4.5, 1.9, 0);
+    g1.add(wall1B);
+
+    // Bedroom Beds
+    const bedGeo = new THREE.BoxGeometry(2.4, 0.6, 3.2);
+    const bedMat = new THREE.MeshStandardMaterial({ color: 0xf472b6, roughness: 0.6 });
+    const bed = new THREE.Mesh(bedGeo, bedMat);
+    bed.position.set(9, 0.3, -3.5);
+    g1.add(bed);
+
+    // Study Desk
+    const deskGeo = new THREE.BoxGeometry(2.6, 0.8, 1.2);
+    const deskMat = new THREE.MeshStandardMaterial({ color: 0x92400e, roughness: 0.5 });
+    const desk = new THREE.Mesh(deskGeo, deskMat);
+    desk.position.set(-8.5, 0.4, -4.5);
+    g1.add(desk);
+
+    // Railing
+    const rail1 = new THREE.Mesh(new THREE.BoxGeometry(width, 0.8, 0.15), railingMat);
+    rail1.position.set(0, 0.4, depth / 2);
+    g1.add(rail1);
+
+    this.scene.add(g1);
+    this.floorGroups.push(g1);
+
+    // Floor 2: Top Terrace (Clotheslines, Solar Inverter, Water Tank)
+    const g2 = new THREE.Group();
+    g2.position.y = floorHeights[2];
+
+    const slab2 = new THREE.Mesh(new THREE.BoxGeometry(width, 0.4, depth), floor2Mat);
+    slab2.position.y = -0.2;
+    slab2.receiveShadow = true;
+    g2.add(slab2);
+
+    // Solar Panels
+    const solarGeo = new THREE.BoxGeometry(4.5, 0.1, 2.5);
+    const solarMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a, metalness: 0.8, roughness: 0.2 });
+    const solar = new THREE.Mesh(solarGeo, solarMat);
+    solar.position.set(-8, 0.5, -3);
+    solar.rotation.x = 0.2;
+    g2.add(solar);
+
+    // Water Tank
+    const tankGeo = new THREE.CylinderGeometry(1.2, 1.2, 2.2, 16);
+    const tankMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4 });
+    const tank = new THREE.Mesh(tankGeo, tankMat);
+    tank.position.set(9, 1.1, -3.5);
+    g2.add(tank);
+
+    // Railing
+    const rail2 = new THREE.Mesh(new THREE.BoxGeometry(width, 0.9, 0.15), railingMat);
+    rail2.position.set(0, 0.45, depth / 2);
+    g2.add(rail2);
+
+    this.scene.add(g2);
+    this.floorGroups.push(g2);
+  }
+
+  createTaskMarkers() {
+    const floorHeights = [0, 7.5, 15];
+
+    const markersData = [
+      // Floor 0: Ground Floor Tasks
+      { id: "TASK_CHAI", text: "☕ Make Chai", x: -9, z: -3.5, floor: 0, color: "#F59E0B" },
+      { id: "TASK_ACHAR", text: "🏺 Achar Jars", x: -11, z: 2, floor: 0, color: "#EAB308" },
+      { id: "TASK_RANGOLI", text: "🧹 Clean Rangoli", x: 3, z: 1, floor: 0, color: "#EC4899" },
+      { id: "LOCKBOX", text: "📦 Phone Lock Box (Meeting)", x: 0, z: -3.5, floor: 0, color: "#06B6D4" },
+
+      // Floor 1: Middle Floor Tasks
+      { id: "TASK_MATH", text: "📚 Do Math Homework", x: -8.5, z: -3.5, floor: 1, color: "#3B82F6" },
+      { id: "TASK_BED", text: "🛏️ Fold Bedsheet", x: 9, z: -2.5, floor: 1, color: "#F43F5E" },
+      { id: "TASK_TULSI", text: "🌿 Water Tulsi", x: 10, z: 3, floor: 1, color: "#10B981" },
+      { id: "TASK_FUSE_1", text: "⚡ Fix Fuse Box", x: -11, z: -4, floor: 1, color: "#EF4444" },
+
+      // Floor 2: Top Terrace Tasks
+      { id: "TASK_CLOTHES", text: "🧺 Fold Dry Clothes", x: 0, z: 0, floor: 2, color: "#8B5CF6" },
+      { id: "TASK_SOLAR", text: "☀️ Clean Solar Panels", x: -8, z: -2, floor: 2, color: "#06B6D4" },
+      { id: "TASK_FUSE_2", text: "⚡ Terrace Switchboard", x: 8, z: -4, floor: 2, color: "#EF4444" }
+    ];
+
+    markersData.forEach((data) => {
+      const sprite = this.createFloatingMarkerSprite(data.text, data.color);
+      const baseY = floorHeights[data.floor] + 2.2;
+      sprite.position.set(data.x, baseY, data.z);
+      this.scene.add(sprite);
+
+      this.taskMarkers.push({
+        sprite,
+        baseY,
+        floor: data.floor,
+        id: data.id
+      });
+    });
+  }
+
+  createFloatingMarkerSprite(text, color) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 320;
+    canvas.height = 90;
+    const ctx = canvas.getContext('2d');
+
+    // Glowing background bubble
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+    ctx.beginPath();
+    ctx.roundRect(8, 8, 304, 56, 16);
+    ctx.fill();
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 3.5;
+    ctx.stroke();
+
+    // Text Label
+    ctx.font = 'bold 22px sans-serif';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, 160, 36);
+
+    // Pointer Pin
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(150, 64);
+    ctx.lineTo(170, 64);
+    ctx.lineTo(160, 80);
+    ctx.closePath();
+    ctx.fill();
+
+    const texture = new THREE.CanvasTexture(canvas);
+    const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
+    const sprite = new THREE.Sprite(spriteMat);
+    sprite.scale.set(3.0, 0.85, 1);
+    return sprite;
+  }
+
+  setFloorVisibility(activeFloor) {
+    this.activeFloor = activeFloor;
+
+    // Floor culling: Only show floors up to current floor + 1 for seamless visibility
+    this.floorGroups.forEach((group, floorIndex) => {
+      group.visible = (floorIndex <= activeFloor);
+    });
+
+    // Task markers visibility
+    this.taskMarkers.forEach((marker) => {
+      marker.sprite.visible = (marker.floor === activeFloor);
+    });
+  }
+
+  update(dt) {
+    this.markerTime += dt;
+
+    // Bouncing animation for floating task markers
+    this.taskMarkers.forEach((m) => {
+      if (m.sprite.visible) {
+        m.sprite.position.y = m.baseY + Math.sin(this.markerTime * 3) * 0.22;
+      }
+    });
   }
 }

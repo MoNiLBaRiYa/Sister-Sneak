@@ -252,7 +252,7 @@ export class Game {
     // Create 3D Player
     if (this.threeRenderer) {
       if (this.player3D) this.player3D.destroy();
-      this.player3D = new Player3D(pConfig, this.threeRenderer.scene);
+      this.player3D = new Player3D(pConfig, this.threeRenderer.scene, true);
     }
 
     // Create 4 AI Bots
@@ -272,7 +272,7 @@ export class Game {
         this.bots.push(bot);
 
         if (this.threeRenderer) {
-          const b3d = new Player3D(bConfig, this.threeRenderer.scene);
+          const b3d = new Player3D(bConfig, this.threeRenderer.scene, false);
           this.bots3D.set(key, b3d);
         }
       }
@@ -283,6 +283,7 @@ export class Game {
 
     this.camera.setFloor(1);
     if (this.isoCamera) this.isoCamera.setFloor(1);
+    if (this.haveli3D) this.haveli3D.setFloorVisibility(1);
     this.updateHUDHeader();
     this.showIntroCutscene();
   }
@@ -328,7 +329,7 @@ export class Game {
 
     if (this.threeRenderer) {
       if (this.player3D) this.player3D.destroy();
-      this.player3D = new Player3D(pConfig, this.threeRenderer.scene);
+      this.player3D = new Player3D(pConfig, this.threeRenderer.scene, true);
     }
 
     this.remotePlayers.clear();
@@ -415,7 +416,7 @@ export class Game {
 
     if (this.threeRenderer) {
       if (this.player3D) this.player3D.destroy();
-      this.player3D = new Player3D(pConfig, this.threeRenderer.scene);
+      this.player3D = new Player3D(pConfig, this.threeRenderer.scene, true);
     }
 
     this.remotePlayers.clear();
@@ -634,6 +635,7 @@ export class Game {
   update(dt) {
     this.camera.update(dt);
     this.houseMap.update(dt);
+    if (this.haveli3D) this.haveli3D.update(dt);
 
     if (this.state === "PLAYING") {
       // 1. Player Input & Movement

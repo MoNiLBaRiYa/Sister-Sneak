@@ -153,128 +153,214 @@
 
     <!-- UI Modal Container -->
     <div id="ui-overlay" class="modal-layer">
-      <!-- 1. Start Lobby / Character Selection Screen -->
+      <!-- 1. Start Lobby / Modern 3D Game Showcase Portal -->
       <div id="screen-lobby" class="screen-view active">
-        <div class="lobby-card">
-          <div class="title-banner">
-            <div class="title-tag">Gujarati Joint Family Comedy & Deduction</div>
-            <h1 class="game-title">Sister Sneak</h1>
-            <h2 class="game-subtitle">📱 PHONE LOCKED! 🔒</h2>
-          </div>
-
-          <!-- Mode Selector Tabs: Single Player vs Multiplayer -->
-          <div class="mode-tabs">
-            <button class="mode-tab active" id="tab-singleplayer">🎮 Single Player (with AI Bots)</button>
-            <button class="mode-tab" id="tab-multiplayer">🌐 Multiplayer (Custom Code / Link)</button>
-          </div>
-          
-          <div class="lobby-story">
-            <p><strong>The Crisis:</strong> The On-Duty Mummy locked all five sisters' phones in the heirloom steel box!
-            Nobody gets their phone back until the house is <strong>100% clean</strong>. But one sister is secretly a <strong>Prankster</strong> sabotaging chores...</p>
-          </div>
-
-          <div class="character-select-section">
-            <h3>1. Select Your Sister:</h3>
-            <div class="sister-cards-grid" id="sister-cards-grid">
-              <!-- Dynamically Populated by JS -->
+        <div class="lobby-card modern-portal-card">
+          <!-- Top Brand Header -->
+          <div class="portal-header">
+            <div class="portal-branding">
+              <span class="portal-tag">✨ GUJARATI JOINT FAMILY 3D DEDUCTION ✨</span>
+              <h1 class="game-title">SISTER SNEAK 3D</h1>
+              <h2 class="game-subtitle">📱 THE HEIRLOOM PHONE LOCKOUT 🔒</h2>
             </div>
           </div>
 
-          <!-- Inspector Mummy Selection Section -->
-          <div class="mummy-select-section">
-            <h3>2. Choose Round Inspector Mummy:</h3>
-            <div class="mummy-cards-grid" id="mummy-cards-grid">
-              <div class="mummy-card selected" data-id="RIDDHI_MUMMY">
-                <span class="m-avatar">👩‍🦱</span>
-                <span class="m-name">Riddhi & Jahanvi's Mummy</span>
-                <span class="m-trait">Strict on bedrooms & bedsheets</span>
+          <!-- Modern Navigation Tabs -->
+          <div class="portal-nav-bar">
+            <button class="portal-tab active" id="tab-portal-play">🎮 PLAY MATCH</button>
+            <button class="portal-tab" id="tab-portal-powers">⚡ SISTER POWERS</button>
+            <button class="portal-tab" id="tab-portal-mummy">👵 MUMMY AI & RADAR</button>
+            <button class="portal-tab" id="tab-portal-lore">📖 STORY & RULES</button>
+          </div>
+
+          <!-- TAB 1: PLAY MATCH (Singleplayer & Multiplayer) -->
+          <div id="portal-panel-play" class="portal-tab-content active">
+            <!-- Mode Switcher -->
+            <div class="mode-tabs">
+              <button class="mode-tab active" id="tab-singleplayer">🎮 Solo vs AI Bots</button>
+              <button class="mode-tab" id="tab-multiplayer">🌐 Online Multiplayer (Room Code)</button>
+            </div>
+
+            <!-- Step 1: Select Sister with Dual Power Badges -->
+            <div class="character-select-section">
+              <div class="section-title-row">
+                <h3>1. Select Your Sister:</h3>
+                <span class="section-hint">Click a card to equip & view powers</span>
               </div>
-              <div class="mummy-card" data-id="SHRUTI_MUMMY">
-                <span class="m-avatar">👩‍🦳</span>
-                <span class="m-name">Shruti ni Mummy</span>
-                <span class="m-trait">Perfectionist on kitchen & glassware</span>
-              </div>
-              <div class="mummy-card" data-id="JISHA_MUMMY">
-                <span class="m-avatar">👩‍🦰</span>
-                <span class="m-name">Jisha ni Mummy</span>
-                <span class="m-trait">Monitors homework sheets & books</span>
-              </div>
-              <div class="mummy-card" data-id="JYEANA_MUMMY">
-                <span class="m-avatar">👩</span>
-                <span class="m-name">Jyeana ni Mummy</span>
-                <span class="m-trait">Inspects switchboards & electricity bills</span>
-              </div>
-              <div class="mummy-card" data-id="RANDOM">
-                <span class="m-avatar">🎲</span>
-                <span class="m-name">Random Mummy</span>
-                <span class="m-trait">Random inspector chosen each round</span>
+              <div class="sister-cards-grid" id="sister-cards-grid">
+                <!-- Dynamically Populated by JS -->
               </div>
             </div>
-          </div>
 
-          <!-- Global Role Preference Selection (Applies to Singleplayer & Multiplayer) -->
-          <div class="role-preference-section">
-            <h3>3. Choose Your Role:</h3>
-            <div class="role-preference-bar">
-              <label><input type="radio" name="rolePref" value="random" checked> 🎲 Random Role</label>
-              <label class="role-innocent-label"><input type="radio" name="rolePref" value="innocent"> 😇 Force Innocent</label>
-              <label class="role-imposter-label"><input type="radio" name="rolePref" value="prankster"> 😈 Force Prankster</label>
-            </div>
-          </div>
-
-          <!-- Single Player Options -->
-          <div id="singleplayer-options-panel" class="lobby-options-panel">
-            <button id="btn-start-game" class="main-cta-btn">
-              <span>START SNEAKING & CLEANING (SOLO)</span>
-              <span class="btn-arrow">➔</span>
-            </button>
-          </div>
-
-          <!-- Multiplayer Room Creation & Joining Panel -->
-          <div id="multiplayer-options-panel" class="lobby-options-panel hidden">
-            <div class="mp-room-actions">
-              <div class="mp-box create-box">
-                <h4>🏠 Host Private Room</h4>
-                <p>Create a custom 4-5 digit room code or auto-generate:</p>
-                <div class="mp-input-row" style="margin-bottom:8px;">
-                  <input type="text" id="input-custom-host-code" placeholder="Custom Code (e.g. 1234) or Leave Empty" maxlength="8">
+            <!-- Step 2: Inspector Mummy Selector -->
+            <div class="mummy-select-section">
+              <div class="section-title-row">
+                <h3>2. Choose Round Inspector Mummy:</h3>
+                <span class="section-hint">Each Mummy has distinct patrol habits & strictness</span>
+              </div>
+              <div class="mummy-cards-grid" id="mummy-cards-grid">
+                <div class="mummy-card selected" data-id="RIDDHI_MUMMY">
+                  <span class="m-avatar">👩‍🦱</span>
+                  <span class="m-name">Riddhi & Jahanvi's Mummy</span>
+                  <span class="m-trait">Strict on bedrooms & bedsheets</span>
                 </div>
-                <button id="btn-create-room" class="mp-action-btn">Generate Room Code & Host</button>
-              </div>
-              <div class="mp-box join-box">
-                <h4>🔑 Join Sister's Room</h4>
-                <p>Enter 4-5 digit room code shared by host:</p>
-                <div class="mp-input-row">
-                  <input type="text" id="input-room-code" placeholder="e.g. 1234" maxlength="8">
-                  <button id="btn-join-room" class="mp-action-btn secondary">Join Room</button>
+                <div class="mummy-card" data-id="SHRUTI_MUMMY">
+                  <span class="m-avatar">👩‍🦳</span>
+                  <span class="m-name">Shruti ni Mummy</span>
+                  <span class="m-trait">Perfectionist on kitchen & tea</span>
+                </div>
+                <div class="mummy-card" data-id="JISHA_MUMMY">
+                  <span class="m-avatar">👩‍🦰</span>
+                  <span class="m-name">Jisha ni Mummy</span>
+                  <span class="m-trait">Monitors homework sheets & books</span>
+                </div>
+                <div class="mummy-card" data-id="JYEANA_MUMMY">
+                  <span class="m-avatar">👩</span>
+                  <span class="m-name">Jyeana ni Mummy</span>
+                  <span class="m-trait">Inspects switchboards & fuses</span>
+                </div>
+                <div class="mummy-card" data-id="RANDOM">
+                  <span class="m-avatar">🎲</span>
+                  <span class="m-name">Random Mummy</span>
+                  <span class="m-trait">Random inspector chosen each round</span>
                 </div>
               </div>
             </div>
+
+            <!-- Step 3: Global Role Preference -->
+            <div class="role-preference-section">
+              <div class="section-title-row">
+                <h3>3. Choose Role Preference:</h3>
+              </div>
+              <div class="role-preference-bar">
+                <label><input type="radio" name="rolePref" value="random" checked> 🎲 Random Role</label>
+                <label class="role-innocent-label"><input type="radio" name="rolePref" value="innocent"> 😇 Force Innocent</label>
+                <label class="role-imposter-label"><input type="radio" name="rolePref" value="prankster"> 😈 Force Prankster</label>
+              </div>
+            </div>
+
+            <!-- Solo Play Action -->
+            <div id="singleplayer-options-panel" class="lobby-options-panel">
+              <button id="btn-start-game" class="main-cta-btn">
+                <span>START SNEAKING & CLEANING (SOLO)</span>
+                <span class="btn-arrow">➔</span>
+              </button>
+            </div>
+
+            <!-- Multiplayer Room Creation & Joining -->
+            <div id="multiplayer-options-panel" class="lobby-options-panel hidden">
+              <div class="mp-room-actions">
+                <div class="mp-box create-box">
+                  <h4>🏠 Host Private Room</h4>
+                  <p>Create a custom 4-5 digit room code or auto-generate:</p>
+                  <div class="mp-input-row" style="margin-bottom:8px;">
+                    <input type="text" id="input-custom-host-code" placeholder="Custom Code (e.g. 1234) or Leave Empty" maxlength="8">
+                  </div>
+                  <button id="btn-create-room" class="mp-action-btn">Generate Room Code & Host</button>
+                </div>
+                <div class="mp-box join-box">
+                  <h4>🔑 Join Sister's Room</h4>
+                  <p>Enter 4-5 digit room code shared by host:</p>
+                  <div class="mp-input-row">
+                    <input type="text" id="input-room-code" placeholder="e.g. 1234" maxlength="8">
+                    <button id="btn-join-room" class="mp-action-btn secondary">Join Room</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Multiplayer Waiting Room -->
+            <div id="multiplayer-waiting-room" class="lobby-options-panel hidden">
+              <div class="room-code-banner">
+                <span class="code-label">ROOM CODE:</span>
+                <span class="code-val" id="mp-room-code-display">1234</span>
+                <div class="code-btn-group">
+                  <button id="btn-copy-code" class="copy-code-btn">📋 Copy Code</button>
+                  <button id="btn-copy-invite-link" class="copy-code-btn link-btn">🔗 Share Invite Link</button>
+                </div>
+              </div>
+              <div class="mp-waiting-body">
+                <div class="mp-waiting-header">
+                  <h4>Joined Sisters in House:</h4>
+                  <span id="mp-player-count">1 / 5 Sisters</span>
+                </div>
+                <div class="mp-players-list" id="mp-lobby-players-list">
+                  <!-- Populated dynamically with connected peers -->
+                </div>
+                <div class="mp-bot-notice">💡 Unfilled sister slots will automatically be controlled by AI bots!</div>
+              </div>
+              <button id="btn-mp-start-game" class="main-cta-btn">
+                <span>START MULTIPLAYER MATCH 🚀</span>
+              </button>
+            </div>
           </div>
 
-          <!-- Multiplayer Waiting Room (Once Room Created or Joined) -->
-          <div id="multiplayer-waiting-room" class="lobby-options-panel hidden">
-            <div class="room-code-banner">
-              <span class="code-label">ROOM CODE:</span>
-              <span class="code-val" id="mp-room-code-display">1234</span>
-              <div class="code-btn-group">
-                <button id="btn-copy-code" class="copy-code-btn">📋 Copy Code</button>
-                <button id="btn-copy-invite-link" class="copy-code-btn link-btn">🔗 Share Invite Link</button>
+          <!-- TAB 2: SISTER POWERS SHOWCASE -->
+          <div id="portal-panel-powers" class="portal-tab-content hidden">
+            <div class="powers-showcase-grid">
+              <div class="power-detail-card">
+                <div class="pd-header"><span class="pd-avatar">🌸</span> <h4>Riddhi</h4> <span class="pd-badge">Timid & Cozy</span></div>
+                <div class="pd-innocent"><span class="badge-tag inno">😇 INNOCENT: Blanket Sanctuary</span><p>Wraps in 3D quilt blanket: 100% invisible to Mummy for 10s + 0% suspicion + speed boost.</p></div>
+                <div class="pd-prankster"><span class="badge-tag prank">😈 PRANKSTER: Sleep Cloud Trap</span><p>Drops lavender sleep fog on floor: slows all nearby innocents by 60% for 8s.</p></div>
+              </div>
+              <div class="power-detail-card">
+                <div class="pd-header"><span class="pd-avatar">🎨</span> <h4>Shruti</h4> <span class="pd-badge">Creative & Crafty</span></div>
+                <div class="pd-innocent"><span class="badge-tag inno">😇 INNOCENT: Artistic Masterstroke</span><p>Instantly auto-solves active chore or gives +20% Cleanliness burst + 6s speed flow.</p></div>
+                <div class="pd-prankster"><span class="badge-tag prank">😈 PRANKSTER: Rangoli Paint Splatter</span><p>Splashes bright rangoli paint over innocents' screens, blinding them for 5s.</p></div>
+              </div>
+              <div class="power-detail-card">
+                <div class="pd-header"><span class="pd-avatar">🎒</span> <h4>Jahanvi</h4> <span class="pd-badge">Explorer & Speedster</span></div>
+                <div class="pd-innocent"><span class="badge-tag inno">😇 INNOCENT: Vent Shortcut & Turbo Dash</span><p>Instant stair teleport to any floor + 7s 2.2x Supersonic Dash trails.</p></div>
+                <div class="pd-prankster"><span class="badge-tag prank">😈 PRANKSTER: Sticky Bubblegum Snare</span><p>Places 3D bubblegum trap on floor: completely immobilizes stepping innocents for 5s.</p></div>
+              </div>
+              <div class="power-detail-card">
+                <div class="pd-header"><span class="pd-avatar">📚</span> <h4>Jisha</h4> <span class="pd-badge">Mummy's Ladli (Topper)</span></div>
+                <div class="pd-innocent"><span class="badge-tag inno">😇 INNOCENT: Mummy's Ladli Shield</span><p>Golden halo: 12s total immunity to Mummy's inspection + math chores auto-solve.</p></div>
+                <div class="pd-prankster"><span class="badge-tag prank">😈 PRANKSTER: False Alarm & Blame</span><p>Screams fake emergency, redirecting Mummy to chase nearest innocent sister.</p></div>
+              </div>
+              <div class="power-detail-card">
+                <div class="pd-header"><span class="pd-avatar">⚡</span> <h4>Jyeana</h4> <span class="pd-badge">Techie & Inverter Hacker</span></div>
+                <div class="pd-innocent"><span class="badge-tag inno">😇 INNOCENT: Smart Inverter Hack</span><p>Instantly fixes switchboard blackouts across all 3 floors + Night Vision + 7s sprint.</p></div>
+                <div class="pd-prankster"><span class="badge-tag prank">😈 PRANKSTER: EMP Jammer & Glitch</span><p>Electromagnetic pulse: inverts innocent sisters' movement controls (Left ⇋ Right) for 6s.</p></div>
               </div>
             </div>
-            <div class="mp-waiting-body">
-              <div class="mp-waiting-header">
-                <h4>Joined Sisters in House:</h4>
-                <span id="mp-player-count">1 / 5 Sisters</span>
+          </div>
+
+          <!-- TAB 3: MUMMY RADAR & FLYING CHAPPAL GUIDE -->
+          <div id="portal-panel-mummy" class="portal-tab-content hidden">
+            <div class="mummy-guide-container">
+              <div class="guide-box">
+                <h4>👀 1. Visible 3D FOV Vision Cone</h4>
+                <p>Mummy projects a visible 3D vision spotlight from her eyes. When it's <strong style="color:#FEF08A;">Yellow</strong>, she is in normal patrol. If she catches you sprinting or sabotaging, the cone flashes <strong style="color:#EF4444;">Alarmed Red</strong>!</p>
               </div>
-              <div class="mp-players-list" id="mp-lobby-players-list">
-                <!-- Populated dynamically with connected peers -->
+              <div class="guide-box">
+                <h4>🔥 2. Dynamic Household Anger Meter</h4>
+                <p>Household tension rises when chores are delayed or blackouts occur. When Anger hits 100%, Mummy enters **ENRAGED** state!</p>
               </div>
-              <div class="mp-bot-notice">💡 Unfilled sister slots will automatically be controlled by AI bots!</div>
+              <div class="guide-box">
+                <h4>🩴 3. The Flying Chappal Danger</h4>
+                <p>When Enraged, Mummy throws her traditional rubber slipper across the room in a high-speed physics arc! Getting hit inflicts a **4-second stun** and spikes suspicion to 100%!</p>
+              </div>
             </div>
-            <button id="btn-mp-start-game" class="main-cta-btn">
-              <span>START MULTIPLAYER MATCH 🚀</span>
-            </button>
+          </div>
+
+          <!-- TAB 4: LORE & HOW TO PLAY -->
+          <div id="portal-panel-lore" class="portal-tab-content hidden">
+            <div class="lore-guide-container">
+              <div class="lore-card">
+                <h4>📱 The Heirloom Phone Lockout</h4>
+                <p>It's Sunday afternoon in the joint-family Haveli mansion. The on-duty Mummy has locked all five sisters' smartphones in the heirloom steel box until the entire house reaches <strong>100% Cleanliness</strong>!</p>
+                <p>Four sisters are working hard doing chores. But one sister is secretly a <strong>Prankster</strong> sabotaging switchboards and locking door kundis. Unmask the Prankster in Emergency Meetings to win!</p>
+              </div>
+              <div class="lore-card">
+                <h4>🎮 Controls:</h4>
+                <ul>
+                  <li><strong>WASD / Arrow Keys / Virtual Joystick</strong>: Move your sister.</li>
+                  <li><strong>E / Action Button</strong>: Clean chore / fix switchboard / call Emergency Meeting.</li>
+                  <li><strong>Q / Space / Power Button</strong>: Trigger active Character Power.</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </div>
