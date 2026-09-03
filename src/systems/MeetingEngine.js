@@ -56,6 +56,30 @@ export class MeetingEngine {
         if (msg) this.sendChatMessage(msg);
       });
     });
+
+    // Soundboard Quick Voice Reaction Buttons
+    const sbMummy = document.getElementById("sb-mummy-aavi");
+    const sbPakdi = document.getElementById("sb-pakdi-gayi");
+    const sbSus = document.getElementById("sb-sus");
+
+    if (sbMummy) {
+      sbMummy.addEventListener("click", () => {
+        if (this.game.soundboard) this.game.soundboard.playVoiceLine("MUMMY_AAVI");
+        this.sendChatMessage("🚨 Mummy Aavi! Look busy!");
+      });
+    }
+    if (sbPakdi) {
+      sbPakdi.addEventListener("click", () => {
+        if (this.game.soundboard) this.game.soundboard.playVoiceLine("PAKDI_GAYI");
+        this.sendChatMessage("😱 Pakdi Gayi! You were caught red-handed!");
+      });
+    }
+    if (sbSus) {
+      sbSus.addEventListener("click", () => {
+        if (this.game.soundboard) this.game.soundboard.playVoiceLine("SUSPICIOUS");
+        this.sendChatMessage("🤫 Something is super sus!");
+      });
+    }
   }
 
   submitChat() {

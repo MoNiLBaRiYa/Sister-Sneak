@@ -258,15 +258,19 @@ if (WebSocketServer) {
 
           case 'CHAT_MESSAGE': {
             if (currentRoomCode) {
-              broadcastToRoom(currentRoomCode, {
-                type: 'CHAT_MESSAGE',
-                senderId: myPlayerId,
-                sisterId: data.sisterId,
-                senderName: data.senderName,
-                avatar: data.avatar,
-                color: data.color,
-                text: data.text
-              });
+              const safeText = String(data.text || '').replace(/[<>]/g, '').trim().substring(0, 150);
+              const safeName = String(data.senderName || '').replace(/[<>]/g, '').trim().substring(0, 30);
+              if (safeText.length > 0) {
+                broadcastToRoom(currentRoomCode, {
+                  type: 'CHAT_MESSAGE',
+                  senderId: myPlayerId,
+                  sisterId: data.sisterId,
+                  senderName: safeName,
+                  avatar: data.avatar,
+                  color: data.color,
+                  text: safeText
+                });
+              }
             }
             break;
           }

@@ -1,8 +1,7 @@
 /**
- * Sister Sneak: Phone Locked - Master Game Engine
- * Manages game loop, entity updates, render pipelines, custom cutscenes,
- * active character power system, real-time multiplayer network sync,
- * pause/exit management, and mobile responsiveness.
+ * Sister Sneak 3D: Phone Locked - Master Game Engine
+ * 3D Isometric WebGL Engine (Three.js), Asymmetric Powers,
+ * Mummy FOV Vision Cone & Flying Chappal Danger System.
  */
 
 import { CANVAS_WIDTH, CANVAS_HEIGHT, FLOOR_Y } from '../config/constants.js';
@@ -21,16 +20,26 @@ import { MeetingEngine } from '../systems/MeetingEngine.js';
 import { DialogueEngine } from '../systems/DialogueEngine.js';
 import { MultiplayerEngine } from '../systems/MultiplayerEngine.js';
 
+// 3D Engine Systems
+import { ThreeRenderer } from '../engine3d/ThreeRenderer.js';
+import { IsometricCamera } from '../engine3d/IsometricCamera.js';
+import { Lighting3D } from '../engine3d/Lighting3D.js';
+import { HaveliWorld3D } from '../engine3d/HaveliWorld3D.js';
+import { Player3D } from '../entities3d/Player3D.js';
+import { Mummy3D } from '../entities3d/Mummy3D.js';
+import { FlyingChappal3D } from '../entities3d/FlyingChappal3D.js';
+import { ParticleEffects3D } from '../fx3d/ParticleEffects3D.js';
+import { VoiceSoundboard } from '../audio/VoiceSoundboard.js';
+
 export class Game {
   constructor(canvas) {
     this.canvas = canvas;
-    this.ctx = canvas.getContext('2d');
-
     this.state = "LOBBY"; // "LOBBY", "CUTSCENE", "PLAYING", "MEETING", "GAMEOVER"
     this.lastTime = 0;
 
     // Subsystems
     this.audio = new AudioManager();
+    this.soundboard = new VoiceSoundboard();
     this.camera = new Camera();
     this.input = new InputManager(canvas);
     this.taskManager = new TaskManager(this);
@@ -40,12 +49,29 @@ export class Game {
     this.meetingEngine = new MeetingEngine(this);
     this.multiplayer = new MultiplayerEngine(this);
 
+    // Initialize Three.js 3D Engine
+    try {
+      this.threeRenderer = new ThreeRenderer(canvas);
+      this.isoCamera = new IsometricCamera();
+      this.threeRenderer.setCamera(this.isoCamera.getThreeCamera());
+      this.lighting3D = new Lighting3D(this.threeRenderer.scene);
+      this.haveli3D = new HaveliWorld3D(this.threeRenderer.scene, this.lighting3D);
+      this.particles3D = new ParticleEffects3D(this.threeRenderer.scene);
+      this.chappal3D = new FlyingChappal3D(this.threeRenderer.scene);
+    } catch (e) {
+      console.warn("3D WebGL Initialization warning:", e);
+    }
+
     // Entities
     this.player = null;
+    this.player3D = null;
     this.bots = [];
+    this.bots3D = new Map();
     this.remotePlayers = new Map();
+    this.remotePlayers3D = new Map();
     this.mummy = null;
-    this.imposterSisterId = null;
+    this.mummy3D = null;
+    this.pranksterSisterId = null;
     this.selectedSisterId = "RIDDHI";
     this.activeMummyId = "RIDDHI_MUMMY";
 
@@ -53,30 +79,13 @@ export class Game {
     this.posSyncInterval = 0;
 
     this.bindHUDButtons();
-    this.setupMobileViewport();
   }
 
-  setupMobileViewport() {
-    const resize = () => {
-      const container = document.getElementById('game-container');
-      if (!container) return;
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      const scale = Math.min(w / CANVAS_WIDTH, h / CANVAS_HEIGHT);
-      
-      // Auto-scale canvas on mobile screens while maintaining aspect ratio
-      if (w < 1000) {
-        this.canvas.style.width = `${Math.floor(CANVAS_WIDTH * scale)}px`;
-        this.canvas.style.height = `${Math.floor(CANVAS_HEIGHT * scale)}px`;
-      } else {
-        this.canvas.style.width = '100%';
-        this.canvas.style.height = '100%';
-      }
+  coord2Dto3D(x2d, y2d, floor) {
+    return {
+      x: (x2d - 600) / 38,
+      z: (y2d - (FLOOR_Y[floor] + 120)) / 38
     };
-
-    window.addEventListener('resize', resize);
-    window.addEventListener('orientationchange', () => setTimeout(resize, 200));
-    resize();
   }
 
   bindHUDButtons() {
@@ -88,6 +97,8 @@ export class Game {
           if (this.player && this.state === "PLAYING") {
             this.player.setFloor(floorNum);
             this.camera.setFloor(floorNum);
+            if (this.isoCamera) this.isoCamera.setFloor(floorNum);
+            if (this.player3D) this.player3D.setFloor(floorNum);
             this.updateFloorButtonsUI(floorNum);
             this.audio.playStairTransition();
           }
@@ -185,26 +196,6 @@ export class Game {
     document.getElementById("screen-lobby")?.classList.remove("hidden");
   }
 
-  handleRemotePlayerLeft(data) {
-    // Show toast banner
-    this.showTopToast(`👧 ${data.playerName} (${data.sisterId}) left the match! AI bot took over.`);
-
-    // Replace remote player with AI bot
-    if (this.remotePlayers.has(data.sisterId)) {
-      const exiting = this.remotePlayers.get(data.sisterId);
-      this.remotePlayers.delete(data.sisterId);
-
-      const bConfig = SISTERS[data.sisterId];
-      const replacementBot = new Bot({
-        ...bConfig,
-        floor: exiting.floor,
-        x: exiting.x
-      });
-      replacementBot.role = exiting.role;
-      this.bots.push(replacementBot);
-    }
-  }
-
   showTopToast(msg) {
     let toast = document.getElementById("game-toast-banner");
     if (!toast) {
@@ -243,6 +234,12 @@ export class Game {
     }
     this.mummy = new Mummy(MUMMIES[this.activeMummyId]);
 
+    // Create 3D Mummy
+    if (this.threeRenderer) {
+      if (this.mummy3D) this.mummy3D.destroy();
+      this.mummy3D = new Mummy3D(MUMMIES[this.activeMummyId], this.threeRenderer.scene);
+    }
+
     // Create Player
     const pConfig = SISTERS[playerSisterId];
     this.player = new Player({
@@ -252,8 +249,17 @@ export class Game {
     });
     this.player.role = (playerSisterId === this.pranksterSisterId) ? "prankster" : "innocent";
 
+    // Create 3D Player
+    if (this.threeRenderer) {
+      if (this.player3D) this.player3D.destroy();
+      this.player3D = new Player3D(pConfig, this.threeRenderer.scene);
+    }
+
     // Create 4 AI Bots
     this.bots = [];
+    this.bots3D.forEach(b3d => b3d.destroy());
+    this.bots3D.clear();
+
     sisterKeys.forEach((key) => {
       if (key !== playerSisterId) {
         const bConfig = SISTERS[key];
@@ -264,22 +270,24 @@ export class Game {
         });
         bot.role = (key === this.pranksterSisterId) ? "prankster" : "innocent";
         this.bots.push(bot);
+
+        if (this.threeRenderer) {
+          const b3d = new Player3D(bConfig, this.threeRenderer.scene);
+          this.bots3D.set(key, b3d);
+        }
       }
     });
 
-    // Reset Cleanliness State & assign tasks
     this.taskManager.reset();
     this.taskManager.assignTasksForSister(playerSisterId, false);
 
     this.camera.setFloor(1);
+    if (this.isoCamera) this.isoCamera.setFloor(1);
     this.updateHUDHeader();
-
-    // Show cutscene first
     this.showIntroCutscene();
   }
 
   startMultiplayerRoundAsHost(hostSisterId, chosenMummyId = "RIDDHI_MUMMY", rolePreference = "random") {
-    // Find my chosen sister from lobbyPlayers array
     const hostLobbyEntry = this.multiplayer.lobbyPlayers.find(p => p.id === this.multiplayer.myPlayerId || p.isHost);
     const mySisterId = hostLobbyEntry ? hostLobbyEntry.sisterId : hostSisterId;
     this.selectedSisterId = mySisterId;
@@ -287,8 +295,7 @@ export class Game {
     const sisterKeys = Object.keys(SISTERS);
     const lobbyPlayers = this.multiplayer.lobbyPlayers;
     const humanSisterIds = lobbyPlayers.map(p => p.sisterId);
-    
-    // Honor Role Preference
+
     if (rolePreference === "prankster") {
       this.pranksterSisterId = mySisterId;
     } else if (rolePreference === "innocent") {
@@ -306,7 +313,11 @@ export class Game {
     }
     this.mummy = new Mummy(MUMMIES[this.activeMummyId]);
 
-    // Create Host Player
+    if (this.threeRenderer) {
+      if (this.mummy3D) this.mummy3D.destroy();
+      this.mummy3D = new Mummy3D(MUMMIES[this.activeMummyId], this.threeRenderer.scene);
+    }
+
     const pConfig = SISTERS[mySisterId] || SISTERS.RIDDHI;
     this.player = new Player({
       ...pConfig,
@@ -315,15 +326,23 @@ export class Game {
     });
     this.player.role = (mySisterId === this.pranksterSisterId) ? "prankster" : "innocent";
 
-    // Create Remote Players & Bots
+    if (this.threeRenderer) {
+      if (this.player3D) this.player3D.destroy();
+      this.player3D = new Player3D(pConfig, this.threeRenderer.scene);
+    }
+
     this.remotePlayers.clear();
+    this.remotePlayers3D.forEach(rp3d => rp3d.destroy());
+    this.remotePlayers3D.clear();
     this.bots = [];
+    this.bots3D.forEach(b3d => b3d.destroy());
+    this.bots3D.clear();
 
     sisterKeys.forEach((key) => {
       if (key !== mySisterId) {
         const isHuman = humanSisterIds.includes(key);
+        const rConfig = SISTERS[key];
         if (isHuman) {
-          const rConfig = SISTERS[key];
           const remotePlayer = new Player({
             ...rConfig,
             floor: 1,
@@ -331,20 +350,28 @@ export class Game {
           });
           remotePlayer.role = (key === this.pranksterSisterId) ? "prankster" : "innocent";
           this.remotePlayers.set(key, remotePlayer);
+
+          if (this.threeRenderer) {
+            const rp3d = new Player3D(rConfig, this.threeRenderer.scene);
+            this.remotePlayers3D.set(key, rp3d);
+          }
         } else {
-          const bConfig = SISTERS[key];
           const bot = new Bot({
-            ...bConfig,
+            ...rConfig,
             floor: Math.floor(Math.random() * 3),
             x: 200 + Math.random() * 800
           });
           bot.role = (key === this.pranksterSisterId) ? "prankster" : "innocent";
           this.bots.push(bot);
+
+          if (this.threeRenderer) {
+            const b3d = new Player3D(rConfig, this.threeRenderer.scene);
+            this.bots3D.set(key, b3d);
+          }
         }
       }
     });
 
-    // Broadcast START to all peers
     this.multiplayer.broadcast({
       type: 'START_GAME_SYNC',
       pranksterSisterId: this.pranksterSisterId,
@@ -356,6 +383,7 @@ export class Game {
     this.taskManager.assignTasksForSister(mySisterId, true);
 
     this.camera.setFloor(1);
+    if (this.isoCamera) this.isoCamera.setFloor(1);
     this.updateHUDHeader();
     this.showIntroCutscene();
   }
@@ -365,7 +393,11 @@ export class Game {
     this.activeMummyId = data.mummyId || "RIDDHI_MUMMY";
     this.mummy = new Mummy(MUMMIES[this.activeMummyId]);
 
-    // Find my chosen sister from lobbyPlayers array using my playerId
+    if (this.threeRenderer) {
+      if (this.mummy3D) this.mummy3D.destroy();
+      this.mummy3D = new Mummy3D(MUMMIES[this.activeMummyId], this.threeRenderer.scene);
+    }
+
     const myLobbyEntry = data.lobbyPlayers.find(p => p.id === this.multiplayer.myPlayerId);
     const mySisterId = myLobbyEntry ? myLobbyEntry.sisterId : this.selectedSisterId;
     this.selectedSisterId = mySisterId;
@@ -373,7 +405,6 @@ export class Game {
     const sisterKeys = Object.keys(SISTERS);
     const humanSisterIds = data.lobbyPlayers.map(p => p.sisterId);
 
-    // Create Client Player
     const pConfig = SISTERS[mySisterId] || SISTERS.RIDDHI;
     this.player = new Player({
       ...pConfig,
@@ -382,13 +413,22 @@ export class Game {
     });
     this.player.role = (mySisterId === this.pranksterSisterId) ? "prankster" : "innocent";
 
+    if (this.threeRenderer) {
+      if (this.player3D) this.player3D.destroy();
+      this.player3D = new Player3D(pConfig, this.threeRenderer.scene);
+    }
+
     this.remotePlayers.clear();
+    this.remotePlayers3D.forEach(rp3d => rp3d.destroy());
+    this.remotePlayers3D.clear();
     this.bots = [];
+    this.bots3D.forEach(b3d => b3d.destroy());
+    this.bots3D.clear();
 
     sisterKeys.forEach((key) => {
       if (key !== mySisterId) {
+        const rConfig = SISTERS[key];
         if (humanSisterIds.includes(key)) {
-          const rConfig = SISTERS[key];
           const remotePlayer = new Player({
             ...rConfig,
             floor: 1,
@@ -396,15 +436,24 @@ export class Game {
           });
           remotePlayer.role = (key === this.pranksterSisterId) ? "prankster" : "innocent";
           this.remotePlayers.set(key, remotePlayer);
+
+          if (this.threeRenderer) {
+            const rp3d = new Player3D(rConfig, this.threeRenderer.scene);
+            this.remotePlayers3D.set(key, rp3d);
+          }
         } else {
-          const bConfig = SISTERS[key];
           const bot = new Bot({
-            ...bConfig,
+            ...rConfig,
             floor: 1,
             x: 300 + Math.random() * 600
           });
           bot.role = (key === this.pranksterSisterId) ? "prankster" : "innocent";
           this.bots.push(bot);
+
+          if (this.threeRenderer) {
+            const b3d = new Player3D(rConfig, this.threeRenderer.scene);
+            this.bots3D.set(key, b3d);
+          }
         }
       }
     });
@@ -414,24 +463,12 @@ export class Game {
 
     document.getElementById('screen-lobby')?.classList.add('hidden');
     this.camera.setFloor(1);
+    if (this.isoCamera) this.isoCamera.setFloor(1);
     this.updateHUDHeader();
     this.showIntroCutscene();
   }
 
-  handleRemotePowerActivated(data) {
-    const remote = this.remotePlayers.get(data.sisterId);
-    if (remote) {
-      remote.auraColor = data.auraColor;
-      remote.auraTimer = 8.0;
-      if (data.isStealth) {
-        remote.stealthTimer = 10.0;
-      }
-    }
-    this.showTopToast(`⚡ ${data.sisterId} activated ${data.powerName}!`);
-  }
-
   applyPranksterDebuffToInnocents(debuffType, floor, extraData = null) {
-    // 1. Apply debuff to all local AI innocent bots on the affected floor
     this.bots.forEach((b) => {
       if (b.role === "innocent" && b.floor === floor) {
         if (debuffType === "SLEEP_CLOUD") {
@@ -451,7 +488,16 @@ export class Game {
       }
     });
 
-    // 2. Broadcast debuff to all remote innocent human players
+    // 3D Visual Particle FX Triggers
+    if (this.particles3D) {
+      if (debuffType === "SLEEP_CLOUD") {
+        this.particles3D.spawnSleepCloud(0, this.isoCamera.floorHeights[floor] || 0, 0, 8.0);
+      } else if (debuffType === "STICKY_GUM" && extraData) {
+        const c3d = this.coord2Dto3D(extraData.x, extraData.y, floor);
+        this.particles3D.spawnStickyGumTrap(c3d.x, this.isoCamera.floorHeights[floor] || 0, c3d.z, 12.0);
+      }
+    }
+
     if (this.multiplayer && this.multiplayer.isMultiplayer) {
       this.multiplayer.send({
         type: 'PRANKSTER_DEBUFF',
@@ -484,23 +530,6 @@ export class Game {
         this.player.glitchControlTimer = 6.0;
         this.player.taskFreezeTimer = 6.0;
         this.showTopToast("⚡ EMP Jammer! Your movement controls are GLITCHED & INVERTED for 6s!");
-      }
-    }
-  }
-
-  updateRemotePlayerPosition(data) {
-    const remote = this.remotePlayers.get(data.sisterId);
-    if (remote) {
-      remote.floor = data.floor;
-      remote.x = data.x;
-      remote.y = data.y;
-      remote.vx = data.vx;
-      remote.vy = data.vy;
-      remote.facing = data.facing;
-      remote.isMoving = data.isMoving;
-      if (data.auraColor) remote.auraColor = data.auraColor;
-      if (data.isStealth !== undefined) {
-        remote.stealthTimer = data.isStealth ? 10.0 : 0;
       }
     }
   }
@@ -538,7 +567,6 @@ export class Game {
   startPlaying() {
     this.state = "PLAYING";
 
-    // Show HUD & Controls
     document.getElementById("game-hud")?.classList.remove("hidden");
     document.getElementById("floor-switcher")?.classList.remove("hidden");
     document.getElementById("touch-controls")?.classList.remove("hidden");
@@ -588,23 +616,6 @@ export class Game {
     }
   }
 
-  teleportAllToCentralHall() {
-    if (this.player) {
-      this.player.setFloor(1, 600);
-      this.camera.setFloor(1);
-    }
-    if (this.mummy) {
-      this.mummy.floor = 1;
-      this.mummy.x = 640;
-    }
-    this.remotePlayers.forEach((rp, idx) => {
-      rp.setFloor(1, 520 + idx * 70);
-    });
-    this.bots.forEach((b, idx) => {
-      b.setFloor(1, 450 + idx * 80);
-    });
-  }
-
   start() {
     this.lastTime = performance.now();
     requestAnimationFrame(this.loop.bind(this));
@@ -632,9 +643,27 @@ export class Game {
           this.player.moveToPoint(click.x, click.y);
         }
         this.player.handleInput(this.input, dt, this);
-
-        // Update Power Button cooldown UI
         this.updatePowerUI();
+
+        // 3D Player Sync
+        if (this.player3D) {
+          const p3d = this.coord2Dto3D(this.player.x, this.player.y, this.player.floor);
+          this.player3D.updatePosition(p3d.x, p3d.z, this.player.floor);
+          this.player3D.update(dt, this.player.vx, this.player.vy, this.player.auraColor, this.player.stealthTimer > 0);
+
+          // Update Flashlight spotlight cone during Blackouts
+          if (this.lighting3D) {
+            const isBlackoutActive = this.houseMap.isFloorBlackedOut(this.player.floor);
+            this.lighting3D.setBlackout(isBlackoutActive);
+            this.lighting3D.updateFlashlight(p3d.x, this.isoCamera.floorHeights[this.player.floor], p3d.z, this.player3D.facingAngle);
+          }
+
+          // Smooth Isometric Camera tracking
+          if (this.isoCamera) {
+            this.isoCamera.setFloor(this.player.floor);
+            this.isoCamera.update(dt, { x: p3d.x, y: this.isoCamera.floorHeights[this.player.floor], z: p3d.z });
+          }
+        }
 
         // Network Position Broadcast
         this.posSyncInterval += dt;
@@ -643,48 +672,71 @@ export class Game {
           this.multiplayer.syncMyPosition(this.player);
         }
 
-        // Detect current room
+        // Detect current room & hotspots
         const room = this.houseMap.getRoomAt(this.player.x, this.player.y, this.player.floor);
         this.player.currentRoom = room;
         const roomLabel = document.getElementById("hud-room-name");
-        if (roomLabel && room) {
-          roomLabel.innerText = room.name;
-        }
+        if (roomLabel && room) roomLabel.innerText = room.name;
 
-        // Detect nearby hotspots
         this.activeNearbyHotspot = this.houseMap.getHotspotNear(this.player.x, this.player.y, this.player.floor);
         this.updateActionPrompt();
 
-        // Handle interaction press (E / Enter / Action Button)
         if (this.input.consumeInteract() && this.activeNearbyHotspot) {
           this.handleHotspotInteraction(this.activeNearbyHotspot);
         }
-
-        // Handle power ability press (Q / Space / Power Button)
         if (this.input.consumeAction()) {
           this.player.useAbility(this);
         }
       }
 
-      // 2. Remote Connected Players
-      this.remotePlayers.forEach((rp) => rp.update(dt));
+      // 2. AI Bots
+      this.bots.forEach((bot) => {
+        bot.updateAI(dt, this);
+        if (this.bots3D.has(bot.id)) {
+          const b3d = this.bots3D.get(bot.id);
+          const pos = this.coord2Dto3D(bot.x, bot.y, bot.floor);
+          b3d.updatePosition(pos.x, pos.z, bot.floor);
+          b3d.update(dt, bot.vx, bot.vy, bot.auraColor, bot.stealthTimer > 0);
+        }
+      });
 
-      // 3. AI Bots
-      this.bots.forEach((bot) => bot.updateAI(dt, this));
-
-      // 4. Mummy Patrol
+      // 3. Mummy Patrol & 3D FOV Cone
       if (this.mummy) {
         const allSisters = [this.player, ...Array.from(this.remotePlayers.values()), ...this.bots];
         this.mummy.update(dt, allSisters);
         this.updateMummyRadar();
+
+        if (this.mummy3D) {
+          const mpos = this.coord2Dto3D(this.mummy.x, this.mummy.y, this.mummy.floor);
+          this.mummy3D.updatePosition(mpos.x, mpos.z, this.mummy.floor);
+          const isAlarmed = this.mummy.floor === this.player.floor && Math.abs(this.mummy.x - this.player.x) < 220;
+          this.mummy3D.update(dt, this.mummy.isMoving, this.mummy.facing, isAlarmed);
+
+          // Flying Chappal Enrage Trigger
+          if (this.mummy3D.isEnraged && !this.chappal3D.isActive && this.player.floor === this.mummy.floor) {
+            this.soundboard.playVoiceLine("PAKDI_GAYI");
+            const fromPos = this.mummy3D.mesh.position;
+            const toPos = this.player3D.mesh.position;
+            this.chappal3D.throw(fromPos, toPos, () => {
+              this.soundboard.playChappalSlap();
+              this.player.suspicion = 100;
+              this.player.stickyTrapTimer = 4.0;
+              this.showTopToast("🩴 MUMMY THREW HER CHAPPAL! You are STUNNED for 4s!");
+              this.mummy3D.resetAnger();
+            });
+          }
+        }
       }
+
+      // 4. Update 3D Projectiles & Particles
+      if (this.chappal3D) this.chappal3D.update(dt);
+      if (this.particles3D) this.particles3D.update(dt);
 
       // 5. Sabotage System
       if (this.sabotageSystem) {
         this.sabotageSystem.update(dt);
       }
 
-      // 6. Manage Screen FX Overlays (Paint Splatter, Glitch, Sleep Fog, Sticky Gum)
       this.updateScreenOverlays();
     }
   }
@@ -794,6 +846,8 @@ export class Game {
     } else if (hs.isStairHotspot) {
       this.player.setFloor(hs.targetFloor, hs.targetX);
       this.camera.setFloor(hs.targetFloor);
+      if (this.isoCamera) this.isoCamera.setFloor(hs.targetFloor);
+      if (this.player3D) this.player3D.setFloor(hs.targetFloor);
       this.updateFloorButtonsUI(hs.targetFloor);
       this.audio.playStairTransition();
     } else if (hs.taskId) {
@@ -858,37 +912,8 @@ export class Game {
   }
 
   render() {
-    this.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-    // Apply Camera
-    this.camera.apply(this.ctx);
-
-    // 1. Draw House Cutaway Map & Rooms
-    const activeFloor = this.player ? this.player.floor : 1;
-    this.houseMap.draw(this.ctx, activeFloor);
-
-    // 2. Draw Inspector Mummy
-    if (this.mummy) {
-      this.mummy.draw(this.ctx);
+    if (this.threeRenderer) {
+      this.threeRenderer.render();
     }
-
-    // 3. Draw Remote Human Players
-    this.remotePlayers.forEach((rp) => rp.draw(this.ctx));
-
-    // 4. Draw AI Bots
-    this.bots.forEach((bot) => bot.draw(this.ctx));
-
-    // 5. Draw Controllable Local Player
-    if (this.player) {
-      this.player.draw(this.ctx);
-    }
-
-    // 6. Draw Among Us Blackout Fog of War (Spotlight vision for innocents, night vision for prankster)
-    if (this.player) {
-      this.houseMap.drawBlackoutFogOfWar(this.ctx, this.player);
-    }
-
-    // Restore Camera
-    this.camera.restore(this.ctx);
   }
 }
