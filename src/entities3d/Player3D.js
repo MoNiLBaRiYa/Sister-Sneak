@@ -1,7 +1,8 @@
 /**
  * Sister Sneak 3D - 3D Player Entity
  * Manages 360-degree free locomotion, smooth heading rotation,
- * rhythmic walk cycles (legs, arms, head bob), and overhead name badges.
+ * rhythmic walk cycles (legs, arms, head bob), overhead name badges,
+ * 3D objective waypoint compass arrow, and occlusion X-Ray silhouette.
  */
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
@@ -29,22 +30,35 @@ export class Player3D {
     this.facingAngle = 0;
 
     // 1. Prominent Ground Highlight Ring (Bright Cyan for Local Player)
-    const ringGeo = new THREE.RingGeometry(0.75, 0.95, 32);
+    const ringGeo = new THREE.RingGeometry(0.75, 1.05, 32);
     this.groundRingMat = new THREE.MeshBasicMaterial({
       color: isLocalPlayer ? 0x00f0ff : new THREE.Color(config.color || 0xffffff),
       side: THREE.DoubleSide,
       transparent: true,
-      opacity: isLocalPlayer ? 0.95 : 0.45
+      opacity: isLocalPlayer ? 0.95 : 0.45,
+      depthTest: false
     });
     this.groundRing = new THREE.Mesh(ringGeo, this.groundRingMat);
     this.groundRing.rotation.x = -Math.PI / 2;
-    this.groundRing.position.y = 0.04;
+    this.groundRing.position.y = 0.05;
+    this.groundRing.renderOrder = 998;
     this.mesh.add(this.groundRing);
 
     // 2. 3D Overhead Name Badge & Arrow
     const badgeText = isLocalPlayer ? `✨ YOU: ${config.name} ✨` : `👧 ${config.name}`;
     this.nameBadge = this.createNameTagSprite(badgeText, isLocalPlayer, config.color || "#FFF");
     this.mesh.add(this.nameBadge);
+
+    // 3. 3D Waypoint Compass Arrow (Points to nearest unfinished task)
+    if (isLocalPlayer) {
+      const arrowGeo = new THREE.ConeGeometry(0.25, 0.7, 8);
+      arrowGeo.rotateX(Math.PI / 2);
+      const arrowMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b, depthTest: false });
+      this.waypointArrow = new THREE.Mesh(arrowGeo, arrowMat);
+      this.waypointArrow.position.set(0, 0.15, 0);
+      this.waypointArrow.renderOrder = 999;
+      this.mesh.add(this.waypointArrow);
+    }
 
     this.updatePosition(0, 0, this.floor);
   }
@@ -88,6 +102,7 @@ export class Player3D {
     const sprite = new THREE.Sprite(spriteMat);
     sprite.scale.set(isLocalPlayer ? 2.8 : 2.2, isLocalPlayer ? 0.85 : 0.65, 1);
     sprite.position.y = 2.45;
+    sprite.renderOrder = 999;
     return sprite;
   }
 
@@ -104,6 +119,14 @@ export class Player3D {
     this.floor = floor;
     this.y = this.floorHeights[this.floor] || 0;
     this.mesh.position.set(this.x, this.y, this.z);
+  }
+
+  updateWaypoint(target3DX, target3DZ) {
+    if (!this.waypointArrow) return;
+    const dx = target3DX - this.x;
+    const dz = target3DZ - this.z;
+    const angle = Math.atan2(dx, dz);
+    this.waypointArrow.rotation.y = angle - this.mesh.rotation.y;
   }
 
   update(dt, vx, vz, auraColor = null, isStealth = false) {
@@ -155,7 +178,7 @@ export class Player3D {
 
     // Stealth Transparency
     this.mesh.traverse((child) => {
-      if (child.isMesh && child !== this.groundRing) {
+      if (child.isMesh && child !== this.groundRing && child !== this.waypointArrow) {
         child.material.transparent = true;
         child.material.opacity = isStealth ? 0.35 : 1.0;
       }

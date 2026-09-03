@@ -1,7 +1,7 @@
 /**
  * Sister Sneak: Phone Locked - Production Online Multiplayer Server
  * Serves static web app assets and manages real-time WebSocket rooms worldwide.
- * Synchronizes character powers, visual auras, positions, and live chat across all devices.
+ * Includes XSS sanitization, chat rate-limiting, safe JSON parsing, and host authorization.
  */
 
 const http = require('http');
@@ -21,6 +21,16 @@ const MIME_TYPES = {
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon'
 };
+
+function escapeHtml(str) {
+  if (typeof str !== 'string') return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -101,15 +111,18 @@ if (WebSocketServer) {
 
     let currentRoomCode = null;
     let myPlayerId = 'p-' + Math.random().toString(36).substr(2, 6);
+    let lastChatTime = 0;
 
     ws.on('message', (message) => {
       try {
-        const data = JSON.parse(message);
+        if (typeof message !== 'string' && !Buffer.isBuffer(message)) return;
+        const data = JSON.parse(message.toString());
+        if (!data || typeof data !== 'object' || !data.type) return;
 
         switch (data.type) {
           case 'CREATE_ROOM': {
             let roomCode = (data.customCode || '').toUpperCase().replace(/[^A-Z0-9]/g, '').trim();
-            if (!roomCode || roomCode.length < 3) {
+            if (!roomCode || roomCode.length < 3 || roomCode.length > 8) {
               roomCode = generateRoomCode();
             }
 
@@ -123,6 +136,7 @@ if (WebSocketServer) {
               code: roomCode,
               hostSocket: ws,
               players: new Map(),
+              votesCast: new Set(),
               state: {
                 cleanliness: 0,
                 mummyId: data.mummyId || 'RIDDHI_MUMMY',
@@ -133,7 +147,7 @@ if (WebSocketServer) {
 
             const hostPlayer = {
               id: myPlayerId,
-              name: data.name || 'Host (You)',
+              name: escapeHtml(String(data.name || 'Host (You)')).substring(0, 24),
               sisterId: data.sisterId || 'RIDDHI',
               isHost: true
             };
@@ -173,7 +187,7 @@ if (WebSocketServer) {
             currentRoomCode = roomCode;
             const newPlayer = {
               id: myPlayerId,
-              name: data.name || 'Sister',
+              name: escapeHtml(String(data.name || 'Sister')).substring(0, 24),
               sisterId: data.sisterId || 'SHRUTI',
               isHost: false
             };
@@ -201,7 +215,7 @@ if (WebSocketServer) {
               const player = room.players.get(ws);
               if (player) {
                 player.sisterId = data.sisterId;
-                if (data.name) player.name = data.name;
+                if (data.name) player.name = escapeHtml(String(data.name)).substring(0, 24);
                 broadcastToRoom(currentRoomCode, {
                   type: 'LOBBY_UPDATE',
                   players: Array.from(room.players.values())
@@ -214,10 +228,12 @@ if (WebSocketServer) {
           case 'START_GAME':
           case 'START_GAME_SYNC': {
             const room = rooms.get(currentRoomCode);
-            if (room) {
+            // Host authorization check
+            if (room && (room.hostSocket === ws || !room.state.started)) {
               room.state.started = true;
               room.state.pranksterSisterId = data.pranksterSisterId || data.imposterSisterId;
               room.state.mummyId = data.mummyId;
+              room.votesCast.clear();
 
               broadcastToRoom(currentRoomCode, {
                 type: 'START_GAME_SYNC',
@@ -235,9 +251,9 @@ if (WebSocketServer) {
                 type: 'POWER_ACTIVATED',
                 senderId: myPlayerId,
                 sisterId: data.sisterId,
-                powerName: data.powerName,
+                powerName: escapeHtml(String(data.powerName || '')),
                 auraColor: data.auraColor,
-                isStealth: data.isStealth
+                isStealth: !!data.isStealth
               }, ws);
             }
             break;
@@ -250,7 +266,8 @@ if (WebSocketServer) {
                 type: 'PRANKSTER_DEBUFF',
                 senderId: myPlayerId,
                 debuffType: data.debuffType,
-                floor: data.floor
+                floor: Number(data.floor) || 0,
+                extraData: data.extraData || null
               }, ws);
             }
             break;
@@ -258,16 +275,20 @@ if (WebSocketServer) {
 
           case 'CHAT_MESSAGE': {
             if (currentRoomCode) {
-              const safeText = String(data.text || '').replace(/[<>]/g, '').trim().substring(0, 150);
-              const safeName = String(data.senderName || '').replace(/[<>]/g, '').trim().substring(0, 30);
+              const now = Date.now();
+              if (now - lastChatTime < 400) return; // Anti-spam rate limit
+              lastChatTime = now;
+
+              const safeText = escapeHtml(String(data.text || '')).trim().substring(0, 120);
+              const safeName = escapeHtml(String(data.senderName || 'Sister')).trim().substring(0, 24);
               if (safeText.length > 0) {
                 broadcastToRoom(currentRoomCode, {
                   type: 'CHAT_MESSAGE',
                   senderId: myPlayerId,
                   sisterId: data.sisterId,
                   senderName: safeName,
-                  avatar: data.avatar,
-                  color: data.color,
+                  avatar: data.avatar || '👧',
+                  color: data.color || '#38BDF8',
                   text: safeText
                 });
               }
@@ -281,15 +302,15 @@ if (WebSocketServer) {
                 type: 'PLAYER_POS_SYNC',
                 senderId: myPlayerId,
                 sisterId: data.sisterId,
-                floor: data.floor,
-                x: data.x,
-                y: data.y,
-                vx: data.vx,
-                vy: data.vy,
-                facing: data.facing,
-                isMoving: data.isMoving,
-                auraColor: data.auraColor,
-                isStealth: data.isStealth
+                floor: Number(data.floor) || 0,
+                x: Number(data.x) || 500,
+                y: Number(data.y) || 280,
+                vx: Number(data.vx) || 0,
+                vy: Number(data.vy) || 0,
+                facing: data.facing === 'left' ? 'left' : 'right',
+                isMoving: !!data.isMoving,
+                auraColor: data.auraColor || null,
+                isStealth: !!data.isStealth
               }, ws);
             }
             break;
@@ -299,10 +320,10 @@ if (WebSocketServer) {
             if (currentRoomCode) {
               const room = rooms.get(currentRoomCode);
               if (room) {
-                room.state.cleanliness = data.cleanliness;
+                room.state.cleanliness = Math.min(100, Math.max(0, Number(data.cleanliness) || 0));
                 broadcastToRoom(currentRoomCode, {
                   type: 'CLEANLINESS_SYNC',
-                  cleanliness: data.cleanliness,
+                  cleanliness: room.state.cleanliness,
                   completedTaskId: data.completedTaskId,
                   completedBy: data.completedBy
                 }, ws);
@@ -317,7 +338,7 @@ if (WebSocketServer) {
                 type: 'SABOTAGE_TRIGGERED',
                 senderId: myPlayerId,
                 sabotageType: data.sabotageType,
-                floor: data.floor
+                floor: Number(data.floor) || 0
               }, ws);
             }
             break;
@@ -325,10 +346,13 @@ if (WebSocketServer) {
 
           case 'EMERGENCY_MEETING_CALLED': {
             if (currentRoomCode) {
+              const room = rooms.get(currentRoomCode);
+              if (room) room.votesCast.clear();
+
               broadcastToRoom(currentRoomCode, {
                 type: 'EMERGENCY_MEETING_CALLED',
                 senderId: myPlayerId,
-                reason: data.reason
+                reason: escapeHtml(String(data.reason || 'Emergency Called!'))
               });
             }
             break;
@@ -336,12 +360,18 @@ if (WebSocketServer) {
 
           case 'VOTE_CAST_SYNC': {
             if (currentRoomCode) {
-              broadcastToRoom(currentRoomCode, {
-                type: 'VOTE_CAST_SYNC',
-                senderId: myPlayerId,
-                sisterId: data.sisterId,
-                targetId: data.targetId
-              });
+              const room = rooms.get(currentRoomCode);
+              if (room) {
+                if (room.votesCast.has(myPlayerId)) return; // 1-vote-per-player lock
+                room.votesCast.add(myPlayerId);
+
+                broadcastToRoom(currentRoomCode, {
+                  type: 'VOTE_CAST_SYNC',
+                  senderId: myPlayerId,
+                  sisterId: data.sisterId,
+                  targetId: data.targetId
+                });
+              }
             }
             break;
           }
@@ -377,7 +407,7 @@ if (WebSocketServer) {
           }
         }
       } catch (err) {
-        console.error("Socket error processing message:", err);
+        console.error("Socket safe error processing message:", err.message);
       }
     });
 
@@ -418,5 +448,5 @@ if (WebSocketServer) {
 }
 
 server.listen(PORT, () => {
-  console.log(`Sister Sneak Server running on port ${PORT}`);
+  console.log(`Sister Sneak Production Server running on port ${PORT}`);
 });

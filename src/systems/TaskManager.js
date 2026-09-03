@@ -35,27 +35,26 @@ export class TaskManager {
     this.miniGameMap = {
       // 3F Terrace
       CLOTHES_COLLECT: ClothesTask,
-      KITE_UNTANGLE: KiteTask,
-      TANK_VALVE: FridgeTask,
-      PAPAD_DRY: PapadTask,
       SOLAR_PANEL: SolarPanelTask,
+      KITE_UNTANGLE: KiteTask,
+      PAPAD_DRY: PapadTask,
 
       // 2F Living Hub
       PLANT_WATER: WateringTask,
-      BEDSHEET_TUCK: BedsheetTask,
       HOMEWORK_MATH: HomeworkTask,
+      BEDSHEET_TUCK: BedsheetTask,
+      SWITCHES_OFF: SwitchesTask,
       SPICE_RACK: SpiceRackTask,
       FRIDGE_REFILL: FridgeTask,
-      CHAI_FILTER: ChaiTask,
       SNACK_CONTAINER: KhakhraTask,
 
       // 1F Ground Floor
-      FOOTWEAR_MATCH: FootwearTask,
+      CHAI_FILTER: ChaiTask,
       RANGOLI_TOUCHUP: RangoliTask,
+      FOOTWEAR_MATCH: FootwearTask,
       ACHAR_HUNT: AcharTask,
       TRUNK_LOCK: TrunkLockTask,
-      GLASSWARE_ALIGN: GlasswareTask,
-      SWITCHES_OFF: SwitchesTask
+      GLASSWARE_ALIGN: GlasswareTask
     };
 
     this.bindUI();
@@ -86,11 +85,11 @@ export class TaskManager {
       allTaskHotspots.forEach(hs => this.assignedTasks.add(hs.taskId));
     } else {
       const sisterTaskPreferences = {
-        RIDDHI: ["BEDSHEET_TUCK", "CLOTHES_COLLECT", "SNACK_CONTAINER", "PLANT_WATER"],
-        SHRUTI: ["GLASSWARE_ALIGN", "RANGOLI_TOUCHUP", "SPICE_RACK", "SOLAR_PANEL"],
-        JAHANVI: ["TANK_VALVE", "KITE_UNTANGLE", "FOOTWEAR_MATCH", "SWITCHES_OFF"],
+        RIDDHI: ["BEDSHEET_TUCK", "CLOTHES_COLLECT", "PLANT_WATER", "CHAI_FILTER"],
+        SHRUTI: ["RANGOLI_TOUCHUP", "CHAI_FILTER", "BEDSHEET_TUCK", "SOLAR_PANEL"],
+        JAHANVI: ["CLOTHES_COLLECT", "FOOTWEAR_MATCH", "SWITCHES_OFF", "ACHAR_HUNT"],
         JISHA: ["HOMEWORK_MATH", "PLANT_WATER", "CHAI_FILTER", "ACHAR_HUNT"],
-        JYEANA: ["SWITCHES_OFF", "TRUNK_LOCK", "PAPAD_DRY", "SOLAR_PANEL"]
+        JYEANA: ["SWITCHES_OFF", "SOLAR_PANEL", "FOOTWEAR_MATCH", "HOMEWORK_MATH"]
       };
 
       const myPool = sisterTaskPreferences[sisterId] || ["BEDSHEET_TUCK", "PLANT_WATER", "SWITCHES_OFF", "CLOTHES_COLLECT"];
@@ -176,16 +175,14 @@ export class TaskManager {
   openTask(taskId) {
     if (this.activeMiniGame) return;
 
-    // Check if task is already completed
     if (this.isTaskCompleted(taskId)) {
       this.game.audio.playClick();
       this.game.showTopToast("✨ This chore is already sparkling clean!");
       return;
     }
 
-    // Check if floor is blacked out and not switch task
     if (this.game.houseMap.isFloorBlackedOut(this.game.player.floor) && taskId !== "SWITCHES_OFF") {
-      this.game.showTopToast("⚡ Power blackout! Fix the fuse box switch on 1F first!");
+      this.game.showTopToast("⚡ Power blackout! Fix the fuse box switchboard first!");
       return;
     }
 
@@ -214,20 +211,19 @@ export class TaskManager {
         this.markTaskCompleted(taskId);
         this.game.audio.playTaskComplete();
 
-        // If switch task completed, resolve critical blackout
         if (taskId === "SWITCHES_OFF" || taskId === "SOLAR_PANEL") {
           this.game.sabotageSystem?.resolveCriticalSabotage();
         }
 
-        let cleanBonus = 7.0;
-        if (this.game.player.id === "SHRUTI" && (taskId === "BEDSHEET_TUCK" || taskId === "GLASSWARE_ALIGN" || taskId === "RANGOLI_TOUCHUP")) {
-          cleanBonus = 11.0;
+        let cleanBonus = 12.5;
+        if (this.game.player.id === "SHRUTI" && (taskId === "BEDSHEET_TUCK" || taskId === "RANGOLI_TOUCHUP")) {
+          cleanBonus = 18.0;
         }
 
         this.contributeCleanliness(cleanBonus, taskId);
         setTimeout(() => {
           this.closeMiniGame();
-        }, 400);
+        }, 300);
       },
       () => {
         this.closeMiniGame();

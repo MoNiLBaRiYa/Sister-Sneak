@@ -4,7 +4,7 @@
  * Mummy FOV Vision Cone & Flying Chappal Danger System.
  */
 
-import { CANVAS_WIDTH, CANVAS_HEIGHT, FLOOR_Y } from '../config/constants.js';
+import { CANVAS_WIDTH, CANVAS_HEIGHT, FLOOR_Y, HOTSPOTS } from '../config/constants.js';
 import { SISTERS } from '../config/characters.js';
 import { MUMMIES } from '../config/mummies.js';
 import { HouseMap } from '../world/HouseMap.js';
@@ -669,6 +669,27 @@ export class Game {
           if (this.isoCamera) {
             this.isoCamera.setFloor(this.player.floor);
             this.isoCamera.update(dt, { x: p3d.x, y: this.isoCamera.floorHeights[this.player.floor], z: p3d.z });
+          }
+
+          // 3D Waypoint Compass Arrow pointing to nearest unfinished assigned task
+          if (this.taskManager && this.player3D) {
+            const myAssigned = HOTSPOTS.filter(hs => hs.taskId && this.taskManager.assignedTasks.has(hs.taskId) && !this.taskManager.isTaskCompleted(hs.taskId));
+            if (myAssigned.length > 0) {
+              const onFloor = myAssigned.filter(hs => hs.floor === this.player.floor);
+              let targetHotspot = null;
+              if (onFloor.length > 0) {
+                targetHotspot = onFloor.reduce((prev, curr) => Math.hypot(curr.x - this.player.x, curr.y - this.player.y) < Math.hypot(prev.x - this.player.x, prev.y - this.player.y) ? curr : prev);
+              } else {
+                const targetFloor = myAssigned[0].floor;
+                const stairs = HOTSPOTS.filter(hs => hs.isStairHotspot && hs.floor === this.player.floor && ((targetFloor > this.player.floor && hs.targetFloor > this.player.floor) || (targetFloor < this.player.floor && hs.targetFloor < this.player.floor)));
+                targetHotspot = stairs.length > 0 ? stairs[0] : null;
+              }
+
+              if (targetHotspot) {
+                const tc3d = this.coord2Dto3D(targetHotspot.x, targetHotspot.y, targetHotspot.floor);
+                this.player3D.updateWaypoint(tc3d.x, tc3d.z);
+              }
+            }
           }
 
           // Step-on 3D Sticky Trap Check
