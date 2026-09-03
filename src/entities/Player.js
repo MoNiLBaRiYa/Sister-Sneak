@@ -18,6 +18,7 @@
  */
 
 import { Character } from './Character.js';
+import { FLOOR_Y } from '../config/constants.js';
 
 export class Player extends Character {
   constructor(config = {}) {
@@ -164,8 +165,8 @@ export class Player extends Character {
     }
 
     const nextY = this.y + this.vy * dt;
-    const baseFloorY = (game && game.houseMap) ? (this.floor * 220 + 70) : (this.floor * 200);
-    this.y = Math.max(baseFloorY - 50, Math.min(baseFloorY + 160, nextY));
+    const baseFloorY = (FLOOR_Y && FLOOR_Y[this.floor] !== undefined) ? FLOOR_Y[this.floor] : 280;
+    this.y = Math.max(baseFloorY + 50, Math.min(baseFloorY + 155, nextY));
 
     this.update(dt);
   }

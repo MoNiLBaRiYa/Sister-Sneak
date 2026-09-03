@@ -535,66 +535,79 @@ html, body {
 }
 
 .modern-portal-card {
-  max-width: 680px;
-  background: rgba(15, 23, 42, 0.88);
-  border: 2px solid rgba(6, 182, 212, 0.6);
-  backdrop-filter: blur(16px);
-  box-shadow: 0 0 35px rgba(6, 182, 212, 0.35);
-  border-radius: 20px;
+  width: 95% !important;
+  max-width: 860px !important;
+  background: rgba(15, 23, 42, 0.95) !important;
+  border: 2.5px solid rgba(6, 182, 212, 0.75) !important;
+  backdrop-filter: blur(20px) !important;
+  box-shadow: 0 0 50px rgba(6, 182, 212, 0.4), inset 0 0 30px rgba(6, 182, 212, 0.08) !important;
+  border-radius: 24px !important;
+  padding: 22px 24px !important;
 }
 
 .portal-header {
   text-align: center;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1.5px solid rgba(51, 65, 85, 0.6);
 }
 
 .portal-tag {
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 2px;
-  color: var(--primary-cyan);
-  text-shadow: 0 0 8px rgba(6, 182, 212, 0.6);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 2.5px;
+  color: #38BDF8;
+  text-shadow: 0 0 10px rgba(6, 182, 212, 0.7);
   display: block;
+  margin-bottom: 4px;
 }
 
 .portal-nav-bar {
   display: flex;
-  gap: 6px;
-  margin: 8px 0 12px 0;
-  background: rgba(15, 23, 42, 0.9);
-  padding: 4px;
-  border-radius: 12px;
+  gap: 8px;
+  margin: 12px 0 16px 0;
+  background: rgba(11, 17, 33, 0.95);
+  padding: 6px;
+  border-radius: 14px;
   border: 1.5px solid #334155;
 }
 
 .portal-tab {
   flex: 1;
-  padding: 8px 4px;
+  padding: 10px 6px;
   border: none;
   background: transparent;
   color: #94A3B8;
   font-weight: 800;
-  font-size: 10px;
-  border-radius: 8px;
+  font-size: 11px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.portal-tab:hover {
+  color: #FFF;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .portal-tab.active {
   background: linear-gradient(135deg, #06B6D4, #0284C7);
   color: #FFF;
-  box-shadow: 0 0 12px rgba(6, 182, 212, 0.5);
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.6);
+  transform: translateY(-1px);
 }
 
 .section-title-row {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .section-hint {
-  font-size: 9px;
+  font-size: 10px;
   color: #94A3B8;
   font-style: italic;
 }
@@ -986,6 +999,17 @@ html, body {
   pointer-events: none !important;
   z-index: 75 !important;
   overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.screen-fx-overlay.hidden,
+#paint-splatter-overlay.hidden,
+#sleep-fog-overlay.hidden,
+#glitch-scanlines-overlay.hidden,
+#sticky-trap-overlay.hidden {
+  display: none !important;
 }
 
 /* 1. Paint Splatter (Shruti Prankster) */
@@ -1068,9 +1092,6 @@ html, body {
   );
   box-shadow: inset 0 0 50px rgba(6, 182, 212, 0.4);
   animation: glitch-flicker 0.15s infinite;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
 }
 
 .glitch-banner {
@@ -1098,12 +1119,6 @@ html, body {
 }
 
 /* 4. Sticky Gum Trap Alert (Jahanvi Prankster) */
-#sticky-trap-overlay {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
 .sticky-trap-banner {
   background: rgba(185, 28, 28, 0.95);
   color: #FEF08A;

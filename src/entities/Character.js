@@ -43,7 +43,7 @@ export class Character {
 
   setFloor(newFloor, newX = null) {
     this.floor = newFloor;
-    this.y = FLOOR_Y[newFloor] + 120;
+    this.y = (FLOOR_Y[newFloor] !== undefined ? FLOOR_Y[newFloor] : 280) + 110;
     if (newX !== null) {
       this.x = newX;
     }
@@ -65,8 +65,9 @@ export class Character {
     }
 
     // Keep y within floor bounds
-    const minY = FLOOR_Y[this.floor] + 70;
-    const maxY = FLOOR_Y[this.floor] + 155;
+    const baseFloorY = (FLOOR_Y[this.floor] !== undefined ? FLOOR_Y[this.floor] : 280);
+    const minY = baseFloorY + 50;
+    const maxY = baseFloorY + 155;
     this.y = Math.max(minY, Math.min(maxY, this.y));
 
     // Keep x within house bounds

@@ -82,11 +82,22 @@ export class Game {
   }
 
   coord2Dto3D(x2d, y2d, floor) {
-    const baseFloorY = (floor * 220 + 70);
+    const baseFloorY = (FLOOR_Y && FLOOR_Y[floor] !== undefined) ? FLOOR_Y[floor] : 280;
     return {
       x: (x2d - 600) / 38,
-      z: (y2d - (baseFloorY + 50)) / 18
+      z: (y2d - (baseFloorY + 110)) / 12
     };
+  }
+
+  setPlayerFloor(floorNum, targetX = null) {
+    if (!this.player) return;
+    this.player.setFloor(floorNum, targetX);
+    this.camera.setFloor(floorNum);
+    if (this.isoCamera) this.isoCamera.setFloor(floorNum);
+    if (this.haveli3D) this.haveli3D.setFloorVisibility(floorNum);
+    if (this.player3D) this.player3D.setFloor(floorNum);
+    this.updateFloorButtonsUI(floorNum);
+    this.audio.playStairTransition();
   }
 
   bindHUDButtons() {
@@ -96,12 +107,7 @@ export class Game {
       if (btn) {
         btn.addEventListener("click", () => {
           if (this.player && this.state === "PLAYING") {
-            this.player.setFloor(floorNum);
-            this.camera.setFloor(floorNum);
-            if (this.isoCamera) this.isoCamera.setFloor(floorNum);
-            if (this.player3D) this.player3D.setFloor(floorNum);
-            this.updateFloorButtonsUI(floorNum);
-            this.audio.playStairTransition();
+            this.setPlayerFloor(floorNum);
           }
         });
       }
@@ -854,12 +860,7 @@ export class Game {
       this.meetingEngine.startMeeting("Emergency Called at Phone Lock Box!");
       this.multiplayer.syncMeeting("Emergency Called at Phone Lock Box!");
     } else if (hs.isStairHotspot) {
-      this.player.setFloor(hs.targetFloor, hs.targetX);
-      this.camera.setFloor(hs.targetFloor);
-      if (this.isoCamera) this.isoCamera.setFloor(hs.targetFloor);
-      if (this.player3D) this.player3D.setFloor(hs.targetFloor);
-      this.updateFloorButtonsUI(hs.targetFloor);
-      this.audio.playStairTransition();
+      this.setPlayerFloor(hs.targetFloor, hs.targetX);
     } else if (hs.taskId) {
       this.taskManager.openTask(hs.taskId);
     }
