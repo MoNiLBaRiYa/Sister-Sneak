@@ -430,47 +430,60 @@ export class Game {
     this.showTopToast(`⚡ ${data.sisterId} activated ${data.powerName}!`);
   }
 
-  applyPranksterDebuffToInnocents(debuffType, floor) {
-    // 1. Apply to local AI innocent bots
+  applyPranksterDebuffToInnocents(debuffType, floor, extraData = null) {
+    // 1. Apply debuff to all local AI innocent bots on the affected floor
     this.bots.forEach((b) => {
       if (b.role === "innocent" && b.floor === floor) {
-        if (debuffType === "SLOW_TRAP") b.sprintTimer = -6.0;
-        if (debuffType === "PAINT_FRAME") b.suspicion = Math.min(100, b.suspicion + 35);
-        if (debuffType === "BLAME_SHIFT") b.suspicion = Math.min(100, b.suspicion + 30);
+        if (debuffType === "SLEEP_CLOUD") {
+          b.slowDebuffTimer = 8.0;
+        } else if (debuffType === "PAINT_SPLATTER") {
+          b.suspicion = Math.min(100, b.suspicion + 30);
+        } else if (debuffType === "STICKY_GUM") {
+          b.stickyTrapTimer = 5.0;
+        } else if (debuffType === "FALSE_ALARM") {
+          b.suspicion = Math.min(100, b.suspicion + 35);
+          if (this.mummy) {
+            this.mummy.investigateFloor(floor, b.x);
+          }
+        } else if (debuffType === "EMP_JAMMER") {
+          b.glitchControlTimer = 6.0;
+        }
       }
     });
-
-    if (debuffType === "DOOR_SLAM" && this.sabotageSystem) {
-      this.sabotageSystem.triggerSabotage("KUNDI", floor);
-    }
 
     // 2. Broadcast debuff to all remote innocent human players
     if (this.multiplayer && this.multiplayer.isMultiplayer) {
       this.multiplayer.send({
         type: 'PRANKSTER_DEBUFF',
         debuffType: debuffType,
-        floor: floor
+        floor: floor,
+        extraData: extraData
       });
     }
   }
 
   handleRemotePranksterDebuff(data) {
     if (this.player && this.player.role === "innocent") {
-      if (data.debuffType === "SLOW_TRAP") {
-        this.player.slowDebuffTimer = 7.0;
-        this.showTopToast("❄️ Sleep Trap! You are slowed by 50% for 7s!");
-      } else if (data.debuffType === "PAINT_FRAME") {
-        this.player.suspicion = Math.min(100, this.player.suspicion + 35);
-        this.showTopToast("🎨 Framed with Paint Splatter! Mummy Suspicion +35%!");
-      } else if (data.debuffType === "DOOR_SLAM") {
-        this.sabotageSystem.triggerSabotage("KUNDI", data.floor);
-        this.showTopToast("🔒 Doors slammed shut on this floor!");
-      } else if (data.debuffType === "BLAME_SHIFT") {
+      if (data.debuffType === "SLEEP_CLOUD") {
+        this.player.slowDebuffTimer = 8.0;
+        this.showTopToast("😴 Sleep Cloud! You are drowsy and slowed by 60% for 8s!");
+      } else if (data.debuffType === "PAINT_SPLATTER") {
+        this.player.paintBlindTimer = 5.0;
         this.player.suspicion = Math.min(100, this.player.suspicion + 30);
-        this.showTopToast("🎭 The Prankster shifted blame onto you!");
-      } else if (data.debuffType === "TASK_FREEZE") {
-        this.player.taskFreezeTimer = 8.0;
-        this.showTopToast("⚡ Electric Surge! Your chores are frozen for 8s!");
+        this.showTopToast("🎨 Paint Splatter! Your screen is blinded with Rangoli Paint!");
+      } else if (data.debuffType === "STICKY_GUM") {
+        this.player.stickyTrapTimer = 5.0;
+        this.showTopToast("🦶 Trapped in Sticky Bubblegum! You cannot move for 5s!");
+      } else if (data.debuffType === "FALSE_ALARM") {
+        this.player.suspicion = Math.min(100, this.player.suspicion + 35);
+        if (this.mummy) {
+          this.mummy.investigateFloor(data.floor, this.player.x);
+        }
+        this.showTopToast("📢 False Alarm! Mummy is rushing to inspect you!");
+      } else if (data.debuffType === "EMP_JAMMER") {
+        this.player.glitchControlTimer = 6.0;
+        this.player.taskFreezeTimer = 6.0;
+        this.showTopToast("⚡ EMP Jammer! Your movement controls are GLITCHED & INVERTED for 6s!");
       }
     }
   }
@@ -670,6 +683,38 @@ export class Game {
       if (this.sabotageSystem) {
         this.sabotageSystem.update(dt);
       }
+
+      // 6. Manage Screen FX Overlays (Paint Splatter, Glitch, Sleep Fog, Sticky Gum)
+      this.updateScreenOverlays();
+    }
+  }
+
+  updateScreenOverlays() {
+    if (!this.player) return;
+
+    const paintEl = document.getElementById("paint-splatter-overlay");
+    const sleepEl = document.getElementById("sleep-fog-overlay");
+    const glitchEl = document.getElementById("glitch-scanlines-overlay");
+    const stickyEl = document.getElementById("sticky-trap-overlay");
+
+    if (paintEl) {
+      if (this.player.paintBlindTimer > 0) paintEl.classList.remove("hidden");
+      else paintEl.classList.add("hidden");
+    }
+
+    if (sleepEl) {
+      if (this.player.slowDebuffTimer > 0) sleepEl.classList.remove("hidden");
+      else sleepEl.classList.add("hidden");
+    }
+
+    if (glitchEl) {
+      if (this.player.glitchControlTimer > 0) glitchEl.classList.remove("hidden");
+      else glitchEl.classList.add("hidden");
+    }
+
+    if (stickyEl) {
+      if (this.player.stickyTrapTimer > 0) stickyEl.classList.remove("hidden");
+      else stickyEl.classList.add("hidden");
     }
   }
 

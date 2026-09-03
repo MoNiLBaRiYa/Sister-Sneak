@@ -29,8 +29,17 @@ window.addEventListener('DOMContentLoaded', () => {
           <img src="${s.image}" alt="${s.name}" class="card-avatar-img" />
         </div>
         <div class="card-name">${s.name}</div>
-        <div class="card-tagline">${s.tagline || s.archetype}</div>
-        <div class="card-power">⚡ ${s.innocentPower?.name || 'Power'}</div>
+        <div class="card-tagline">${s.archetype}</div>
+        <div class="card-power-stack">
+          <div class="card-power-item innocent">
+            <span class="p-badge">😇 SELF-HELP:</span>
+            <span class="p-name">${s.innocentPower?.name}</span>
+          </div>
+          <div class="card-power-item prankster">
+            <span class="p-badge">😈 TRAP/IRRITATE:</span>
+            <span class="p-name">${s.pranksterPower?.name}</span>
+          </div>
+        </div>
       `;
 
       card.addEventListener('click', () => {

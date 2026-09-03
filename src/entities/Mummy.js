@@ -38,6 +38,14 @@ export class Mummy {
     this.pauseTimer = 0;
   }
 
+  investigateFloor(floor, targetX = null) {
+    this.floor = floor;
+    this.y = FLOOR_Y[this.floor] + 120;
+    this.x = targetX !== null ? Math.max(150, Math.min(1050, targetX + (Math.random() > 0.5 ? 80 : -80))) : (300 + Math.random() * 600);
+    this.pauseTimer = 0;
+    this.facing = Math.random() > 0.5 ? "right" : "left";
+  }
+
   update(dt, sisters) {
     if (this.pauseTimer > 0) {
       this.pauseTimer -= dt;
@@ -70,12 +78,18 @@ export class Mummy {
     // Inspect nearby sisters on same floor
     if (sisters) {
       sisters.forEach((s) => {
-        if (s.floor === this.floor && !s.isHidden && !s.isEjected && !(s.stealthTimer > 0)) {
+        if (s.floor === this.floor && !s.isHidden && !s.isEjected) {
+          // If sister has active stealth or Ladli shield, Mummy completely ignores them
+          if (s.stealthTimer > 0 || s.ladliShieldTimer > 0) {
+            s.suspicion = 0;
+            return;
+          }
+
           const dist = Math.abs(s.x - this.x);
           if (dist < 160) {
             // Check triggers
-            if (s.isDashing) {
-              s.suspicion = Math.min(100, s.suspicion + dt * 15);
+            if (s.isDashing || s.sprintTimer > 0) {
+              s.suspicion = Math.min(100, s.suspicion + dt * 18);
             }
           }
         }

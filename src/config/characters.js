@@ -1,6 +1,9 @@
 /**
- * Sister Sneak: Phone Locked - 5 Sisters Character Definitions
- * Implements Innocent & Prankster abilities, visual traits, and custom avatar artwork.
+ * Sister Sneak: Phone Locked - 5 Sisters Character Definitions & Asymmetric Powers
+ * 
+ * POWER DESIGN PHILOSOPHY:
+ * - INNOCENT POWERS: Strictly HELP ONESELF (Self-Buff, Immunity, Speed Dash, Task Auto-Solve, Stealth).
+ * - PRANKSTER POWERS: Strictly TRAP SOMEONE OR IRRITATE/DISRUPT ALL SISTERS (Sticky Traps, Paint Blindness, Inverted Controls, Sleep Clouds, False Alarms).
  */
 
 export const SISTERS = {
@@ -17,12 +20,14 @@ export const SISTERS = {
     accessory: "blanket",
     speed: 3.2,
     innocentPower: {
-      name: "Cozy Camouflage",
-      desc: "Covers under quilt blanket for 10s (completely invisible to Mummy)."
+      name: "Blanket Sanctuary",
+      tag: "SELF-IMMUNITY & STEALTH",
+      desc: "Covers under cozy blanket: 100% invisible to Mummy, drops suspicion to 0%, and grants speed boost for 10s."
     },
     pranksterPower: {
       name: "Sleep Cloud Trap",
-      desc: "Drops sleep smoke slowing all innocent sisters by 55% for 8s."
+      tag: "MASS IRRITATION & SLOW",
+      desc: "Drops lavender sleep fog on floor: Slows all innocent sisters by 60% with heavy drowsy screen fog for 8s."
     }
   },
 
@@ -39,12 +44,14 @@ export const SISTERS = {
     accessory: "paint-brush",
     speed: 3.4,
     innocentPower: {
-      name: "Artistic Flow",
-      desc: "Auto-solves active chore or grants +20% Cleanliness burst."
+      name: "Artistic Masterstroke",
+      tag: "SELF TASK BURST",
+      desc: "Instantly auto-solves active chore or generates +20% Cleanliness burst + 6s lightfooted sprint."
     },
     pranksterPower: {
-      name: "Fake Paint Frame",
-      desc: "Shoots red paint blinding innocents and raising their suspicion by +35%."
+      name: "Rangoli Paint Splatter",
+      tag: "SCREEN BLINDNESS & SUSPICION",
+      desc: "Shoots festive gulal paint: Blinds all innocent sisters' screens with colorful paint splatter for 5s + raises suspicion by +30%."
     }
   },
 
@@ -61,12 +68,14 @@ export const SISTERS = {
     accessory: "sneakers",
     speed: 4.2,
     innocentPower: {
-      name: "Vent Portal Dash",
-      desc: "Instant floor teleport + supersonic speed sprint."
+      name: "Vent Shortcut & Turbo Dash",
+      tag: "SELF ESCAPE & TELEPORT",
+      desc: "Secret floor teleport through laundry chute + 7s Supersonic Turbo Sprint (2.2x speed)."
     },
     pranksterPower: {
-      name: "Vent & Door Slam",
-      desc: "Vents to another floor and slams all room doors shut with Kundi on innocents."
+      name: "Sticky Bubblegum Snare",
+      tag: "TRAP & IMMOBILIZE",
+      desc: "Lays sticky bubblegum traps: Completely immobilizes & roots innocent sisters in place for 5s."
     }
   },
 
@@ -83,12 +92,14 @@ export const SISTERS = {
     accessory: "glasses",
     speed: 3.5,
     innocentPower: {
-      name: "Universal Ladli Card",
-      desc: "Solves math study sheets instantly with gold star and resets suspicion to 0%."
+      name: "Mummy's Ladli Shield",
+      tag: "SELF ALIBI & TOTAL IMMUNITY",
+      desc: "Activates golden favorite charm: Mummy ignores you completely with love, and you are 100% immune in Emergency Meetings for 12s."
     },
     pranksterPower: {
-      name: "Blame Shift Charm",
-      desc: "Mind-tricks Mummy and shifts suspicion directly onto innocent sisters."
+      name: "False Alarm & Blame Transfer",
+      tag: "MASS CONFUSION & MUMMY RUSH",
+      desc: "Screams a fake emergency! Triggers Mummy to chase innocent sisters and transfers +35% suspicion onto them."
     }
   },
 
@@ -105,12 +116,14 @@ export const SISTERS = {
     accessory: "headband",
     speed: 3.6,
     innocentPower: {
-      name: "Electric Overdrive",
-      desc: "Instantly restores all blacked-out lights + 7s Hyper Sprint."
+      name: "Smart Inverter Hack",
+      tag: "SELF LIGHT & TASK TURBO",
+      desc: "Instantly repairs blackouts on all floors, unlocks night vision, and grants 7s Hyper Sprint."
     },
     pranksterPower: {
-      name: "Sabotage Surge",
-      desc: "Freezes innocent chores for 8s and resets sabotage cooldowns to 0s."
+      name: "EMP Jammer & Inverted Controls",
+      tag: "GLITCH CONTROLS & TASK FREEZE",
+      desc: "Pulses electromagnetic jammer: Inverts innocent sisters' movement controls (Left ⇋ Right) & freezes chores for 6s."
     }
   }
 };
