@@ -82,9 +82,10 @@ export class Game {
   }
 
   coord2Dto3D(x2d, y2d, floor) {
+    const baseFloorY = (floor * 220 + 70);
     return {
       x: (x2d - 600) / 38,
-      z: (y2d - (FLOOR_Y[floor] + 120)) / 38
+      z: (y2d - (baseFloorY + 50)) / 18
     };
   }
 
@@ -476,8 +477,6 @@ export class Game {
           b.slowDebuffTimer = 8.0;
         } else if (debuffType === "PAINT_SPLATTER") {
           b.suspicion = Math.min(100, b.suspicion + 30);
-        } else if (debuffType === "STICKY_GUM") {
-          b.stickyTrapTimer = 5.0;
         } else if (debuffType === "FALSE_ALARM") {
           b.suspicion = Math.min(100, b.suspicion + 35);
           if (this.mummy) {
@@ -495,7 +494,7 @@ export class Game {
         this.particles3D.spawnSleepCloud(0, this.isoCamera.floorHeights[floor] || 0, 0, 8.0);
       } else if (debuffType === "STICKY_GUM" && extraData) {
         const c3d = this.coord2Dto3D(extraData.x, extraData.y, floor);
-        this.particles3D.spawnStickyGumTrap(c3d.x, this.isoCamera.floorHeights[floor] || 0, c3d.z, 12.0);
+        this.particles3D.spawnStickyGumTrap(c3d.x, this.isoCamera.floorHeights[floor] || 0, c3d.z, 15.0);
       }
     }
 
@@ -664,6 +663,15 @@ export class Game {
           if (this.isoCamera) {
             this.isoCamera.setFloor(this.player.floor);
             this.isoCamera.update(dt, { x: p3d.x, y: this.isoCamera.floorHeights[this.player.floor], z: p3d.z });
+          }
+
+          // Step-on 3D Sticky Trap Check
+          if (this.particles3D && this.player.role === "innocent") {
+            const pPos = this.player3D.mesh.position;
+            if (this.particles3D.checkTrapTrigger(pPos.x, pPos.y, pPos.z)) {
+              this.player.stickyTrapTimer = 3.5;
+              this.showTopToast("🦶 Stepped on Sticky Bubblegum! Trapped for 3.5s!");
+            }
           }
         }
 

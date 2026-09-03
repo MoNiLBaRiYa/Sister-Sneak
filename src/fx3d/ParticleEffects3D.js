@@ -58,7 +58,22 @@ export class ParticleEffects3D {
     gumMesh.receiveShadow = true;
     this.scene.add(gumMesh);
 
-    this.gumTraps.push({ mesh: gumMesh, timer: duration, x, y, z, radius: 1.5 });
+    this.gumTraps.push({ mesh: gumMesh, timer: duration, x, y, z, radius: 1.6 });
+  }
+
+  checkTrapTrigger(x, y, z) {
+    for (let i = this.gumTraps.length - 1; i >= 0; i--) {
+      const trap = this.gumTraps[i];
+      if (Math.abs(trap.y - y) < 2.0) {
+        const dist = Math.hypot(trap.x - x, trap.z - z);
+        if (dist < trap.radius) {
+          this.scene.remove(trap.mesh);
+          this.gumTraps.splice(i, 1);
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   // 3. 📚 Jisha Mummy's Ladli Halo (Innocent 3D Orbiting Stars)

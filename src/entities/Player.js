@@ -153,17 +153,20 @@ export class Player extends Character {
     }
 
     // -------------------------------------------------------------
-    // 4. Door Kundi Collision Check
+    // 4. Door Kundi Collision Check & 360-Degree Boundary Clamping
     // -------------------------------------------------------------
     const nextX = this.x + this.vx * dt;
     if (game && game.houseMap && game.houseMap.checkDoorCollision(this.x, nextX, this.floor)) {
       this.vx = 0;
       game.showTopToast("🔒 This room's door is locked with KUNDI from outside!");
     } else {
-      this.x = nextX;
+      this.x = Math.max(80, Math.min(1120, nextX));
     }
 
-    this.y += this.vy * dt;
+    const nextY = this.y + this.vy * dt;
+    const baseFloorY = (game && game.houseMap) ? (this.floor * 220 + 70) : (this.floor * 200);
+    this.y = Math.max(baseFloorY - 50, Math.min(baseFloorY + 160, nextY));
+
     this.update(dt);
   }
 

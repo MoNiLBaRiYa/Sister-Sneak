@@ -1,7 +1,7 @@
 /**
  * Sister Sneak 3D - 3D Player Entity
- * Manages 3D positioning, smooth rotation, procedural walk animations,
- * clear "YOU" indicator badge with pulsating arrow, and visual power auras.
+ * Manages 360-degree free locomotion, smooth heading rotation,
+ * rhythmic walk cycles (legs, arms, head bob), and overhead name badges.
  */
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
@@ -17,7 +17,7 @@ export class Player3D {
     this.scene.add(this.mesh);
 
     this.floor = config.floor || 1;
-    this.floorHeights = [0, 7.5, 15];
+    this.floorHeights = [0, 8, 16];
 
     this.x = 0;
     this.z = 0;
@@ -29,12 +29,12 @@ export class Player3D {
     this.facingAngle = 0;
 
     // 1. Prominent Ground Highlight Ring (Bright Cyan for Local Player)
-    const ringGeo = new THREE.RingGeometry(0.7, 0.9, 32);
+    const ringGeo = new THREE.RingGeometry(0.75, 0.95, 32);
     this.groundRingMat = new THREE.MeshBasicMaterial({
       color: isLocalPlayer ? 0x00f0ff : new THREE.Color(config.color || 0xffffff),
       side: THREE.DoubleSide,
       transparent: true,
-      opacity: isLocalPlayer ? 0.95 : 0.4
+      opacity: isLocalPlayer ? 0.95 : 0.45
     });
     this.groundRing = new THREE.Mesh(ringGeo, this.groundRingMat);
     this.groundRing.rotation.x = -Math.PI / 2;
@@ -112,15 +112,16 @@ export class Player3D {
 
     if (this.isMoving) {
       this.walkCycle += dt * 10;
-      this.facingAngle = Math.atan2(vz, vx);
-      this.mesh.rotation.y = -this.facingAngle + Math.PI / 2;
+      // 360-degree rotation facing movement vector
+      this.facingAngle = Math.atan2(vx, vz);
+      this.mesh.rotation.y = this.facingAngle;
 
       // Animate Legs & Arms
-      const legAngle = Math.sin(this.walkCycle) * 0.6;
+      const legAngle = Math.sin(this.walkCycle) * 0.65;
       if (this.mesh.leftLeg) this.mesh.leftLeg.rotation.x = legAngle;
       if (this.mesh.rightLeg) this.mesh.rightLeg.rotation.x = -legAngle;
-      if (this.mesh.leftArm) this.mesh.leftArm.rotation.x = -legAngle * 0.7;
-      if (this.mesh.rightArm) this.mesh.rightArm.rotation.x = legAngle * 0.7;
+      if (this.mesh.leftArm) this.mesh.leftArm.rotation.x = -legAngle * 0.75;
+      if (this.mesh.rightArm) this.mesh.rightArm.rotation.x = legAngle * 0.75;
 
       // Body Bobbing
       if (this.mesh.torso) this.mesh.torso.position.y = 0.95 + Math.abs(Math.sin(this.walkCycle)) * 0.08;
@@ -139,7 +140,7 @@ export class Player3D {
 
     // Ground Ring Pulsing
     if (this.isLocalPlayer) {
-      const pulse = 0.85 + Math.sin(this.walkCycle * 2) * 0.15;
+      const pulse = 0.9 + Math.sin(this.walkCycle * 2) * 0.12;
       this.groundRing.scale.set(pulse, pulse, pulse);
     }
 

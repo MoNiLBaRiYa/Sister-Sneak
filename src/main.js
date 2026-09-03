@@ -71,12 +71,13 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Portal Navigation Tabs (Play, Powers, Mummy Guide, Lore)
+  // Portal Navigation Tabs (Play, Powers, Mummy Guide, Lore, Roadmap)
   const portalTabs = [
     { btn: 'tab-portal-play', panel: 'portal-panel-play' },
     { btn: 'tab-portal-powers', panel: 'portal-panel-powers' },
     { btn: 'tab-portal-mummy', panel: 'portal-panel-mummy' },
-    { btn: 'tab-portal-lore', panel: 'portal-panel-lore' }
+    { btn: 'tab-portal-lore', panel: 'portal-panel-lore' },
+    { btn: 'tab-portal-roadmap', panel: 'portal-panel-roadmap' }
   ];
 
   portalTabs.forEach(tab => {
