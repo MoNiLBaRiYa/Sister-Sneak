@@ -11,8 +11,8 @@ export class MeetingEngine {
     this.game = game;
     this.isActive = false;
     this.phase = "IDLE"; // "DISCUSSION", "VOTING", "REVEAL", "VERDICT"
-    this.discussionTimer = 12;
-    this.votingTimer = 25;
+    this.discussionTimer = 10;
+    this.votingTimer = 20;
     this.timerInterval = null;
     this.votes = {};      // { sisterId: targetId }
     this.votedSisters = new Set();
@@ -134,13 +134,27 @@ export class MeetingEngine {
   startMeeting(reason = "Emergency Meeting Called!") {
     if (this.isActive) return;
     this.isActive = true;
+    this.game.state = "MEETING";
     this.votes = {};
     this.votedSisters.clear();
-    this.discussionTimer = 12;
-    this.votingTimer = 25;
+    this.discussionTimer = 10;
+    this.votingTimer = 20;
+
+    // Resolve active critical sabotage on meeting call
+    if (this.game.sabotageSystem) {
+      this.game.sabotageSystem.resolveCriticalSabotage();
+    }
 
     this.game.audio.playMeetingGong();
     this.game.teleportAllToCentralHall();
+
+    // Hide gameplay HUDs and overlays
+    document.getElementById("game-hud")?.classList.add("hidden");
+    document.getElementById("floor-switcher")?.classList.add("hidden");
+    document.getElementById("touch-controls")?.classList.add("hidden");
+    document.getElementById("sabotage-bar")?.classList.add("hidden");
+    document.getElementById("action-prompt")?.classList.add("hidden");
+    document.getElementById("mummy-alert")?.classList.add("hidden");
 
     const screen = document.getElementById("screen-meeting");
     const reasonHeader = document.getElementById("meeting-trigger-reason");
@@ -149,11 +163,11 @@ export class MeetingEngine {
     const mummyDialogue = document.getElementById("mummy-dialogue-bubble");
 
     if (reasonHeader) reasonHeader.innerText = reason;
-    if (mummyName) mummyName.innerText = this.game.mummy.name;
-    if (mummyPortrait) mummyPortrait.innerText = this.game.mummy.avatar;
-    if (mummyDialogue) mummyDialogue.innerText = `"${this.game.mummy.dialogues.meeting}"`;
+    if (mummyName && this.game.mummy) mummyName.innerText = this.game.mummy.name;
+    if (mummyPortrait && this.game.mummy) mummyPortrait.innerText = this.game.mummy.avatar;
+    if (mummyDialogue && this.game.mummy) mummyDialogue.innerText = `"${this.game.mummy.dialogues.meeting}"`;
 
-    screen.classList.remove("hidden");
+    if (screen) screen.classList.remove("hidden");
 
     this.populateDebateLog();
     this.startDiscussionPhase();
@@ -190,13 +204,12 @@ export class MeetingEngine {
     const skipBtn = document.getElementById("btn-skip-vote");
     if (skipBtn) skipBtn.disabled = false;
 
-    // Trigger realistic, fair AI Bots automated votes during voting window
+    // Trigger realistic AI Bots automated votes during voting window
     this.game.bots.forEach((bot, idx) => {
       if (bot.isEjected) return;
       setTimeout(() => {
         if (this.phase !== "VOTING" || this.votedSisters.has(bot.id)) return;
 
-        // Living other sisters (NEVER vote for self)
         const others = this.getLivingSisters().filter(s => s.id !== bot.id);
         if (others.length === 0) {
           this.recordVote(bot.id, "SKIP");
@@ -206,7 +219,6 @@ export class MeetingEngine {
         const isBotPrankster = (bot.role === "prankster");
 
         if (isBotPrankster) {
-          // PRANKSTER BOT AI: Tries to blame an innocent sister or skips
           if (Math.random() < 0.35) {
             this.recordVote(bot.id, "SKIP");
           } else {
@@ -218,10 +230,8 @@ export class MeetingEngine {
             this.recordVote(bot.id, target ? target.id : "SKIP");
           }
         } else {
-          // INNOCENT BOT AI: Evaluates evidence objectively
           const highestSuspicion = Math.max(...others.map(o => o.suspicion || 0), 0);
 
-          // If nobody is strongly suspicious (< 45 suspicion), 70% chance to SKIP
           if (highestSuspicion < 45) {
             if (Math.random() < 0.70) {
               this.recordVote(bot.id, "SKIP");
@@ -229,7 +239,6 @@ export class MeetingEngine {
             }
           }
 
-          // Weighted probabilistic vote based on suspicion
           let totalWeight = 0;
           const weighted = others.map(s => {
             const baseSusp = Math.max(5, s.suspicion || 0);
@@ -238,7 +247,6 @@ export class MeetingEngine {
             return { id: s.id, weight: w };
           });
 
-          // 25% chance to skip even with suspicion if not 100% sure
           if (Math.random() < 0.25) {
             this.recordVote(bot.id, "SKIP");
             return;
@@ -256,7 +264,7 @@ export class MeetingEngine {
 
           this.recordVote(bot.id, chosenTarget);
         }
-      }, 1200 + idx * 1800 + Math.random() * 1500);
+      }, 1000 + idx * 1500 + Math.random() * 1000);
     });
 
     const timerBadge = document.getElementById("meeting-timer");
@@ -300,7 +308,7 @@ export class MeetingEngine {
           <div class="susp-bar"><div class="susp-fill" style="width:${Math.round(s.suspicion)}%"></div></div>
         </div>
         ${!s.isEjected ? `
-          <button class="btn-vote-sister" data-id="${s.id}" ${votingEnabled && !this.votedSisters.has(this.game.player.id) ? '' : 'disabled'}>
+          <button class="btn-vote-sister" data-id="${s.id}" ${votingEnabled && !this.votedSisters.has(this.game.player?.id) ? '' : 'disabled'}>
             ${votingEnabled ? `Vote ${s.name}` : '🔒 Discussing...'}
           </button>` : '<span class="ejected-label">Already Punished</span>'}
       `;
@@ -327,12 +335,12 @@ export class MeetingEngine {
         if (!this.isActive) return;
         const line = this.game.dialogueEngine.getRandomDebateLine(s.id);
         this.appendChatMessage(s.name, s.avatar, s.color, line.text, s === this.game.player);
-      }, (idx + 1) * 1200);
+      }, (idx + 1) * 1000);
     });
   }
 
   castVote(targetId) {
-    if (this.votedSisters.has(this.game.player.id)) return;
+    if (!this.game.player || this.votedSisters.has(this.game.player.id)) return;
     this.recordVote(this.game.player.id, targetId);
 
     if (this.game.multiplayer && this.game.multiplayer.isMultiplayer) {
@@ -345,7 +353,6 @@ export class MeetingEngine {
     this.votedSisters.add(sisterId);
     this.populateDebateGrid(this.phase === "VOTING");
 
-    // If all living sisters have cast votes, tally immediately!
     const living = this.getLivingSisters();
     if (this.votedSisters.size >= living.length) {
       if (this.timerInterval) clearInterval(this.timerInterval);
@@ -380,14 +387,12 @@ export class MeetingEngine {
       }
     });
 
-    // Jisha's Prankster Shield
     if (ejectedId === "JISHA" && this.game.pranksterSisterId === "JISHA" && !this.jishaShieldUsed) {
       this.jishaShieldUsed = true;
       this.showVerdict(null, "Jisha used her Ladli Shield! Mummy excused her!");
       return;
     }
 
-    // Ejection requires: strict lead over skip votes, no tie, and at least 2 votes
     if (tie || !ejectedId || maxVotes <= skipVotes || maxVotes < 2) {
       this.showVerdict(null, "No consensus was reached! (Skipped / Tie)");
     } else {
@@ -415,21 +420,24 @@ export class MeetingEngine {
     if (ejectedSister) {
       const isPrankster = (ejectedSister.id === this.game.pranksterSisterId);
       if (title) title.innerText = outcomeText;
-      spotlight.innerHTML = `
-        <div class="verdict-avatar-circle">
-          <img src="${ejectedSister.image || ''}" class="verdict-avatar-img" onerror="this.style.display='none'" />
-          <span style="font-size:52px;">${ejectedSister.avatar}</span>
-        </div>
-        <h3 class="verdict-name-banner" style="color:${isPrankster ? '#10B981' : '#EF4444'};">
-          ${ejectedSister.name} was ${isPrankster ? 'THE PRANKSTER! 😈' : 'NOT The Prankster! 😇'}
-        </h3>
-        <p class="verdict-sub-status">
-          ${isPrankster ? '0 Pranksters remain.' : '1 Prankster remains.'}
-        </p>
-      `;
-      dialogue.innerText = `"${this.game.mummy.dialogues.verdictPunish}"`;
+      if (spotlight) {
+        spotlight.innerHTML = `
+          <div class="verdict-avatar-circle">
+            <img src="${ejectedSister.image || ''}" class="verdict-avatar-img" onerror="this.style.display='none'" />
+            <span style="font-size:52px;">${ejectedSister.avatar}</span>
+          </div>
+          <h3 class="verdict-name-banner" style="color:${isPrankster ? '#10B981' : '#EF4444'};">
+            ${ejectedSister.name} was ${isPrankster ? 'THE PRANKSTER! 😈' : 'NOT The Prankster! 😇'}
+          </h3>
+          <p class="verdict-sub-status">
+            ${isPrankster ? '0 Pranksters remain.' : '1 Prankster remains.'}
+          </p>
+        `;
+      }
+      if (dialogue && this.game.mummy) {
+        dialogue.innerText = `"${this.game.mummy.dialogues.verdictPunish}"`;
+      }
 
-      // 1. INNOCENTS WIN: Prankster was unmasked!
       if (isPrankster) {
         setTimeout(() => {
           this.closeVerdict();
@@ -438,7 +446,6 @@ export class MeetingEngine {
         return;
       }
 
-      // 2. PRANKSTER WINS: Only 1 innocent left alive!
       const livingInnocents = this.getLivingSisters().filter(s => s.id !== this.game.pranksterSisterId);
       if (livingInnocents.length <= 1) {
         setTimeout(() => {
@@ -449,12 +456,16 @@ export class MeetingEngine {
       }
     } else {
       if (title) title.innerText = "No Sister Was Punished";
-      spotlight.innerHTML = `
-        <div style="font-size:60px;">🤷‍♀️</div>
-        <h3 class="verdict-name-banner" style="color:#94A3B8;">No one was ejected. (Skipped / Tie)</h3>
-        <p class="verdict-sub-status">1 Prankster remains.</p>
-      `;
-      dialogue.innerText = `"Koi saboot nathi! Badha potpotana kaam par laago!" (No proof! Everyone back to cleaning!)`;
+      if (spotlight) {
+        spotlight.innerHTML = `
+          <div style="font-size:60px;">🤷‍♀️</div>
+          <h3 class="verdict-name-banner" style="color:#94A3B8;">No one was ejected. (Skipped / Tie)</h3>
+          <p class="verdict-sub-status">1 Prankster remains.</p>
+        `;
+      }
+      if (dialogue) {
+        dialogue.innerText = `"Koi saboot nathi! Badha potpotana kaam par laago!" (No proof! Everyone back to cleaning!)`;
+      }
     }
   }
 
@@ -462,6 +473,18 @@ export class MeetingEngine {
     this.isActive = false;
     this.phase = "IDLE";
     const verdictScreen = document.getElementById("screen-verdict");
+    const meetingScreen = document.getElementById("screen-meeting");
     if (verdictScreen) verdictScreen.classList.add("hidden");
+    if (meetingScreen) meetingScreen.classList.add("hidden");
+
+    if (this.game.state !== "GAMEOVER") {
+      this.game.state = "PLAYING";
+      document.getElementById("game-hud")?.classList.remove("hidden");
+      document.getElementById("floor-switcher")?.classList.remove("hidden");
+      document.getElementById("touch-controls")?.classList.remove("hidden");
+      if (this.game.player && this.game.player.role === "prankster") {
+        document.getElementById("sabotage-bar")?.classList.remove("hidden");
+      }
+    }
   }
 }

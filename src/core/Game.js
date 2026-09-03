@@ -187,6 +187,31 @@ export class Game {
     }
   }
 
+  teleportAllToCentralHall() {
+    // 1. Teleport local player to Floor 1 center table
+    if (this.player) {
+      this.setPlayerFloor(1, 600);
+      this.player.vx = 0;
+      this.player.vy = 0;
+      this.player.isMoving = false;
+    }
+
+    // 2. Teleport bots to Floor 1 around table
+    this.bots.forEach((bot, idx) => {
+      bot.setFloor(1, 420 + idx * 90);
+      bot.vx = 0;
+      bot.vy = 0;
+      bot.isMoving = false;
+    });
+
+    // 3. Teleport Mummy to Floor 1 front
+    if (this.mummy) {
+      this.mummy.floor = 1;
+      this.mummy.x = 600;
+      this.mummy.y = (FLOOR_Y[1] !== undefined ? FLOOR_Y[1] : 280) + 60;
+    }
+  }
+
   leaveMatchToLobby() {
     this.multiplayer.exitMatch();
     this.state = "LOBBY";
