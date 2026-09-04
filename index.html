@@ -190,11 +190,27 @@
               <!-- Left: Live Rotating 3D Character Stage -->
               <div class="hero-stage-card">
                 <div class="hero-stage-badge">🌟 3D CHARACTER PREVIEW 🌟</div>
-                <div id="hero-stage-container" class="hero-stage-viewport"></div>
+                <div class="hero-char-title" id="hero-char-title">
+                  <span class="hero-char-avatar" id="hero-char-avatar">🌸</span>
+                  <div class="hero-char-name-group">
+                    <h3 id="hero-char-name">Riddhi</h3>
+                    <span id="hero-char-archetype">Darpok & Aalsi (Timid & Lazy)</span>
+                  </div>
+                </div>
+                <div id="hero-stage-container" class="hero-stage-viewport">
+                  <div id="hero-power-fx-banner" class="hero-power-fx-banner hidden"></div>
+                </div>
                 <div class="hero-stage-controls">
-                  <button id="btn-hero-test-power" class="hero-power-preview-btn">
-                    <span>⚡ PREVIEW SISTER POWER FX</span>
-                  </button>
+                  <div class="hero-dual-power-buttons">
+                    <button id="btn-hero-preview-innocent" class="hero-power-btn innocent-preview-btn">
+                      <span>😇 PREVIEW INNOCENT:</span>
+                      <strong id="hero-btn-innocent-name">Blanket Sanctuary</strong>
+                    </button>
+                    <button id="btn-hero-preview-prankster" class="hero-power-btn prankster-preview-btn">
+                      <span>😈 PREVIEW PRANKSTER (IMPOSTER):</span>
+                      <strong id="hero-btn-prankster-name">Sleep Cloud Trap</strong>
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -613,6 +629,16 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Mobile Portrait Orientation Prompt -->
+  <div id="portrait-rotate-prompt" class="portrait-rotate-overlay hidden">
+    <div class="rotate-card">
+      <div class="rotate-phone-anim">📱 ➔ 📲</div>
+      <h3>Rotate Device to Landscape</h3>
+      <p>Sister Sneak 3D is designed for widescreen isometric Haveli gameplay! Please rotate your phone sideways for the best experience.</p>
+      <button id="btn-dismiss-rotate" class="dismiss-rotate-btn">Continue in Portrait Anyway</button>
     </div>
   </div>
 

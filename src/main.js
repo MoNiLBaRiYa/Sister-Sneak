@@ -1,7 +1,8 @@
 /**
  * Sister Sneak: Phone Locked - Main Application Bootstrap
  * Initializes game engine, lobby character selector with custom illustrated avatars,
- * 3D rotating character hero stage, interactive power sandbox studio,
+ * 3D rotating character hero stage with dual Innocent / Prankster preview buttons,
+ * interactive power sandbox studio, mobile landscape rotation detection,
  * role preferences, instant character sync across lobby, and matchmaking connections.
  */
 
@@ -25,14 +26,80 @@ window.addEventListener('DOMContentLoaded', () => {
     heroStage = new HeroStage3D(heroContainer);
   }
 
-  // Hero Power Preview FX Button
-  const btnHeroPower = document.getElementById('btn-hero-test-power');
-  if (btnHeroPower && heroStage) {
-    btnHeroPower.addEventListener('click', () => {
-      heroStage.triggerPowerBurst();
-      game.audio.playPower();
+  // Update Hero Card UI (Avatar, Name, Tagline, Dual Power Button Labels)
+  function updateHeroStageUI(sisterId) {
+    const s = SISTERS[sisterId] || SISTERS.RIDDHI;
+    
+    const charAvatar = document.getElementById('hero-char-avatar');
+    const charName = document.getElementById('hero-char-name');
+    const charArchetype = document.getElementById('hero-char-archetype');
+    const innoName = document.getElementById('hero-btn-innocent-name');
+    const prankName = document.getElementById('hero-btn-prankster-name');
+
+    if (charAvatar) charAvatar.innerText = s.avatar || "🌸";
+    if (charName) charName.innerText = s.name || "Riddhi";
+    if (charArchetype) charArchetype.innerText = s.archetype || "Timid & Cozy";
+    if (innoName) innoName.innerText = s.innocentPower?.name || "Blanket Sanctuary";
+    if (prankName) prankName.innerText = s.pranksterPower?.name || "Sleep Cloud Trap";
+
+    if (heroStage) {
+      heroStage.setSister(sisterId);
+    }
+  }
+
+  // Dual Hero Power Preview FX Buttons
+  const btnPreviewInnocent = document.getElementById('btn-hero-preview-innocent');
+  const btnPreviewPrankster = document.getElementById('btn-hero-preview-prankster');
+  const heroPowerBanner = document.getElementById('hero-power-fx-banner');
+
+  if (btnPreviewInnocent) {
+    btnPreviewInnocent.addEventListener('click', () => {
       const s = SISTERS[selectedSister];
-      game.showTopToast(`✨ Previewing ${s.name}'s Signature Power FX! ✨`);
+      if (heroStage) heroStage.triggerPowerBurst("innocent");
+      game.audio.playPower();
+
+      if (heroPowerBanner) {
+        heroPowerBanner.innerHTML = `😇 <strong>INNOCENT SELF-HELP:</strong> ${s.innocentPower?.name}<br><small>${s.innocentPower?.desc}</small>`;
+        heroPowerBanner.classList.remove('hidden');
+        setTimeout(() => heroPowerBanner.classList.add('hidden'), 4000);
+      }
+
+      game.showTopToast(`😇 Previewing ${s.name}'s Innocent Power: ${s.innocentPower?.name}! ✨`);
+    });
+  }
+
+  if (btnPreviewPrankster) {
+    btnPreviewPrankster.addEventListener('click', () => {
+      const s = SISTERS[selectedSister];
+      if (heroStage) heroStage.triggerPowerBurst("prankster");
+      game.audio.playPower();
+
+      if (heroPowerBanner) {
+        heroPowerBanner.innerHTML = `😈 <strong>PRANKSTER (IMPOSTER) TRAP:</strong> ${s.pranksterPower?.name}<br><small>${s.pranksterPower?.desc}</small>`;
+        heroPowerBanner.classList.remove('hidden');
+        setTimeout(() => heroPowerBanner.classList.add('hidden'), 4000);
+      }
+
+      // Trigger respective screen visual FX overlay
+      if (selectedSister === "RIDDHI") {
+        const sleepEl = document.getElementById("sleep-fog-overlay");
+        sleepEl?.classList.remove("hidden");
+        setTimeout(() => sleepEl?.classList.add("hidden"), 3000);
+      } else if (selectedSister === "SHRUTI") {
+        const paintEl = document.getElementById("paint-splatter-overlay");
+        paintEl?.classList.remove("hidden");
+        setTimeout(() => paintEl?.classList.add("hidden"), 3500);
+      } else if (selectedSister === "JAHANVI") {
+        const stickyEl = document.getElementById("sticky-trap-overlay");
+        stickyEl?.classList.remove("hidden");
+        setTimeout(() => stickyEl?.classList.add("hidden"), 3000);
+      } else if (selectedSister === "JYEANA") {
+        const glitchEl = document.getElementById("glitch-scanlines-overlay");
+        glitchEl?.classList.remove("hidden");
+        setTimeout(() => glitchEl?.classList.add("hidden"), 3000);
+      }
+
+      game.showTopToast(`😈 Previewing ${s.name}'s Prankster (Imposter) Power: ${s.pranksterPower?.name}! ⚡`);
     });
   }
 
@@ -68,10 +135,8 @@ window.addEventListener('DOMContentLoaded', () => {
         selectedSister = s.id;
         game.selectedSisterId = s.id;
 
-        // Update 3D Hero Stage Model
-        if (heroStage) {
-          heroStage.setSister(s.id);
-        }
+        // Update 3D Hero Stage Model & UI Details
+        updateHeroStageUI(s.id);
 
         // Sync character change to multiplayer lobby in real time
         if (game.multiplayer && game.multiplayer.isMultiplayer) {
@@ -84,6 +149,9 @@ window.addEventListener('DOMContentLoaded', () => {
       sisterGrid.appendChild(card);
     });
   }
+
+  // Initialize initial hero stage UI
+  updateHeroStageUI(selectedSister);
 
   // 3. Wire Mummy Selection Cards
   const mummyCards = document.querySelectorAll('.mummy-card');
@@ -316,6 +384,34 @@ window.addEventListener('DOMContentLoaded', () => {
     btnToggleCreator.addEventListener('click', (e) => {
       e.stopPropagation();
       creatorBadge.classList.toggle('minimized');
+    });
+  }
+
+  // 16. Mobile Portrait Orientation Detection & Prompt
+  function checkOrientation() {
+    const isPortrait = window.matchMedia("(orientation: portrait) and (max-width: 900px)").matches;
+    const rotatePrompt = document.getElementById("portrait-rotate-prompt");
+    if (rotatePrompt && !rotatePrompt.dataset.dismissed) {
+      if (isPortrait) {
+        rotatePrompt.classList.remove("hidden");
+      } else {
+        rotatePrompt.classList.add("hidden");
+      }
+    }
+  }
+
+  window.addEventListener("resize", checkOrientation);
+  window.addEventListener("orientationchange", checkOrientation);
+  checkOrientation();
+
+  const btnDismissRotate = document.getElementById("btn-dismiss-rotate");
+  if (btnDismissRotate) {
+    btnDismissRotate.addEventListener("click", () => {
+      const rotatePrompt = document.getElementById("portrait-rotate-prompt");
+      if (rotatePrompt) {
+        rotatePrompt.dataset.dismissed = "true";
+        rotatePrompt.classList.add("hidden");
+      }
     });
   }
 });

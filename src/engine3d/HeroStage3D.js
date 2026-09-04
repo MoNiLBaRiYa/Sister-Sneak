@@ -1,7 +1,7 @@
 /**
  * Sister Sneak 3D - Hero Stage 3D Viewport
  * Interactive 3D Landing Page Showcase with Rotating Character Podium,
- * dynamic stage lighting, and interactive character power particle bursts.
+ * dynamic stage lighting, and dual Innocent / Prankster (Imposter) power particle bursts.
  */
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
@@ -23,7 +23,7 @@ export class HeroStage3D {
   initThree() {
     if (!this.container) return;
 
-    const width = this.container.clientWidth || 280;
+    const width = this.container.clientWidth || 320;
     const height = this.container.clientHeight || 240;
 
     // Scene
@@ -31,7 +31,7 @@ export class HeroStage3D {
 
     // Camera
     this.camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 100);
-    this.camera.position.set(0, 1.6, 4.5);
+    this.camera.position.set(0, 1.6, 4.4);
     this.camera.lookAt(0, 1.1, 0);
 
     // Renderer
@@ -94,7 +94,7 @@ export class HeroStage3D {
 
   onResize() {
     if (!this.container || !this.renderer || !this.camera) return;
-    const width = this.container.clientWidth || 280;
+    const width = this.container.clientWidth || 320;
     const height = this.container.clientHeight || 240;
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
@@ -119,13 +119,14 @@ export class HeroStage3D {
     }
   }
 
-  triggerPowerBurst() {
+  triggerPowerBurst(mode = "innocent") {
     const config = SISTERS[this.currentSisterId] || SISTERS.RIDDHI;
-    const color = new THREE.Color(config.color || "#F59E0B");
+    const isPrankster = (mode === "prankster");
+    const color = isPrankster ? new THREE.Color("#EF4444") : new THREE.Color(config.color || "#10B981");
 
-    // Spawn 25 glowing orbital burst particles
-    for (let i = 0; i < 25; i++) {
-      const geo = new THREE.SphereGeometry(0.06 + Math.random() * 0.04, 8, 8);
+    // Spawn 35 glowing orbital burst particles
+    for (let i = 0; i < 35; i++) {
+      const geo = new THREE.SphereGeometry(0.06 + Math.random() * 0.05, 8, 8);
       const mat = new THREE.MeshBasicMaterial({
         color: color,
         transparent: true,
@@ -133,11 +134,11 @@ export class HeroStage3D {
       });
       const p = new THREE.Mesh(geo, mat);
       p.position.set(0, 1.2, 0);
-      const angle = (i / 25) * Math.PI * 2;
-      const speed = 1.8 + Math.random() * 1.5;
+      const angle = (i / 35) * Math.PI * 2;
+      const speed = (isPrankster ? 2.5 : 1.8) + Math.random() * 1.5;
       p.velocity = new THREE.Vector3(
         Math.cos(angle) * speed,
-        (Math.random() - 0.2) * 2.0,
+        (Math.random() - 0.2) * (isPrankster ? 3.0 : 2.0),
         Math.sin(angle) * speed
       );
       p.life = 1.0;
@@ -174,7 +175,7 @@ export class HeroStage3D {
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const p = this.particles[i];
       p.position.addScaledVector(p.velocity, 0.016);
-      p.life -= 0.025;
+      p.life -= 0.022;
       p.material.opacity = Math.max(0, p.life);
       p.scale.multiplyScalar(0.96);
 
