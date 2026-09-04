@@ -520,7 +520,7 @@ html, body {
 }
 
 /* Among Us Style Cards & Modern 3D Portal */
-.lobby-card, .courtroom-card, .cutscene-card, .pause-card, .verdict-card, .gameover-card, .help-card {
+.courtroom-card, .cutscene-card, .pause-card, .verdict-card, .gameover-card, .help-card {
   background: #1E293B;
   border: 2.5px solid #334155;
   border-radius: 18px;
@@ -535,14 +535,20 @@ html, body {
 }
 
 .modern-portal-card {
-  width: 96% !important;
-  max-width: 1240px !important;
-  background: rgba(15, 23, 42, 0.96) !important;
+  width: 96vw !important;
+  max-width: 1400px !important;
+  height: auto !important;
+  min-height: 85vh !important;
+  max-height: 96vh !important;
+  background: rgba(15, 23, 42, 0.97) !important;
   border: 2.5px solid rgba(6, 182, 212, 0.75) !important;
   backdrop-filter: blur(20px) !important;
-  box-shadow: 0 0 50px rgba(6, 182, 212, 0.4), inset 0 0 30px rgba(6, 182, 212, 0.08) !important;
+  box-shadow: 0 0 60px rgba(6, 182, 212, 0.45), inset 0 0 30px rgba(6, 182, 212, 0.08) !important;
   border-radius: 24px !important;
   padding: 22px 28px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  margin: auto !important;
 }
 
 .portal-header {
@@ -618,10 +624,12 @@ html, body {
   gap: 18px;
   align-items: stretch;
   margin-bottom: 12px;
+  width: 100%;
 }
 
 .hero-stage-card {
   flex: 0 0 320px;
+  width: 320px;
   background: rgba(15, 23, 42, 0.88);
   border: 2px solid var(--primary-cyan);
   border-radius: 18px;
@@ -631,6 +639,47 @@ html, body {
   align-items: center;
   justify-content: space-between;
   box-shadow: 0 0 25px rgba(6, 182, 212, 0.35);
+}
+
+@media (min-width: 900px) {
+  .modern-portal-card {
+    width: 96vw !important;
+    max-width: 1400px !important;
+    min-width: 860px !important;
+  }
+
+  .hero-showcase-row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    gap: 20px !important;
+    width: 100% !important;
+  }
+
+  .hero-stage-card {
+    flex: 0 0 320px !important;
+    width: 320px !important;
+    min-width: 320px !important;
+  }
+
+  .hero-select-column {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+
+  .sister-cards-grid {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .mummy-cards-grid {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
 }
 
 .hero-stage-badge {
@@ -2286,8 +2335,8 @@ html, body {
     padding: 1px 3px !important;
   }
 
-  /* 7. Modal Cards (Lobby, Courtroom, Verdict, Minigames) */
-  .lobby-card, .courtroom-card, .cutscene-card, .minigame-card, .pause-card, .verdict-card, .gameover-card, .help-card {
+  /* 7. Modal Cards (Courtroom, Verdict, Minigames) */
+  .courtroom-card, .cutscene-card, .minigame-card, .pause-card, .verdict-card, .gameover-card, .help-card {
     padding: 8px 12px !important;
     max-height: 96vh !important;
     border-radius: 12px !important;
