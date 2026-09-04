@@ -177,19 +177,36 @@
           <!-- TAB 1: PLAY MATCH (Singleplayer & Multiplayer) -->
           <div id="portal-panel-play" class="portal-tab-content active">
             <!-- Mode Switcher -->
+            <!-- Mode Switcher -->
             <div class="mode-tabs">
               <button class="mode-tab active" id="tab-singleplayer">🎮 Solo vs AI Bots</button>
               <button class="mode-tab" id="tab-multiplayer">🌐 Online Multiplayer (Room Code)</button>
             </div>
 
-            <!-- Step 1: Select Sister with Dual Power Badges -->
-            <div class="character-select-section">
-              <div class="section-title-row">
-                <h3>1. Select Your Sister:</h3>
-                <span class="section-hint">Click a card to equip & view powers</span>
+            <!-- Hero 3D Stage Showcase & Character Selection Row -->
+            <div class="hero-showcase-row">
+              <!-- Left: Live Rotating 3D Character Stage -->
+              <div class="hero-stage-card">
+                <div class="hero-stage-badge">🌟 3D CHARACTER PREVIEW 🌟</div>
+                <div id="hero-stage-container" class="hero-stage-viewport"></div>
+                <div class="hero-stage-controls">
+                  <button id="btn-hero-test-power" class="hero-power-preview-btn">
+                    <span>⚡ PREVIEW SISTER POWER FX</span>
+                  </button>
+                </div>
               </div>
-              <div class="sister-cards-grid" id="sister-cards-grid">
-                <!-- Dynamically Populated by JS -->
+
+              <!-- Right: Character Cards Selector -->
+              <div class="hero-select-column">
+                <div class="character-select-section">
+                  <div class="section-title-row">
+                    <h3>1. Select Your Sister:</h3>
+                    <span class="section-hint">Click a card to equip & view powers</span>
+                  </div>
+                  <div class="sister-cards-grid" id="sister-cards-grid">
+                    <!-- Dynamically Populated by JS -->
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -277,7 +294,8 @@
                 <span class="code-val" id="mp-room-code-display">1234</span>
                 <div class="code-btn-group">
                   <button id="btn-copy-code" class="copy-code-btn">📋 Copy Code</button>
-                  <button id="btn-copy-invite-link" class="copy-code-btn link-btn">🔗 Share Invite Link</button>
+                  <button id="btn-copy-invite-link" class="copy-code-btn link-btn">🔗 Copy Direct Link</button>
+                  <button id="btn-share-whatsapp" class="copy-code-btn whatsapp-btn">💬 Share on WhatsApp</button>
                 </div>
               </div>
               <div class="mp-waiting-body">
@@ -296,8 +314,20 @@
             </div>
           </div>
 
-          <!-- TAB 2: SISTER POWERS SHOWCASE -->
+          <!-- TAB 2: SISTER POWERS SHOWCASE & INTERACTIVE SANDBOX -->
           <div id="portal-panel-powers" class="portal-tab-content hidden">
+            <!-- Interactive Sandbox Playground Studio -->
+            <div class="sandbox-header-banner">
+              <h4>🧪 Interactive Power Sandbox Studio</h4>
+              <p>Click any button to test that power's live screen FX & sound directly in your browser:</p>
+            </div>
+            <div class="sandbox-test-buttons-grid">
+              <button class="sandbox-btn sb-riddhi" data-power="RIDDHI">🌸 Test Blanket Camouflage</button>
+              <button class="sandbox-btn sb-shruti" data-power="SHRUTI">🎨 Test Rangoli Paint Splatter</button>
+              <button class="sandbox-btn sb-jahanvi" data-power="JAHANVI">🎒 Test Sticky Gum Snare</button>
+              <button class="sandbox-btn sb-jisha" data-power="JISHA">📚 Test Ladli Shield</button>
+              <button class="sandbox-btn sb-jyeana" data-power="JYEANA">⚡ Test EMP Controls Inverter</button>
+            </div>
             <div class="powers-showcase-grid">
               <div class="power-detail-card">
                 <div class="pd-header"><span class="pd-avatar">🌸</span> <h4>Riddhi</h4> <span class="pd-badge">Timid & Cozy</span></div>

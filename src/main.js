@@ -1,12 +1,14 @@
 /**
  * Sister Sneak: Phone Locked - Main Application Bootstrap
  * Initializes game engine, lobby character selector with custom illustrated avatars,
+ * 3D rotating character hero stage, interactive power sandbox studio,
  * role preferences, instant character sync across lobby, and matchmaking connections.
  */
 
 import { Game } from './core/Game.js';
 import { SISTERS } from './config/characters.js';
 import { MUMMIES } from './config/mummies.js';
+import { HeroStage3D } from './engine3d/HeroStage3D.js';
 
 window.addEventListener('DOMContentLoaded', () => {
   const canvas = document.getElementById('gameCanvas');
@@ -16,7 +18,25 @@ window.addEventListener('DOMContentLoaded', () => {
   let selectedSister = "RIDDHI";
   let selectedMummy = "RIDDHI_MUMMY";
 
-  // 1. Populate Sister Selection Cards with Custom Avatars
+  // 1. Initialize Hero 3D Stage on Landing Page
+  const heroContainer = document.getElementById('hero-stage-container');
+  let heroStage = null;
+  if (heroContainer) {
+    heroStage = new HeroStage3D(heroContainer);
+  }
+
+  // Hero Power Preview FX Button
+  const btnHeroPower = document.getElementById('btn-hero-test-power');
+  if (btnHeroPower && heroStage) {
+    btnHeroPower.addEventListener('click', () => {
+      heroStage.triggerPowerBurst();
+      game.audio.playPower();
+      const s = SISTERS[selectedSister];
+      game.showTopToast(`✨ Previewing ${s.name}'s Signature Power FX! ✨`);
+    });
+  }
+
+  // 2. Populate Sister Selection Cards with Custom Avatars
   const sisterGrid = document.getElementById('sister-cards-grid');
   if (sisterGrid) {
     sisterGrid.innerHTML = "";
@@ -48,6 +68,11 @@ window.addEventListener('DOMContentLoaded', () => {
         selectedSister = s.id;
         game.selectedSisterId = s.id;
 
+        // Update 3D Hero Stage Model
+        if (heroStage) {
+          heroStage.setSister(s.id);
+        }
+
         // Sync character change to multiplayer lobby in real time
         if (game.multiplayer && game.multiplayer.isMultiplayer) {
           game.multiplayer.updateMyCharacter(s.id, s.name);
@@ -60,7 +85,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 2. Wire Mummy Selection Cards
+  // 3. Wire Mummy Selection Cards
   const mummyCards = document.querySelectorAll('.mummy-card');
   mummyCards.forEach((mCard) => {
     mCard.addEventListener('click', () => {
@@ -71,7 +96,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Portal Navigation Tabs (Play, Powers, Mummy Guide, Lore, Roadmap)
+  // 4. Portal Navigation Tabs (Play, Powers, Mummy Guide, Lore, Roadmap)
   const portalTabs = [
     { btn: 'tab-portal-play', panel: 'portal-panel-play' },
     { btn: 'tab-portal-powers', panel: 'portal-panel-powers' },
@@ -94,11 +119,48 @@ window.addEventListener('DOMContentLoaded', () => {
         panelEl.classList.remove('hidden');
         panelEl.classList.add('active');
         game.audio.playClick();
+
+        if (tab.btn === 'tab-portal-play' && heroStage) {
+          setTimeout(() => heroStage.onResize(), 100);
+        }
       });
     }
   });
 
-  // Single Player vs Multiplayer Tabs
+  // 5. Interactive Sandbox Studio Buttons in TAB 2
+  const sandboxBtns = document.querySelectorAll('.sandbox-btn');
+  sandboxBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const powerType = btn.getAttribute('data-power');
+      game.audio.playPower();
+
+      if (powerType === "RIDDHI") {
+        const sleepEl = document.getElementById("sleep-fog-overlay");
+        sleepEl?.classList.remove("hidden");
+        game.showTopToast("😴 Riddhi: Lavender Sleep Cloud Fog Active (Slows nearby by 60%)!");
+        setTimeout(() => sleepEl?.classList.add("hidden"), 3000);
+      } else if (powerType === "SHRUTI") {
+        const paintEl = document.getElementById("paint-splatter-overlay");
+        paintEl?.classList.remove("hidden");
+        game.showTopToast("🎨 Shruti: Rangoli Paint Splatter Blinds Screen (5s)!");
+        setTimeout(() => paintEl?.classList.add("hidden"), 3500);
+      } else if (powerType === "JAHANVI") {
+        const stickyEl = document.getElementById("sticky-trap-overlay");
+        stickyEl?.classList.remove("hidden");
+        game.showTopToast("🦶 Jahanvi: Sticky Bubblegum Snare Placed! Traps anyone stepping on it!");
+        setTimeout(() => stickyEl?.classList.add("hidden"), 3000);
+      } else if (powerType === "JISHA") {
+        game.showTopToast("😇 Jisha: Mummy's Ladli Shield Active! Immune to suspicion & checks (12s)!");
+      } else if (powerType === "JYEANA") {
+        const glitchEl = document.getElementById("glitch-scanlines-overlay");
+        glitchEl?.classList.remove("hidden");
+        game.showTopToast("⚡ Jyeana: EMP Jammer Active! Controls are INVERTED (6s)!");
+        setTimeout(() => glitchEl?.classList.add("hidden"), 3000);
+      }
+    });
+  });
+
+  // 6. Single Player vs Multiplayer Tabs
   const tabSingle = document.getElementById('tab-singleplayer');
   const tabMulti = document.getElementById('tab-multiplayer');
   const panelSingle = document.getElementById('singleplayer-options-panel');
@@ -125,7 +187,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Start Game Button (Single Player Solo)
+  // 7. Start Game Button (Single Player Solo)
   const btnStart = document.getElementById('btn-start-game');
   if (btnStart) {
     btnStart.addEventListener('click', () => {
@@ -139,7 +201,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Multiplayer: Create Room
+  // 8. Multiplayer: Create Room
   const btnCreateRoom = document.getElementById('btn-create-room');
   const inputCustomHostCode = document.getElementById('input-custom-host-code');
   if (btnCreateRoom) {
@@ -159,7 +221,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Multiplayer: Join Room
+  // 9. Multiplayer: Join Room
   const btnJoinRoom = document.getElementById('btn-join-room');
   const inputRoomCode = document.getElementById('input-room-code');
   if (btnJoinRoom && inputRoomCode) {
@@ -185,7 +247,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Copy Room Code Button
+  // 10. Copy Room Code Button
   const btnCopyCode = document.getElementById('btn-copy-code');
   if (btnCopyCode) {
     btnCopyCode.addEventListener('click', () => {
@@ -197,19 +259,30 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Copy 1-Click WhatsApp / Browser Invite Link Button
+  // 11. Copy Direct Link Button
   const btnCopyLink = document.getElementById('btn-copy-invite-link');
   if (btnCopyLink) {
     btnCopyLink.addEventListener('click', () => {
       const link = game.multiplayer.getShareableLink();
       navigator.clipboard.writeText(link).then(() => {
         btnCopyLink.innerText = "✅ Link Copied!";
-        setTimeout(() => { btnCopyLink.innerText = "🔗 Share Invite Link"; }, 1500);
+        setTimeout(() => { btnCopyLink.innerText = "🔗 Copy Direct Link"; }, 1500);
       });
     });
   }
 
-  // Multiplayer: Host Start Match
+  // 12. 1-Click Share on WhatsApp Button
+  const btnShareWhatsapp = document.getElementById('btn-share-whatsapp');
+  if (btnShareWhatsapp) {
+    btnShareWhatsapp.addEventListener('click', () => {
+      const code = game.multiplayer.roomCode;
+      const link = game.multiplayer.getShareableLink();
+      const msg = encodeURIComponent(`👧 Join my Sister Sneak match! 📱🔒\n\nRoom Code: *${code}*\nClick to join directly:\n${link}`);
+      window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
+    });
+  }
+
+  // 13. Multiplayer: Host Start Match
   const btnMpStart = document.getElementById('btn-mp-start-game');
   if (btnMpStart) {
     btnMpStart.addEventListener('click', () => {
@@ -223,7 +296,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Play Again Button
+  // 14. Play Again Button
   const btnPlayAgain = document.getElementById('btn-play-again');
   if (btnPlayAgain) {
     btnPlayAgain.addEventListener('click', () => {
@@ -236,7 +309,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Creator Message Toggle (Brother Monil)
+  // 15. Creator Message Toggle (Brother Monil)
   const btnToggleCreator = document.getElementById('btn-toggle-creator');
   const creatorBadge = document.getElementById('creator-corner-badge');
   if (btnToggleCreator && creatorBadge) {
