@@ -1998,8 +1998,61 @@ html, body {
 }
 
 /* ==========================================================================
-   Mobile Optimization (Portrait & Small Screens)
+   Mobile Optimization (Portrait & Small Screens <= 860px)
    ========================================================================== */
+@media (max-width: 860px) {
+  .hero-showcase-row {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+
+  .hero-stage-card {
+    flex: none !important;
+    width: 100% !important;
+    max-width: 320px !important;
+    margin: 0 auto !important;
+  }
+
+  .hero-stage-viewport {
+    height: 180px !important;
+  }
+
+  .portal-nav-bar {
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .portal-nav-bar::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .portal-tab {
+    flex: 0 0 auto !important;
+    padding: 8px 12px !important;
+    font-size: 10px !important;
+  }
+
+  .modern-portal-card {
+    padding: 14px 12px !important;
+    border-radius: 16px !important;
+    max-height: 94vh !important;
+    overflow-y: auto !important;
+  }
+
+  .sister-cards-grid {
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  .mummy-cards-grid {
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)) !important;
+    gap: 6px !important;
+  }
+}
+
 @media (max-width: 650px) {
   .creator-corner-badge {
     left: 8px !important;
@@ -2023,12 +2076,6 @@ html, body {
   .hud-center {
     max-width: 130px;
   }
-  .sister-cards-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  .mummy-cards-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
   .sisters-debate-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -2044,6 +2091,12 @@ html, body {
     bottom: 80px;
     right: 8px;
     padding: 4px 6px;
+  }
+  .game-title {
+    font-size: 20px !important;
+  }
+  .game-subtitle {
+    font-size: 12px !important;
   }
 }
 
