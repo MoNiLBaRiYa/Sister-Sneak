@@ -662,6 +662,10 @@ html, body {
 }
 
 @media (min-width: 900px) {
+  .modern-portal-card {
+    padding: 24px 36px 60px 36px !important;
+  }
+
   .hero-showcase-row {
     display: flex !important;
     flex-direction: row !important;
@@ -671,13 +675,13 @@ html, body {
   }
 
   .hero-stage-card {
-    flex: 0 0 360px !important;
-    width: 360px !important;
-    min-width: 360px !important;
+    flex: 0 0 380px !important;
+    width: 380px !important;
+    min-width: 380px !important;
   }
 
   .hero-stage-viewport {
-    height: 260px !important;
+    height: 280px !important;
   }
 
   .hero-select-column {
@@ -688,15 +692,45 @@ html, body {
   .sister-cards-grid {
     display: grid !important;
     grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
-    gap: 10px !important;
+    gap: 12px !important;
     width: 100% !important;
   }
 
   .mummy-cards-grid {
     display: grid !important;
     grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
-    gap: 10px !important;
+    gap: 12px !important;
     width: 100% !important;
+  }
+
+  .powers-showcase-grid, .mummy-guide-container, .lore-guide-container {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  .modern-portal-card {
+    padding: 28px 56px 60px 56px !important;
+  }
+
+  .hero-stage-card {
+    flex: 0 0 430px !important;
+    width: 430px !important;
+    min-width: 430px !important;
+  }
+
+  .hero-stage-viewport {
+    height: 320px !important;
+  }
+
+  .sister-cards-grid {
+    gap: 14px !important;
+  }
+
+  .mummy-cards-grid {
+    gap: 14px !important;
   }
 }
 
@@ -2103,10 +2137,10 @@ html, body {
   }
 
   .modern-portal-card {
-    padding: 14px 12px !important;
-    border-radius: 16px !important;
-    max-height: 94vh !important;
-    overflow-y: auto !important;
+    padding: 14px 12px 60px 12px !important;
+    border-radius: 0 !important;
+    max-height: none !important;
+    overflow-y: visible !important;
   }
 
   .sister-cards-grid {
