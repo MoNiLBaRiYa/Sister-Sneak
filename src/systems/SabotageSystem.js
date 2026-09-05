@@ -32,6 +32,13 @@ export class SabotageSystem {
   }
 
   update(dt) {
+    if (this.game.state !== "PLAYING") {
+      if (this.criticalSabotageActive) {
+        this.resolveCriticalSabotage();
+      }
+      return;
+    }
+
     // Update cooldown timers
     Object.keys(this.cooldowns).forEach((k) => {
       if (this.cooldowns[k] > 0) {
@@ -50,7 +57,9 @@ export class SabotageSystem {
 
       if (this.criticalTimer <= 0) {
         this.criticalSabotageActive = false;
-        this.game.triggerDefeat("CRITICAL_SABOTAGE_EXPIRED");
+        if (this.game.state === "PLAYING") {
+          this.game.triggerDefeat("CRITICAL_SABOTAGE_EXPIRED");
+        }
       }
     }
 
@@ -103,12 +112,19 @@ export class SabotageSystem {
   }
 
   resolveCriticalSabotage() {
-    if (this.criticalSabotageActive || this.game.houseMap.blackedOutFloors.size > 0) {
-      this.criticalSabotageActive = false;
+    this.criticalSabotageActive = false;
+    this.criticalTimer = 0;
+    if (this.game.houseMap && this.game.houseMap.blackedOutFloors) {
       this.game.houseMap.blackedOutFloors.clear();
-      const alertEl = document.getElementById("mummy-alert");
-      if (alertEl) alertEl.classList.add("hidden");
-      this.game.showTopToast("✨ Blown Fuse Repaired! Power & Lights 100% Restored! ✨");
     }
+    if (this.game.lighting3D) {
+      this.game.lighting3D.setBlackout(false);
+    }
+    const alertEl = document.getElementById("mummy-alert");
+    if (alertEl) {
+      alertEl.classList.add("hidden");
+      alertEl.innerHTML = "";
+    }
+    this.game.showTopToast("✨ Blown Fuse Repaired! Power & Lights 100% Restored! ✨");
   }
 }

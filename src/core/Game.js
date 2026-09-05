@@ -216,6 +216,17 @@ export class Game {
     this.multiplayer.exitMatch();
     this.state = "LOBBY";
     this.taskManager.reset();
+    if (this.sabotageSystem) {
+      this.sabotageSystem.resolveCriticalSabotage();
+      this.sabotageSystem.criticalSabotageActive = false;
+      this.sabotageSystem.cooldowns = { BLACKOUT: 10, KUNDI: 10 };
+    }
+    this.bots3D.forEach(b => b.destroy());
+    this.bots3D.clear();
+    this.remotePlayers3D.forEach(r => r.destroy());
+    this.remotePlayers3D.clear();
+    if (this.mummy3D) { this.mummy3D.destroy(); this.mummy3D = null; }
+    if (this.player3D) { this.player3D.destroy(); this.player3D = null; }
 
     document.getElementById("game-hud")?.classList.add("hidden");
     document.getElementById("floor-switcher")?.classList.add("hidden");
@@ -565,6 +576,42 @@ export class Game {
     }
   }
 
+  updateRemotePlayerPosition(data) {
+    if (this.remotePlayers.has(data.sisterId)) {
+      const rp = this.remotePlayers.get(data.sisterId);
+      rp.x = data.x;
+      rp.y = data.y;
+      rp.floor = data.floor;
+      rp.vx = data.vx;
+      rp.vy = data.vy;
+      rp.facing = data.facing;
+      rp.isMoving = data.isMoving;
+      rp.auraColor = data.auraColor;
+      rp.stealthTimer = data.isStealth ? 5.0 : 0;
+    }
+  }
+
+  handleRemotePlayerLeft(data) {
+    if (this.remotePlayers.has(data.sisterId)) {
+      this.remotePlayers.delete(data.sisterId);
+    }
+    if (this.remotePlayers3D.has(data.sisterId)) {
+      this.remotePlayers3D.get(data.sisterId).destroy();
+      this.remotePlayers3D.delete(data.sisterId);
+    }
+  }
+
+  handleRemotePowerActivated(data) {
+    if (this.remotePlayers.has(data.sisterId)) {
+      const rp = this.remotePlayers.get(data.sisterId);
+      rp.auraColor = data.auraColor;
+      if (data.isStealth) {
+        rp.stealthTimer = 5.0;
+      }
+      this.showTopToast(`⚡ ${data.sisterId} activated ${data.powerName}!`);
+    }
+  }
+
   showIntroCutscene() {
     this.state = "CUTSCENE";
     const screen = document.getElementById("screen-cutscene");
@@ -756,9 +803,27 @@ export class Game {
         bot.updateAI(dt, this);
         if (this.bots3D.has(bot.id)) {
           const b3d = this.bots3D.get(bot.id);
-          const pos = this.coord2Dto3D(bot.x, bot.y, bot.floor);
-          b3d.updatePosition(pos.x, pos.z, bot.floor);
-          b3d.update(dt, bot.vx, bot.vy, bot.auraColor, bot.stealthTimer > 0);
+          const isSameFloor = (bot.floor === this.player.floor);
+          b3d.mesh.visible = isSameFloor;
+          if (isSameFloor) {
+            const pos = this.coord2Dto3D(bot.x, bot.y, bot.floor);
+            b3d.updatePosition(pos.x, pos.z, bot.floor);
+            b3d.update(dt, bot.vx, bot.vy, bot.auraColor, bot.stealthTimer > 0);
+          }
+        }
+      });
+
+      // 2b. Remote Players
+      this.remotePlayers.forEach((rp, key) => {
+        if (this.remotePlayers3D.has(key)) {
+          const rp3d = this.remotePlayers3D.get(key);
+          const isSameFloor = (rp.floor === this.player.floor);
+          rp3d.mesh.visible = isSameFloor;
+          if (isSameFloor) {
+            const pos = this.coord2Dto3D(rp.x, rp.y, rp.floor);
+            rp3d.updatePosition(pos.x, pos.z, rp.floor);
+            rp3d.update(dt, rp.vx, rp.vy, rp.auraColor, rp.stealthTimer > 0);
+          }
         }
       });
 
@@ -769,23 +834,27 @@ export class Game {
         this.updateMummyRadar();
 
         if (this.mummy3D) {
-          const mpos = this.coord2Dto3D(this.mummy.x, this.mummy.y, this.mummy.floor);
-          this.mummy3D.updatePosition(mpos.x, mpos.z, this.mummy.floor);
-          const isAlarmed = this.mummy.floor === this.player.floor && Math.abs(this.mummy.x - this.player.x) < 220;
-          this.mummy3D.update(dt, this.mummy.isMoving, this.mummy.facing, isAlarmed);
+          const isSameFloor = (this.mummy.floor === this.player.floor);
+          this.mummy3D.mesh.visible = isSameFloor;
+          if (isSameFloor) {
+            const mpos = this.coord2Dto3D(this.mummy.x, this.mummy.y, this.mummy.floor);
+            this.mummy3D.updatePosition(mpos.x, mpos.z, this.mummy.floor);
+            const isAlarmed = Math.abs(this.mummy.x - this.player.x) < 220;
+            this.mummy3D.update(dt, this.mummy.isMoving, this.mummy.facing, isAlarmed);
 
-          // Flying Chappal Enrage Trigger
-          if (this.mummy3D.isEnraged && !this.chappal3D.isActive && this.player.floor === this.mummy.floor) {
-            this.soundboard.playVoiceLine("PAKDI_GAYI");
-            const fromPos = this.mummy3D.mesh.position;
-            const toPos = this.player3D.mesh.position;
-            this.chappal3D.throw(fromPos, toPos, () => {
-              this.soundboard.playChappalSlap();
-              this.player.suspicion = 100;
-              this.player.stickyTrapTimer = 4.0;
-              this.showTopToast("🩴 MUMMY THREW HER CHAPPAL! You are STUNNED for 4s!");
-              this.mummy3D.resetAnger();
-            });
+            // Flying Chappal Enrage Trigger
+            if (this.mummy3D.isEnraged && !this.chappal3D.isActive && this.player.floor === this.mummy.floor) {
+              this.soundboard.playVoiceLine("PAKDI_GAYI");
+              const fromPos = this.mummy3D.mesh.position;
+              const toPos = this.player3D.mesh.position;
+              this.chappal3D.throw(fromPos, toPos, () => {
+                this.soundboard.playChappalSlap();
+                this.player.suspicion = 100;
+                this.player.stickyTrapTimer = 4.0;
+                this.showTopToast("🩴 MUMMY THREW HER CHAPPAL! You are STUNNED for 4s!");
+                this.mummy3D.resetAnger();
+              });
+            }
           }
         }
       }
@@ -915,6 +984,10 @@ export class Game {
   triggerWin(reason) {
     if (this.state === "GAMEOVER") return;
     this.state = "GAMEOVER";
+    if (this.sabotageSystem) {
+      this.sabotageSystem.resolveCriticalSabotage();
+      this.sabotageSystem.criticalSabotageActive = false;
+    }
     this.audio.playVictory();
 
     const screen = document.getElementById("screen-gameover");
@@ -945,6 +1018,9 @@ export class Game {
   triggerDefeat(reason) {
     if (this.state === "GAMEOVER") return;
     this.state = "GAMEOVER";
+    if (this.sabotageSystem) {
+      this.sabotageSystem.criticalSabotageActive = false;
+    }
     this.audio.playDefeat();
 
     const screen = document.getElementById("screen-gameover");
