@@ -1,18 +1,7 @@
-// Sister Sneak: Phone Locked - Service Worker for PWA Offline Caching
-const CACHE_NAME = 'sister-sneak-pwa-v1';
-const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/css/style.css',
-  '/manifest.json'
-];
+// Sister Sneak: Phone Locked - Service Worker (Network-First Strategy)
+const CACHE_NAME = 'sister-sneak-v20260905';
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE).catch((err) => console.warn('PWA Cache prefetch', err));
-    })
-  );
   self.skipWaiting();
 });
 
@@ -21,18 +10,24 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((keys) => {
       return Promise.all(
         keys.map((key) => {
-          if (key !== CACHE_NAME) return caches.delete(key);
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
+  // Always fetch latest code from network first, only use cache when offline
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      return cachedResponse || fetch(event.request).catch(() => cachedResponse);
-    })
+    fetch(event.request)
+      .then((networkResponse) => {
+        return networkResponse;
+      })
+      .catch(() => {
+        return caches.match(event.request);
+      })
   );
 });

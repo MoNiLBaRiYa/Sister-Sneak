@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#06B6D4">
   <title>Sister Sneak: Phone Locked 📱🔒</title>
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="css/style.css?v=20260905_fullscreen">
+  <link rel="stylesheet" href="css/style.css?v=20260905_v4">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700;800&family=Yatra+One&display=swap" rel="stylesheet">
@@ -156,7 +156,7 @@
     <!-- UI Modal Container -->
     <div id="ui-overlay" class="modal-layer">
       <!-- 1. Start Lobby / Modern 3D Game Showcase Portal -->
-      <div id="screen-lobby" class="screen-view active">
+      <div id="screen-lobby" class="active">
         <div class="modern-portal-card">
           <!-- Top Brand Header -->
           <div class="portal-header">
@@ -643,15 +643,28 @@
   </div>
 
   <!-- Game Scripts (ES6 Modules) -->
-  <script type="module" src="src/main.js"></script>
+  <script type="module" src="src/main.js?v=20260905_v4"></script>
 
-  <!-- PWA Service Worker Registration -->
+  <!-- PWA Service Worker Registration & Cache Purge -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch((err) => {
-          console.warn('PWA service worker registration notice:', err);
-        });
+        if ('caches' in window) {
+          caches.keys().then((names) => {
+            for (let name of names) {
+              if (name !== 'sister-sneak-v20260905') {
+                caches.delete(name);
+              }
+            }
+          });
+        }
+        navigator.serviceWorker.register('/sw.js?v=20260905_v4')
+          .then((reg) => {
+            reg.update();
+          })
+          .catch((err) => {
+            console.warn('PWA service worker registration notice:', err);
+          });
       });
     }
   </script>
