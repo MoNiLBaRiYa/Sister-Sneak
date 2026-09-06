@@ -175,7 +175,9 @@ export class TaskManager {
   openTask(taskId) {
     if (this.activeMiniGame) return;
 
-    if (this.isTaskCompleted(taskId)) {
+    const isEmergencyFuse = (taskId === "SWITCHES_OFF" && this.game.sabotageSystem && this.game.sabotageSystem.criticalSabotageActive);
+
+    if (this.isTaskCompleted(taskId) && !isEmergencyFuse) {
       this.game.audio.playClick();
       this.game.showTopToast("✨ This chore is already sparkling clean!");
       return;

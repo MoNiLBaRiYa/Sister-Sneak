@@ -49,15 +49,29 @@ export class Player3D {
     this.nameBadge = this.createNameTagSprite(badgeText, isLocalPlayer, config.color || "#FFF");
     this.mesh.add(this.nameBadge);
 
-    // 3. 3D Waypoint Compass Arrow (Points to nearest unfinished task)
+    // 3. 3D Waypoint Compass Arrow (Orbits at radius 1.45m outside character's feet)
     if (isLocalPlayer) {
-      const arrowGeo = new THREE.ConeGeometry(0.25, 0.7, 8);
-      arrowGeo.rotateX(Math.PI / 2);
-      const arrowMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b, depthTest: false });
-      this.waypointArrow = new THREE.Mesh(arrowGeo, arrowMat);
-      this.waypointArrow.position.set(0, 0.15, 0);
-      this.waypointArrow.renderOrder = 999;
-      this.mesh.add(this.waypointArrow);
+      this.waypointPivot = new THREE.Group();
+      this.waypointPivot.position.set(0, 0.14, 0);
+
+      // Arrow Cone Tip pointing forward +Z
+      const coneGeo = new THREE.ConeGeometry(0.3, 0.65, 12);
+      coneGeo.rotateX(Math.PI / 2);
+      this.arrowMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b, depthTest: false });
+      const arrowCone = new THREE.Mesh(coneGeo, this.arrowMat);
+      arrowCone.position.set(0, 0, 1.45);
+      arrowCone.renderOrder = 999;
+      this.waypointPivot.add(arrowCone);
+
+      // Arrow Stem Shaft
+      const stemGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.45, 8);
+      stemGeo.rotateX(Math.PI / 2);
+      const arrowStem = new THREE.Mesh(stemGeo, this.arrowMat);
+      arrowStem.position.set(0, 0, 1.0);
+      arrowStem.renderOrder = 999;
+      this.waypointPivot.add(arrowStem);
+
+      this.mesh.add(this.waypointPivot);
     }
 
     this.updatePosition(0, 0, this.floor);
@@ -122,19 +136,24 @@ export class Player3D {
   }
 
   updateWaypoint(target3DX, target3DZ, isEmergency = false, time = 0) {
-    if (!this.waypointArrow) return;
+    if (!this.waypointPivot) return;
     const dx = target3DX - this.x;
     const dz = target3DZ - this.z;
-    const angle = Math.atan2(dx, dz);
-    this.waypointArrow.rotation.y = angle - this.mesh.rotation.y;
+    const worldAngle = Math.atan2(dx, dz);
+    this.waypointPivot.rotation.y = worldAngle - this.mesh.rotation.y;
 
     if (isEmergency) {
-      this.waypointArrow.material.color.set(0xef4444);
-      const pulse = 1.35 + Math.sin(time * 10) * 0.35;
-      this.waypointArrow.scale.set(pulse, pulse, pulse * 1.2);
+      if (this.arrowMat) this.arrowMat.color.set(0xff1744);
+      const pulse = 1.35 + Math.sin(time * 12) * 0.35;
+      this.waypointPivot.scale.set(pulse, pulse, pulse);
+      if (this.groundRingMat) this.groundRingMat.color.set(0xff1744);
+      const ringPulse = 1.0 + Math.sin(time * 8) * 0.2;
+      this.groundRing.scale.set(ringPulse, ringPulse, 1.0);
     } else {
-      this.waypointArrow.material.color.set(0xf59e0b);
-      this.waypointArrow.scale.set(1.0, 1.0, 1.0);
+      if (this.arrowMat) this.arrowMat.color.set(0xf59e0b);
+      this.waypointPivot.scale.set(1.0, 1.0, 1.0);
+      if (this.groundRingMat) this.groundRingMat.color.set(0x00f0ff);
+      this.groundRing.scale.set(1.0, 1.0, 1.0);
     }
   }
 

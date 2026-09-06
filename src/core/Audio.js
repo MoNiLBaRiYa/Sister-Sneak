@@ -26,21 +26,35 @@ export class AudioManager {
 
   setupUnlockListeners() {
     const unlock = () => {
-      this.resume();
+      this.initContext();
+      if (this.ctx) {
+        if (this.ctx.state === 'suspended' || this.ctx.state === 'interrupted') {
+          this.ctx.resume();
+        }
+        try {
+          // Play 1 silent sample to decisively unlock iOS Safari Web Audio hardware pipeline
+          const buffer = this.ctx.createBuffer(1, 1, 22050);
+          const source = this.ctx.createBufferSource();
+          source.buffer = buffer;
+          source.connect(this.ctx.destination);
+          source.start(0);
+        } catch (e) {}
+      }
     };
-    window.addEventListener('touchstart', unlock, { once: true, passive: true });
-    window.addEventListener('pointerdown', unlock, { once: true, passive: true });
-    window.addEventListener('click', unlock, { once: true, passive: true });
+    ['touchstart', 'touchend', 'pointerdown', 'click', 'keydown'].forEach((evt) => {
+      window.addEventListener(evt, unlock, { passive: true });
+    });
   }
 
   resume() {
-    if (this.ctx && this.ctx.state === 'suspended') {
+    if (this.ctx && (this.ctx.state === 'suspended' || this.ctx.state === 'interrupted')) {
       this.ctx.resume();
     }
   }
 
   toggleSound() {
     this.enabled = !this.enabled;
+    if (this.enabled) this.resume();
     return this.enabled;
   }
 
