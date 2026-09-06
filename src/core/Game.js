@@ -19,6 +19,7 @@ import { SabotageSystem } from '../systems/SabotageSystem.js';
 import { MeetingEngine } from '../systems/MeetingEngine.js';
 import { DialogueEngine } from '../systems/DialogueEngine.js';
 import { MultiplayerEngine } from '../systems/MultiplayerEngine.js';
+import { SecretPassageSystem } from '../systems/SecretPassageSystem.js';
 
 // 3D Engine Systems
 import { ThreeRenderer } from '../engine3d/ThreeRenderer.js';
@@ -48,6 +49,7 @@ export class Game {
     this.sabotageSystem = new SabotageSystem(this);
     this.meetingEngine = new MeetingEngine(this);
     this.multiplayer = new MultiplayerEngine(this);
+    this.secretPassages = new SecretPassageSystem(this);
 
     // Initialize Three.js 3D Engine
     try {
@@ -139,11 +141,49 @@ export class Game {
       }, { passive: false });
     }
 
+    // Report Sabotage Quick Trigger Button
+    const reportBtn = document.getElementById("btn-report-sabotage");
+    const touchReportBtn = document.getElementById("btn-touch-report");
+
+    const triggerReportSabotage = () => {
+      if (this.player && this.state === "PLAYING") {
+        if (this.meetingEngine) {
+          const check = this.meetingEngine.canPlayerCallMeeting();
+          if (!check.allowed) {
+            this.showNotification(check.reason, 3500);
+            if (this.audio) this.audio.playSabotageAlert();
+            return;
+          }
+        }
+        const hs = this.activeNearbyHotspot;
+        const locationName = (hs && hs.label) ? hs.label : (this.sabotageSystem?.activeFuseName || "Blown Switchboard");
+        const reportReason = `🚨 Crime Scene Reported by ${this.player.name} at ${locationName}!`;
+        this.meetingEngine.startMeeting(reportReason);
+        if (this.multiplayer && this.multiplayer.isMultiplayer) {
+          this.multiplayer.syncMeeting(reportReason);
+        }
+      }
+    };
+
+    if (reportBtn) reportBtn.addEventListener("click", triggerReportSabotage);
+    if (touchReportBtn) {
+      touchReportBtn.addEventListener("click", triggerReportSabotage);
+      touchReportBtn.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        triggerReportSabotage();
+      }, { passive: false });
+    }
+
     // Key shortcut for power: Q or Space
     window.addEventListener("keydown", (e) => {
       if (e.code === "KeyQ" || e.code === "Space") {
         if (this.player && this.state === "PLAYING") {
           this.player.useAbility(this);
+        }
+      }
+      if (e.code === "KeyR") {
+        if (this.sabotageSystem && this.sabotageSystem.criticalSabotageActive && this.activeNearbyHotspot?.isFuseBox) {
+          triggerReportSabotage();
         }
       }
     });
@@ -896,6 +936,11 @@ export class Game {
         this.meetingEngine.update(dt);
       }
 
+      // 7. Secret Passage System (Almaris & Trunks)
+      if (this.secretPassages) {
+        this.secretPassages.update(dt);
+      }
+
       this.updateScreenOverlays();
     }
   }
@@ -1011,6 +1056,19 @@ export class Game {
       }
     } else {
       prompt.classList.add("hidden");
+    }
+
+    // Toggle Report Sabotage Quick Button
+    const reportBtn = document.getElementById("btn-report-sabotage");
+    const touchReportBtn = document.getElementById("btn-touch-report");
+    const isNearBlownFuse = this.sabotageSystem && this.sabotageSystem.criticalSabotageActive && this.activeNearbyHotspot && this.activeNearbyHotspot.isFuseBox;
+    if (reportBtn) {
+      if (isNearBlownFuse) reportBtn.classList.remove("hidden");
+      else reportBtn.classList.add("hidden");
+    }
+    if (touchReportBtn) {
+      if (isNearBlownFuse) touchReportBtn.classList.remove("hidden");
+      else touchReportBtn.classList.add("hidden");
     }
   }
 

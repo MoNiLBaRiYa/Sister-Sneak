@@ -338,3 +338,61 @@ export const SABOTAGE_COOLDOWNS = {
   BLACKOUT: 45,
   KUNDI: 30
 };
+
+// =========================================================================
+// --- AUTHENTIC HAVELI SECRET CUPBOARDS & PASSAGES (ચોર દરવાજા / કબાટ) ---
+// =========================================================================
+export const SECRET_PASSAGES = [
+  {
+    id: "PASSAGE_KITCHEN",
+    name: "1F Kitchen Ration Pantry",
+    gujaratiName: "રસોડાનો કબાટ",
+    icon: "🚪",
+    floor: 0,
+    x: 230,
+    y: FLOOR_Y[0] + 60,
+    x3d: -10.5,
+    z3d: -4.2,
+    radius: 48,
+    connectsTo: ["PASSAGE_STORE", "PASSAGE_BEDROOM"]
+  },
+  {
+    id: "PASSAGE_STORE",
+    name: "1F Dadi's Heirloom Trunk",
+    gujaratiName: "દાદીની પેટી",
+    icon: "🧳",
+    floor: 0,
+    x: 920,
+    y: FLOOR_Y[0] + 60,
+    x3d: 8.2,
+    z3d: -4.2,
+    radius: 48,
+    connectsTo: ["PASSAGE_KITCHEN", "PASSAGE_TERRACE"]
+  },
+  {
+    id: "PASSAGE_BEDROOM",
+    name: "2F Bedroom Vintage Almari",
+    gujaratiName: "મોટો કબાટ",
+    icon: "🚪",
+    floor: 1,
+    x: 920,
+    y: FLOOR_Y[1] + 72,
+    x3d: 8.2,
+    z3d: -3.2,
+    radius: 48,
+    connectsTo: ["PASSAGE_KITCHEN", "PASSAGE_TERRACE"]
+  },
+  {
+    id: "PASSAGE_TERRACE",
+    name: "3F Rooftop Secret Trapdoor",
+    gujaratiName: "ધાબાનો ચોર દરવાજો",
+    icon: "🪜",
+    floor: 2,
+    x: 220,
+    y: FLOOR_Y[2] + 68,
+    x3d: -10.0,
+    z3d: -3.5,
+    radius: 48,
+    connectsTo: ["PASSAGE_STORE", "PASSAGE_BEDROOM"]
+  }
+];

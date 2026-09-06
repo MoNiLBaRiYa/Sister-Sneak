@@ -84,6 +84,12 @@
         <span class="prompt-text">Do Chore</span>
       </div>
 
+      <!-- Quick Trigger: Report Crime Scene / Sabotage -->
+      <button id="btn-report-sabotage" class="report-sabotage-btn hidden">
+        <span class="report-icon">🚨</span>
+        <span class="report-text">REPORT CRIME SCENE <span class="hotkey-badge">[R]</span></span>
+      </button>
+
       <!-- Vertical Floor Switcher Fast-Nav (Right side) -->
       <div id="floor-switcher" class="floor-nav-panel hidden">
         <button class="floor-nav-btn" data-floor="2" id="floor-btn-2">3F<br><small>Terrace</small></button>
@@ -118,6 +124,8 @@
           <div class="joystick-knob"></div>
         </div>
         <div class="touch-action-group">
+          <button id="btn-touch-report" class="touch-report-btn hidden" aria-label="Report Crime Scene">🚨</button>
+          <button id="btn-touch-passage" class="touch-passage-btn hidden" aria-label="Sneak Through Secret Almari">🚪</button>
           <button id="btn-touch-power" class="touch-power-btn" aria-label="Use Character Power">⚡</button>
           <button id="btn-touch-action" class="touch-action-btn" aria-label="Interact / Do Chore">E</button>
         </div>
@@ -699,6 +707,29 @@
           </div>
         </div>
       </div>
+
+      <!-- Authentic Haveli Secret Passages & Almari Modal (ચોર દરવાજા અને કબાટ) -->
+      <div id="modal-secret-passage" class="modal-card secret-passage-modal-card hidden">
+        <div class="passage-modal-header">
+          <div class="passage-title-group">
+            <span class="passage-header-icon">🚪</span>
+            <div>
+              <h3>HAVELI SECRET PASSAGE</h3>
+              <p class="passage-header-guj">હવેલીના ગુપ્ત ચોર દરવાજા અને કબાટ</p>
+            </div>
+          </div>
+          <button id="btn-close-passage-modal" class="modal-close-btn" aria-label="Close Passage Modal">&times;</button>
+        </div>
+        <div class="passage-current-badge">
+          <span id="passage-current-location">You are inside: 1F Kitchen Ration Pantry (રસોડાનો કબાટ)</span>
+        </div>
+        <div class="passage-instructions">
+          Select a connected passage destination to sneak through without using staircases:
+        </div>
+        <div id="passage-destinations-grid" class="passage-destinations-grid">
+          <!-- Populated dynamically by SecretPassageSystem.js -->
+        </div>
+      </div>
     </div>
   </div>
 
@@ -713,7 +744,7 @@
   </div>
 
   <!-- Game Scripts (ES6 Modules) -->
-  <script type="module" src="src/main.js?v=20260906_v6"></script>
+  <script type="module" src="src/main.js?v=20260906_v8"></script>
 
   <!-- PWA Service Worker Registration & Cache Purge -->
   <script>
@@ -722,13 +753,13 @@
         if ('caches' in window) {
           caches.keys().then((names) => {
             for (let name of names) {
-              if (name !== 'sister-sneak-v20260906_v7') {
+              if (name !== 'sister-sneak-v20260906_v8') {
                 caches.delete(name);
               }
             }
           });
         }
-        navigator.serviceWorker.register('/sw.js?v=20260906_v7')
+        navigator.serviceWorker.register('/sw.js?v=20260906_v8')
           .then((reg) => {
             reg.update();
           })

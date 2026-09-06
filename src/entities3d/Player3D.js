@@ -161,32 +161,83 @@ export class Player3D {
     const moveLen = Math.hypot(vx, vz);
     this.isMoving = moveLen > 0.05;
 
+    // Natural Eye Blinking Animation
+    if (this.mesh.eyes) {
+      if (!this.blinkTimer) this.blinkTimer = 0;
+      this.blinkTimer += dt;
+      if (this.blinkTimer > 3.2) {
+        this.mesh.eyes.scale.y = 0.1; // Blink closed
+        if (this.blinkTimer > 3.32) {
+          this.mesh.eyes.scale.y = 1.0; // Open
+          this.blinkTimer = Math.random() * 0.8;
+        }
+      } else {
+        this.mesh.eyes.scale.y = 1.0;
+      }
+    }
+
     if (this.isMoving) {
       this.walkCycle += dt * 10;
       // 360-degree rotation facing movement vector
       this.facingAngle = Math.atan2(vx, vz);
       this.mesh.rotation.y = this.facingAngle;
 
-      // Animate Legs & Arms
+      // Animate Legs & Arms with heel-toe swing
       const legAngle = Math.sin(this.walkCycle) * 0.65;
       if (this.mesh.leftLeg) this.mesh.leftLeg.rotation.x = legAngle;
       if (this.mesh.rightLeg) this.mesh.rightLeg.rotation.x = -legAngle;
       if (this.mesh.leftArm) this.mesh.leftArm.rotation.x = -legAngle * 0.75;
       if (this.mesh.rightArm) this.mesh.rightArm.rotation.x = legAngle * 0.75;
 
-      // Body Bobbing
-      if (this.mesh.torso) this.mesh.torso.position.y = 0.95 + Math.abs(Math.sin(this.walkCycle)) * 0.08;
-      if (this.mesh.head) this.mesh.head.position.y = 1.65 + Math.abs(Math.sin(this.walkCycle)) * 0.08;
+      // Body Bobbing & Hip Sway
+      if (this.mesh.torso) {
+        this.mesh.torso.position.y = 0.95 + Math.abs(Math.sin(this.walkCycle)) * 0.08;
+        this.mesh.torso.rotation.z = Math.sin(this.walkCycle) * 0.06;
+      }
+      if (this.mesh.head) {
+        this.mesh.head.position.y = 1.65 + Math.abs(Math.sin(this.walkCycle)) * 0.08;
+        this.mesh.head.rotation.z = -Math.sin(this.walkCycle) * 0.04;
+      }
+
+      // Secondary Motion on Hair Braids / Ponytails
+      const hairSway = Math.sin(this.walkCycle) * 0.28;
+      if (this.mesh.leftBraid) {
+        this.mesh.leftBraid.rotation.z = -0.15 + hairSway;
+        this.mesh.leftBraid.rotation.x = Math.abs(hairSway) * 0.4;
+      }
+      if (this.mesh.rightBraid) {
+        this.mesh.rightBraid.rotation.z = 0.15 + hairSway;
+        this.mesh.rightBraid.rotation.x = Math.abs(hairSway) * 0.4;
+      }
+      if (this.mesh.pony) {
+        this.mesh.pony.rotation.x = -0.5 + Math.abs(Math.sin(this.walkCycle)) * 0.35;
+        this.mesh.pony.rotation.z = hairSway * 0.6;
+      }
     } else {
-      // Idle Breathing
+      // Idle Breathing & Subtle Rest
       this.walkCycle += dt * 2.5;
       const breath = Math.sin(this.walkCycle) * 0.03;
-      if (this.mesh.torso) this.mesh.torso.position.y = 0.95 + breath;
-      if (this.mesh.head) this.mesh.head.position.y = 1.65 + breath;
+      if (this.mesh.torso) {
+        this.mesh.torso.position.y = 0.95 + breath;
+        this.mesh.torso.rotation.z = 0;
+      }
+      if (this.mesh.head) {
+        this.mesh.head.position.y = 1.65 + breath;
+        this.mesh.head.rotation.z = 0;
+      }
       if (this.mesh.leftLeg) this.mesh.leftLeg.rotation.x = 0;
       if (this.mesh.rightLeg) this.mesh.rightLeg.rotation.x = 0;
       if (this.mesh.leftArm) this.mesh.leftArm.rotation.x = 0;
       if (this.mesh.rightArm) this.mesh.rightArm.rotation.x = 0;
+      if (this.mesh.leftBraid) {
+        this.mesh.leftBraid.rotation.set(0, 0, -0.15);
+      }
+      if (this.mesh.rightBraid) {
+        this.mesh.rightBraid.rotation.set(0, 0, 0.15);
+      }
+      if (this.mesh.pony) {
+        this.mesh.pony.rotation.set(-0.5 + breath * 2, 0, 0);
+      }
     }
 
     // Ground Ring Pulsing

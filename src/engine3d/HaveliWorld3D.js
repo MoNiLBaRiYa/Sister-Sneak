@@ -17,6 +17,7 @@ export class HaveliWorld3D {
     this.floorGroups = [];
     this.taskMarkers = [];
     this.clotheslines = [];
+    this.hinchkoSwings = [];
     this.steamingChaiPot = null;
     this.activeFloor = 1;
     this.markerTime = 0;
@@ -151,6 +152,11 @@ export class HaveliWorld3D {
       g0.add(barniCap);
     }
 
+    // Steel Masala Dabba / Vaghariya Stand on Kitchen Shelf
+    const masalaStand = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.45, 0.25, 12), steelMat);
+    masalaStand.position.set(-8.2, 1.15, -4.2);
+    g0.add(masalaStand);
+
     // 5. 💡 1F Ground Power Board
     const fuseBox0 = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 0.2), steelMat);
     fuseBox0.position.set(9.8, 2.0, -4.8);
@@ -160,7 +166,17 @@ export class HaveliWorld3D {
     led0.position.set(9.8, 2.4, -4.68);
     g0.add(led0);
 
-    // 6. 🪜 DEDICATED 1F GROUND STAIRCASE ROOM & 3D WOODEN STEPS
+    // 6. 🛋️ GUJARATI HAVELI PROPS & LIVELY FURNITURE (Floor 0)
+    this.buildHinchkoSwing(g0, teakWoodMat, darkWoodMat, goldMat, fabricYellowMat, fabricPinkMat);
+    this.buildUrliWithPetals(g0, goldMat);
+    this.buildMatkaWithTap(g0, terracottaMat, goldMat, darkWoodMat);
+    this.buildToran(g0);
+
+    // 7. 🚪 AUTHENTIC HAVELI SECRET PASSAGES (Floor 0)
+    this.buildSecretPantryCabinet(g0, darkWoodMat, goldMat);
+    this.buildSecretDadiTrunk(g0, darkWoodMat, goldMat);
+
+    // 8. 🪜 DEDICATED 1F GROUND STAIRCASE ROOM & 3D WOODEN STEPS
     this.buildGroundStairRoom(g0, wallPlasterMat, teakWoodMat, darkWoodMat, goldMat, lanternGlowMat);
 
     this.scene.add(g0);
@@ -286,7 +302,19 @@ export class HaveliWorld3D {
     rail1.position.set(0, 0.4, depth / 2);
     g1.add(rail1);
 
-    // 6. 🪜 DEDICATED 2F LIVING HUB STAIRCASE ROOM (1F Down & 3F Up)
+    // Framed Haveli Heritage Family Portrait on Central Living Wall
+    const portraitFrame = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.4, 0.08), goldMat);
+    portraitFrame.position.set(0, 2.8, -depth / 2 + 0.22);
+    g1.add(portraitFrame);
+    const portraitCanvas = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.2, 0.02), new THREE.MeshStandardMaterial({ color: 0x92400e, roughness: 0.8 }));
+    portraitCanvas.position.set(0, 2.8, -depth / 2 + 0.27);
+    g1.add(portraitCanvas);
+
+    // 6. 🚪 AUTHENTIC HAVELI SECRET PASSAGE & STACKED TRUNKS (Floor 1)
+    this.buildSecretVintageAlmari(g1, darkWoodMat, goldMat, teakWoodMat);
+    this.buildStackedTrunks(g1, steelMat, goldMat, teakWoodMat);
+
+    // 7. 🪜 DEDICATED 2F LIVING HUB STAIRCASE ROOM (1F Down & 3F Up)
     this.buildHubStairRoom(g1, wallPlasterMat, teakWoodMat, darkWoodMat, goldMat, lanternGlowMat);
 
     this.scene.add(g1);
@@ -372,7 +400,11 @@ export class HaveliWorld3D {
     led2.position.set(7.5, 2.4, -3.88);
     g2.add(led2);
 
-    // 4. 🪜 DEDICATED 3F ROOFTOP STAIRWELL ENCLOSURE (Stairhead Gazebo & Doorway)
+    // 4. 🚰 SINTEX ROOFTOP WATER TANK & SECRET TRAPDOOR (Floor 2)
+    this.buildSintexWaterTank(g2);
+    this.buildSecretTrapdoor(g2, darkWoodMat, steelMat, goldMat);
+
+    // 5. 🪜 DEDICATED 3F ROOFTOP STAIRWELL ENCLOSURE (Stairhead Gazebo & Doorway)
     this.buildTerraceStairRoom(g2, wallPlasterMat, teakWoodMat, darkWoodMat, goldMat, lanternGlowMat);
 
     this.scene.add(g2);
@@ -516,6 +548,391 @@ export class HaveliWorld3D {
     }
   }
 
+  // 1. Gujarati Hinchko Swing with Brass Chains & Bolsters (હિંચકો)
+  buildHinchkoSwing(group, teakWoodMat, darkWoodMat, goldMat, yellowMat, pinkMat) {
+    const swingRoot = new THREE.Group();
+    swingRoot.position.set(-2.0, 3.8, 2.0); // Pivot at ceiling height
+
+    // Ceiling Mount Plates
+    const plateGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.05, 8);
+    const p1 = new THREE.Mesh(plateGeo, goldMat); p1.position.set(-1.0, 0, -0.4); swingRoot.add(p1);
+    const p2 = new THREE.Mesh(plateGeo, goldMat); p2.position.set(1.0, 0, -0.4); swingRoot.add(p2);
+    const p3 = new THREE.Mesh(plateGeo, goldMat); p3.position.set(-1.0, 0, 0.4); swingRoot.add(p3);
+    const p4 = new THREE.Mesh(plateGeo, goldMat); p4.position.set(1.0, 0, 0.4); swingRoot.add(p4);
+
+    // Brass Suspension Chains
+    const chainGeo = new THREE.CylinderGeometry(0.02, 0.02, 2.9, 6);
+    const c1 = new THREE.Mesh(chainGeo, goldMat); c1.position.set(-1.0, -1.45, -0.4); swingRoot.add(c1);
+    const c2 = new THREE.Mesh(chainGeo, goldMat); c2.position.set(1.0, -1.45, -0.4); swingRoot.add(c2);
+    const c3 = new THREE.Mesh(chainGeo, goldMat); c3.position.set(-1.0, -1.45, 0.4); swingRoot.add(c3);
+    const c4 = new THREE.Mesh(chainGeo, goldMat); c4.position.set(1.0, -1.45, 0.4); swingRoot.add(c4);
+
+    // Carved Teakwood Swing Seat Platform
+    const seatPlatform = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.12, 1.1), teakWoodMat);
+    seatPlatform.position.set(0, -2.9, 0);
+    seatPlatform.castShadow = true;
+    swingRoot.add(seatPlatform);
+
+    // Carved Backrest & Side Armrests
+    const backRest = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.55, 0.08), teakWoodMat);
+    backRest.position.set(0, -2.6, -0.5);
+    swingRoot.add(backRest);
+
+    const armL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.35, 1.0), darkWoodMat);
+    armL.position.set(-1.16, -2.7, 0);
+    swingRoot.add(armL);
+    const armR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.35, 1.0), darkWoodMat);
+    armR.position.set(1.16, -2.7, 0);
+    swingRoot.add(armR);
+
+    // Silk Cushion (ગાદી)
+    const cushion = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.08, 0.95), yellowMat);
+    cushion.position.set(0, -2.8, 0);
+    swingRoot.add(cushion);
+
+    // Cylindrical Bolsters (ઓશિકા)
+    const bolsterGeo = new THREE.CylinderGeometry(0.14, 0.14, 0.7, 12);
+    const bL = new THREE.Mesh(bolsterGeo, pinkMat);
+    bL.rotation.z = Math.PI / 2;
+    bL.position.set(-0.7, -2.68, 0);
+    swingRoot.add(bL);
+
+    const bR = new THREE.Mesh(bolsterGeo, pinkMat);
+    bR.rotation.z = Math.PI / 2;
+    bR.position.set(0.7, -2.68, 0);
+    swingRoot.add(bR);
+
+    group.add(swingRoot);
+    this.hinchkoSwings.push(swingRoot);
+  }
+
+  // 2. Brass Urli with Floating Flower Petals (પીતળની ઉરલી)
+  buildUrliWithPetals(group, goldMat) {
+    const urliGroup = new THREE.Group();
+    urliGroup.position.set(3.8, 0.15, 2.2);
+
+    // Ornate Brass Bowl
+    const bowlGeo = new THREE.CylinderGeometry(0.65, 0.42, 0.28, 16);
+    const bowl = new THREE.Mesh(bowlGeo, goldMat);
+    urliGroup.add(bowl);
+
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(0.65, 0.04, 6, 16), goldMat);
+    rim.rotation.x = Math.PI / 2;
+    rim.position.y = 0.14;
+    urliGroup.add(rim);
+
+    // Translucent Water
+    const waterMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1, transparent: true, opacity: 0.8 });
+    const water = new THREE.Mesh(new THREE.CircleGeometry(0.6, 16), waterMat);
+    water.rotation.x = -Math.PI / 2;
+    water.position.y = 0.12;
+    urliGroup.add(water);
+
+    // Floating Rose & Marigold Petals
+    const roseMat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.4, side: THREE.DoubleSide });
+    const marigoldMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.4, side: THREE.DoubleSide });
+
+    const petalAngles = [0, 0.8, 1.6, 2.4, 3.2, 4.0, 4.8, 5.6];
+    petalAngles.forEach((ang, idx) => {
+      const rad = 0.2 + (idx % 3) * 0.14;
+      const pet = new THREE.Mesh(new THREE.CircleGeometry(0.08, 8), idx % 2 === 0 ? roseMat : marigoldMat);
+      pet.rotation.x = -Math.PI / 2;
+      pet.position.set(Math.cos(ang) * rad, 0.13, Math.sin(ang) * rad);
+      urliGroup.add(pet);
+    });
+
+    group.add(urliGroup);
+  }
+
+  // 3. Earthen Matka on Stand with Brass Tap (માટલું અને નળ)
+  buildMatkaWithTap(group, terracottaMat, goldMat, darkWoodMat) {
+    const matkaGroup = new THREE.Group();
+    matkaGroup.position.set(-7.5, 0, -4.2);
+
+    // Black Iron Tripod Stand
+    const ironMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.9, roughness: 0.3 });
+    const standRing = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.03, 6, 16), ironMat);
+    standRing.rotation.x = Math.PI / 2;
+    standRing.position.y = 0.55;
+    matkaGroup.add(standRing);
+
+    for (let i = 0; i < 3; i++) {
+      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.58, 6), ironMat);
+      const a = (i * Math.PI * 2) / 3;
+      leg.position.set(Math.cos(a) * 0.35, 0.28, Math.sin(a) * 0.35);
+      matkaGroup.add(leg);
+    }
+
+    // Terracotta Matka Sphere
+    const pot = new THREE.Mesh(new THREE.SphereGeometry(0.44, 16, 16), terracottaMat);
+    pot.position.y = 0.88;
+    matkaGroup.add(pot);
+
+    const lid = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.26, 0.1, 12), terracottaMat);
+    lid.position.y = 1.34;
+    matkaGroup.add(lid);
+
+    // Shiny Brass Tap
+    const tap = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.2, 6), goldMat);
+    tap.rotation.x = Math.PI / 2;
+    tap.position.set(0, 0.72, 0.44);
+    matkaGroup.add(tap);
+
+    // Brass Drinking Glass
+    const glass = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.07, 0.22, 10), goldMat);
+    glass.position.set(0.48, 0.65, 0.1);
+    matkaGroup.add(glass);
+
+    group.add(matkaGroup);
+  }
+
+  // 4. Marigold Flower Toran on Arch (ગલગોટા તોરણ)
+  buildToran(group) {
+    const toranGroup = new THREE.Group();
+    toranGroup.position.set(0, 3.4, 0);
+
+    const yellowMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+    const orangeMat = new THREE.MeshBasicMaterial({ color: 0xf97316 });
+    const leafMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.5 });
+
+    const span = 10;
+    const count = 16;
+    for (let i = 0; i <= count; i++) {
+      const frac = i / count;
+      const x = -span / 2 + frac * span;
+      const droop = -Math.sin(frac * Math.PI) * 0.4;
+      const fl = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), i % 2 === 0 ? yellowMat : orangeMat);
+      fl.position.set(x, droop, 0);
+      toranGroup.add(fl);
+
+      if (i % 3 === 0) {
+        const leaf = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.16, 4), leafMat);
+        leaf.rotation.x = Math.PI;
+        leaf.position.set(x, droop - 0.1, 0);
+        toranGroup.add(leaf);
+      }
+    }
+    group.add(toranGroup);
+  }
+
+  // 5. Secret Passage 1: 1F Kitchen Ration Pantry (રસોડાનો કબાટ)
+  buildSecretPantryCabinet(group, darkWoodMat, goldMat) {
+    const cabGroup = new THREE.Group();
+    cabGroup.position.set(-13.0, 0, -4.2);
+
+    // Outer Cabinet Body
+    const body = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2.4, 1.0), darkWoodMat);
+    body.position.y = 1.2;
+    cabGroup.add(body);
+
+    // Double Wooden Doors with Slats
+    const doorL = new THREE.Mesh(new THREE.BoxGeometry(0.68, 2.2, 0.08), darkWoodMat);
+    doorL.position.set(-0.36, 1.2, 0.52);
+    cabGroup.add(doorL);
+
+    const doorR = new THREE.Mesh(new THREE.BoxGeometry(0.68, 2.2, 0.08), darkWoodMat);
+    doorR.position.set(0.36, 1.2, 0.52);
+    cabGroup.add(doorR);
+
+    // Brass Handles & Vintage Latch
+    const handleL = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.2, 6), goldMat);
+    handleL.position.set(-0.1, 1.2, 0.58);
+    cabGroup.add(handleL);
+
+    const handleR = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.2, 6), goldMat);
+    handleR.position.set(0.1, 1.2, 0.58);
+    cabGroup.add(handleR);
+
+    const latch = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.06, 0.04), goldMat);
+    latch.position.set(0, 1.4, 0.58);
+    cabGroup.add(latch);
+
+    // Subtle Gujju Brass Plaque
+    const plaque = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.12, 0.02), goldMat);
+    plaque.position.set(0, 2.25, 0.52);
+    cabGroup.add(plaque);
+
+    group.add(cabGroup);
+  }
+
+  // 6. Secret Passage 2: 1F Dadi's Heirloom Trunk (દાદીની પેટી)
+  buildSecretDadiTrunk(group, darkWoodMat, goldMat) {
+    const trunkGroup = new THREE.Group();
+    trunkGroup.position.set(6.5, 0, -4.2);
+
+    // Sturdy Wooden Trunk Body
+    const body = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.75, 1.1), darkWoodMat);
+    body.position.y = 0.38;
+    trunkGroup.add(body);
+
+    // Domed Curved Lid
+    const lid = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 1.6, 12, 1, false, 0, Math.PI), darkWoodMat);
+    lid.rotation.z = Math.PI / 2;
+    lid.position.set(0, 0.75, 0);
+    trunkGroup.add(lid);
+
+    // Brass Corner Brackets & Trim Straps
+    const strapL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.76, 1.12), goldMat);
+    strapL.position.set(-0.55, 0.38, 0);
+    trunkGroup.add(strapL);
+
+    const strapR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.76, 1.12), goldMat);
+    strapR.position.set(0.55, 0.38, 0);
+    trunkGroup.add(strapR);
+
+    // Big Brass Padlock & Hasp
+    const lock = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.22, 0.1), goldMat);
+    lock.position.set(0, 0.68, 0.58);
+    trunkGroup.add(lock);
+
+    // Side Brass Carry Handles
+    const handleL = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.02, 6, 12), goldMat);
+    handleL.position.set(-0.82, 0.45, 0);
+    trunkGroup.add(handleL);
+
+    const handleR = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.02, 6, 12), goldMat);
+    handleR.position.set(0.82, 0.45, 0);
+    trunkGroup.add(handleR);
+
+    group.add(trunkGroup);
+  }
+
+  // 7. Secret Passage 3: 2F Bedroom Vintage Almari (મોટો કબાટ)
+  buildSecretVintageAlmari(group, darkWoodMat, goldMat, teakWoodMat) {
+    const almariGroup = new THREE.Group();
+    almariGroup.position.set(6.2, 0, -4.5);
+
+    // Almari Main Cabinet
+    const body = new THREE.Mesh(new THREE.BoxGeometry(1.8, 2.7, 1.0), darkWoodMat);
+    body.position.y = 1.35;
+    almariGroup.add(body);
+
+    // Carved Top Arch Pediment / Crown
+    const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 0.12, 16, 1, false, 0, Math.PI), teakWoodMat);
+    crown.rotation.z = Math.PI / 2;
+    crown.position.set(0, 2.7, 0.45);
+    almariGroup.add(crown);
+
+    // Left Door (Carved Wood Panels)
+    const doorL = new THREE.Mesh(new THREE.BoxGeometry(0.82, 2.4, 0.08), teakWoodMat);
+    doorL.position.set(-0.43, 1.3, 0.52);
+    almariGroup.add(doorL);
+
+    // Right Door with Dressing Mirror
+    const doorR = new THREE.Mesh(new THREE.BoxGeometry(0.82, 2.4, 0.08), teakWoodMat);
+    doorR.position.set(0.43, 1.3, 0.52);
+    almariGroup.add(doorR);
+
+    // Mirror Glass Panel on Right Door
+    const mirrorMat = new THREE.MeshStandardMaterial({ color: 0x93c5fd, metalness: 0.95, roughness: 0.05 });
+    const mirror = new THREE.Mesh(new THREE.BoxGeometry(0.62, 1.9, 0.02), mirrorMat);
+    mirror.position.set(0.43, 1.35, 0.57);
+    almariGroup.add(mirror);
+
+    // Brass Handles & Keyhole
+    const lock = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.05, 8), goldMat);
+    lock.rotation.x = Math.PI / 2;
+    lock.position.set(-0.06, 1.3, 0.58);
+    almariGroup.add(lock);
+
+    const pull = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.015, 6, 10), goldMat);
+    pull.position.set(-0.06, 1.22, 0.6);
+    almariGroup.add(pull);
+
+    group.add(almariGroup);
+  }
+
+  // 8. Secret Passage 4: 3F Rooftop Secret Trapdoor (ધાબાનો ચોર દરવાજો)
+  buildSecretTrapdoor(group, darkWoodMat, steelMat, goldMat) {
+    const trapGroup = new THREE.Group();
+    trapGroup.position.set(-7.5, 0.02, -1.5);
+
+    // Wooden Trapdoor Planks Frame
+    const hatch = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.06, 1.4), darkWoodMat);
+    trapGroup.add(hatch);
+
+    // Iron Straps & Rivets
+    const strap1 = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 1.42), steelMat);
+    strap1.position.set(-0.45, 0.01, 0);
+    trapGroup.add(strap1);
+
+    const strap2 = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 1.42), steelMat);
+    strap2.position.set(0.45, 0.01, 0);
+    trapGroup.add(strap2);
+
+    // Brass Iron Pull Ring
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.03, 6, 12), goldMat);
+    ring.rotation.x = Math.PI / 2;
+    ring.position.set(0, 0.06, 0);
+    trapGroup.add(ring);
+
+    group.add(trapGroup);
+  }
+
+  // 9. Sintex Rooftop Water Tank (પાણીની ટાંકી)
+  buildSintexWaterTank(group) {
+    const tankGroup = new THREE.Group();
+    tankGroup.position.set(-13.0, 0, 3.5);
+
+    const blackPlasticMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.4 });
+    const whiteTextMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 });
+    const pvcPipeMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.3 });
+
+    // Main Cylindrical Body
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 1.9, 18), blackPlasticMat);
+    body.position.y = 0.95;
+    tankGroup.add(body);
+
+    // Molded Rib Rings
+    for (let i = 0; i < 3; i++) {
+      const rib = new THREE.Mesh(new THREE.TorusGeometry(0.92, 0.04, 6, 18), blackPlasticMat);
+      rib.rotation.x = Math.PI / 2;
+      rib.position.y = 0.5 + i * 0.45;
+      tankGroup.add(rib);
+    }
+
+    // Top Screwed Lid
+    const lid = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.5, 0.15, 16), blackPlasticMat);
+    lid.position.y = 1.95;
+    tankGroup.add(lid);
+
+    // White "SINTEX" Brand Band
+    const band = new THREE.Mesh(new THREE.CylinderGeometry(0.91, 0.91, 0.22, 18), whiteTextMat);
+    band.position.y = 1.25;
+    tankGroup.add(band);
+
+    // PVC Connecting Water Pipe down to floor
+    const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.8, 8), pvcPipeMat);
+    pipe.position.set(0.92, 0.9, 0);
+    tankGroup.add(pipe);
+
+    group.add(tankGroup);
+  }
+
+  // 10. Stacked Heirloom Trunks in 2F Living (ટ્રંકનો થપ્પો)
+  buildStackedTrunks(group, steelMat, goldMat, teakWoodMat) {
+    const stackGroup = new THREE.Group();
+    stackGroup.position.set(10.5, 0, 2.2);
+
+    // Bottom Large Steel Trunk
+    const b1 = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.55, 0.9), steelMat);
+    b1.position.y = 0.275;
+    stackGroup.add(b1);
+
+    // Middle Teal Painted Trunk
+    const tealMat = new THREE.MeshStandardMaterial({ color: 0x0d9488, roughness: 0.5 });
+    const b2 = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.45, 0.75), tealMat);
+    b2.position.y = 0.55 + 0.225;
+    stackGroup.add(b2);
+
+    // Top Brass Heirloom Chest
+    const b3 = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.35, 0.6), goldMat);
+    b3.position.y = 1.0 + 0.175;
+    stackGroup.add(b3);
+
+    group.add(stackGroup);
+  }
+
   createTaskMarkers() {
     const floorHeights = [0, 8, 16];
 
@@ -627,6 +1044,11 @@ export class HaveliWorld3D {
     // Gentle swaying of terrace sarees in the breeze
     this.clotheslines.forEach((cloth, idx) => {
       cloth.rotation.x = Math.sin(this.markerTime * 2 + idx) * 0.18;
+    });
+
+    // Gentle oscillating swing physics for Gujarati Hinchko
+    this.hinchkoSwings.forEach((swing) => {
+      swing.rotation.x = Math.sin(this.markerTime * 1.6) * 0.07;
     });
 
     // Steam bobbing on Chai Pot
