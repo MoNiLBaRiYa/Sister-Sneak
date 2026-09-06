@@ -300,15 +300,55 @@ export class Room {
       ctx.fillRect(x + 44, y + 66, 6, 6);
       ctx.fillRect(x + 34, y + 78, 6, 6);
     } else if (this.isStairs) {
-      ctx.fillStyle = "#D97706";
-      const numSteps = 7;
-      const stepW = w / numSteps;
-      const stepH = (h - 20) / numSteps;
+      // Realistic 2D Wooden Staircase with Teak Risers & Balustrades
+      const numSteps = 8;
+      const stepW = (w - 30) / numSteps;
+      const stepH = (h - 40) / numSteps;
+      const baseFloorY = y + h - 16;
+
+      // Draw Steps from left to right ascending
       for (let s = 0; s < numSteps; s++) {
-        ctx.fillRect(x + s * stepW, y + h - 16 - (s + 1) * stepH, stepW + 2, (s + 1) * stepH);
+        const sx = x + 15 + s * stepW;
+        const sh = (s + 1) * stepH;
+        const sy = baseFloorY - sh;
+
+        // Step Riser Front (Shadowed Teak)
+        ctx.fillStyle = "#78350F";
+        ctx.fillRect(sx, sy, stepW + 1, sh);
+
+        // Step Tread Top (Polished Golden Amber)
+        ctx.fillStyle = "#D97706";
+        ctx.fillRect(sx, sy, stepW + 1, 4);
+
+        // Tread Nosing Highlight
+        ctx.fillStyle = "#FDE68A";
+        ctx.fillRect(sx, sy, stepW + 1, 1.5);
       }
-      ctx.fillStyle = "#78350F";
-      ctx.fillText("🪜 STAIRS", x + 20, y + 40);
+
+      // Sloping Wooden Handrail
+      ctx.strokeStyle = "#451A03";
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(x + 15, baseFloorY - 24);
+      ctx.lineTo(x + 15 + numSteps * stepW, baseFloorY - (numSteps * stepH) - 24);
+      ctx.stroke();
+
+      // Brass Balusters
+      ctx.strokeStyle = "#F59E0B";
+      ctx.lineWidth = 2;
+      for (let s = 0; s < numSteps; s += 2) {
+        const bx = x + 20 + s * stepW;
+        const by = baseFloorY - (s + 1) * stepH;
+        ctx.beginPath();
+        ctx.moveTo(bx, by);
+        ctx.lineTo(bx, by - 24);
+        ctx.stroke();
+      }
+
+      // Room Title Badge
+      ctx.fillStyle = "#FDE68A";
+      ctx.font = "bold 11px Fredoka, sans-serif";
+      ctx.fillText("🪜 STAIRWELL", x + 18, y + 36);
     }
   }
 

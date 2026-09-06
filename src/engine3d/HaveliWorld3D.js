@@ -3,7 +3,8 @@
  * Renders an authentic 3-Floor Indian Joint-Family Haveli with real physical room props:
  * Kitchen Stove & Chai Strainer, Study Desk & Math Workbook, Bed & Quilt,
  * Balcony Tulsi Kyaro, Terrace Clotheslines with swaying Sarees, Solar Panels,
- * Gujarati Barni Pickle Jars, Floor Rangoli, Shoe Rack, and Phone Lock Box.
+ * Gujarati Barni Pickle Jars, Floor Rangoli, Shoe Rack, Phone Lock Box,
+ * and dedicated 3D physical Staircase Rooms on all floors with wooden steps and banisters.
  */
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
@@ -35,6 +36,7 @@ export class HaveliWorld3D {
     const terraceStoneMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.8 });
     const wallPlasterMat = new THREE.MeshStandardMaterial({ color: 0xfef3c7, roughness: 0.55 });
     const darkWoodMat = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.5 });
+    const teakWoodMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.45 });
     const goldMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.3, metalness: 0.8 });
     const graniteMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2 });
     const fabricPinkMat = new THREE.MeshStandardMaterial({ color: 0xf472b6, roughness: 0.8 });
@@ -43,9 +45,10 @@ export class HaveliWorld3D {
     const steelMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85, roughness: 0.2 });
     const ceramicWhiteMat = new THREE.MeshStandardMaterial({ color: 0xfef9c3, roughness: 0.3 });
     const plantMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.6 });
+    const lanternGlowMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
 
     // =========================================================================
-    // FLOOR 0: GROUND FLOOR (Entry Veranda, Courtyard, Kitchen, Store Room)
+    // FLOOR 0: GROUND FLOOR (Entry Veranda, Courtyard, Kitchen, Store Room, 1F Stairwell)
     // =========================================================================
     const g0 = new THREE.Group();
 
@@ -55,7 +58,7 @@ export class HaveliWorld3D {
     slab0.receiveShadow = true;
     g0.add(slab0);
 
-    // Decorative Back Wall with Carved Arch Trim
+    // Decorative Back Wall
     const backWall0 = new THREE.Mesh(new THREE.BoxGeometry(width, 4.2, 0.4), wallPlasterMat);
     backWall0.position.set(0, 2.1, -depth / 2);
     backWall0.receiveShadow = true;
@@ -70,7 +73,7 @@ export class HaveliWorld3D {
     rightWall0.position.set(width / 2, 2.1, 0);
     g0.add(rightWall0);
 
-    // Low Open Dividers (0.8m height so player & furniture are 100% visible)
+    // Low Open Dividers
     const div0L = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.2, depth * 0.75), wallPlasterMat);
     div0L.position.set(-5.5, 0.6, -1.0);
     g0.add(div0L);
@@ -133,37 +136,38 @@ export class HaveliWorld3D {
     g0.add(strainerHandle);
 
     // 4. 🏺 Dadi's Store Room: Ceramic Gujarati Barni Jars (Right Room)
-    const storeShelf = new THREE.Mesh(new THREE.BoxGeometry(4.0, 0.15, 1.4), darkWoodMat);
-    storeShelf.position.set(10.5, 0.9, -4.5);
+    const storeShelf = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.15, 1.2), darkWoodMat);
+    storeShelf.position.set(8.2, 0.9, -4.5);
     g0.add(storeShelf);
 
     for (let i = -1; i <= 1; i++) {
-      // Ceramic Barni Body (White/Cream base)
-      const barni = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.35, 0.7, 16), ceramicWhiteMat);
-      barni.position.set(10.5 + i * 1.1, 1.35, -4.5);
+      const barni = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.32, 0.65, 16), ceramicWhiteMat);
+      barni.position.set(8.2 + i * 0.95, 1.3, -4.5);
       barni.castShadow = true;
       g0.add(barni);
 
-      // Mustard/Yellow Cloth Lid
-      const barniCap = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.32, 0.2, 16), fabricYellowMat);
-      barniCap.position.set(10.5 + i * 1.1, 1.75, -4.5);
+      const barniCap = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 0.18, 16), fabricYellowMat);
+      barniCap.position.set(8.2 + i * 0.95, 1.68, -4.5);
       g0.add(barniCap);
     }
 
     // 5. 💡 1F Ground Power Board
     const fuseBox0 = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 0.2), steelMat);
-    fuseBox0.position.set(13.5, 2.0, -3.5);
+    fuseBox0.position.set(9.8, 2.0, -4.8);
     g0.add(fuseBox0);
 
     const led0 = new THREE.Mesh(new THREE.SphereGeometry(0.06), new THREE.MeshBasicMaterial({ color: 0x10b981 }));
-    led0.position.set(13.5, 2.4, -3.38);
+    led0.position.set(9.8, 2.4, -4.68);
     g0.add(led0);
+
+    // 6. 🪜 DEDICATED 1F GROUND STAIRCASE ROOM & 3D WOODEN STEPS
+    this.buildGroundStairRoom(g0, wallPlasterMat, teakWoodMat, darkWoodMat, goldMat, lanternGlowMat);
 
     this.scene.add(g0);
     this.floorGroups.push(g0);
 
     // =========================================================================
-    // FLOOR 1: MIDDLE FLOOR (Living Hub, Study Desk, Bedrooms, Balcony)
+    // FLOOR 1: MIDDLE FLOOR (Living Hub, Study Desk, Bedroom, Balcony, 2F Stairwell)
     // =========================================================================
     const g1 = new THREE.Group();
     g1.position.y = floorHeights[1];
@@ -238,21 +242,21 @@ export class HaveliWorld3D {
     pencil.position.set(-9.8, 0.96, -3.9);
     g1.add(pencil);
 
-    // 3. 🛏️ Sisters' Bedroom Bed with Rumpled Quilt & Pillows (Right Room)
-    const bedFrame = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.6, 4.4), darkWoodMat);
-    bedFrame.position.set(10.5, 0.3, -3.2);
+    // 3. 🛏️ Sisters' Bedroom Bed (Cleanly inside Bedroom at x=8.2)
+    const bedFrame = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.6, 4.2), darkWoodMat);
+    bedFrame.position.set(8.2, 0.3, -3.2);
     g1.add(bedFrame);
 
-    const mattress = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.4, 4.1), fabricPinkMat);
-    mattress.position.set(10.5, 0.7, -3.2);
+    const mattress = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.4, 3.9), fabricPinkMat);
+    mattress.position.set(8.2, 0.7, -3.2);
     g1.add(mattress);
 
-    const pillow1 = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.22, 0.8), fabricYellowMat);
-    pillow1.position.set(9.4, 0.95, -4.8);
+    const pillow1 = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.22, 0.75), fabricYellowMat);
+    pillow1.position.set(7.3, 0.95, -4.6);
     g1.add(pillow1);
 
-    const pillow2 = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.22, 0.8), fabricYellowMat);
-    pillow2.position.set(11.6, 0.95, -4.8);
+    const pillow2 = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.22, 0.75), fabricYellowMat);
+    pillow2.position.set(9.1, 0.95, -4.6);
     g1.add(pillow2);
 
     // 4. 🌿 Balcony Tulsi Kyaro Pedestal & Watering Can (Far Left)
@@ -282,11 +286,14 @@ export class HaveliWorld3D {
     rail1.position.set(0, 0.4, depth / 2);
     g1.add(rail1);
 
+    // 6. 🪜 DEDICATED 2F LIVING HUB STAIRCASE ROOM (1F Down & 3F Up)
+    this.buildHubStairRoom(g1, wallPlasterMat, teakWoodMat, darkWoodMat, goldMat, lanternGlowMat);
+
     this.scene.add(g1);
     this.floorGroups.push(g1);
 
     // =========================================================================
-    // FLOOR 2: TOP TERRACE (Drying Sarees, Solar Panels, Inverter)
+    // FLOOR 2: TOP TERRACE (Drying Sarees, Solar Panels, Inverter, 3F Stairwell)
     // =========================================================================
     const g2 = new THREE.Group();
     g2.position.y = floorHeights[2];
@@ -304,18 +311,18 @@ export class HaveliWorld3D {
     rail2Front.position.set(0, 0.45, depth / 2);
     g2.add(rail2Front);
 
-    // 1. 🧺 Clotheslines & Fluttering Sarees with Laundry Basket (Center Patio)
+    // 1. 🧺 Clotheslines & Fluttering Sarees (Center Patio)
     const postL = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.4, 8), darkWoodMat);
     postL.position.set(-6, 1.2, 0.5);
     g2.add(postL);
 
     const postR = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.4, 8), darkWoodMat);
-    postR.position.set(6, 1.2, 0.5);
+    postR.position.set(5.5, 1.2, 0.5);
     g2.add(postR);
 
-    const wire = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 12, 6), steelMat);
+    const wire = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 11.5, 6), steelMat);
     wire.rotation.z = Math.PI / 2;
-    wire.position.set(0, 2.2, 0.5);
+    wire.position.set(-0.25, 2.2, 0.5);
     g2.add(wire);
 
     // Swaying Dupattas
@@ -325,12 +332,12 @@ export class HaveliWorld3D {
     this.clotheslines.push(cloth1);
 
     const cloth2 = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 1.6), fabricBlueMat);
-    cloth2.position.set(0.5, 1.4, 0.5);
+    cloth2.position.set(0.2, 1.4, 0.5);
     g2.add(cloth2);
     this.clotheslines.push(cloth2);
 
     const cloth3 = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 1.6), fabricYellowMat);
-    cloth3.position.set(3.8, 1.4, 0.5);
+    cloth3.position.set(3.4, 1.4, 0.5);
     g2.add(cloth3);
     this.clotheslines.push(cloth3);
 
@@ -356,17 +363,157 @@ export class HaveliWorld3D {
     squeegee.rotation.z = Math.PI / 4;
     g2.add(squeegee);
 
-    // 3. ⚡ 3F Solar Inverter Switchboard
+    // 3. ⚡ 3F Solar Inverter Switchboard (Shifted cleanly to x=7.5)
     const fuseBox2 = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 0.2), steelMat);
-    fuseBox2.position.set(10.0, 2.0, -4.0);
+    fuseBox2.position.set(7.5, 2.0, -4.0);
     g2.add(fuseBox2);
 
     const led2 = new THREE.Mesh(new THREE.SphereGeometry(0.06), new THREE.MeshBasicMaterial({ color: 0x10b981 }));
-    led2.position.set(10.0, 2.4, -3.88);
+    led2.position.set(7.5, 2.4, -3.88);
     g2.add(led2);
+
+    // 4. 🪜 DEDICATED 3F ROOFTOP STAIRWELL ENCLOSURE (Stairhead Gazebo & Doorway)
+    this.buildTerraceStairRoom(g2, wallPlasterMat, teakWoodMat, darkWoodMat, goldMat, lanternGlowMat);
 
     this.scene.add(g2);
     this.floorGroups.push(g2);
+  }
+
+  // Helper: Build 1F Ground Staircase Room
+  buildGroundStairRoom(group, wallMat, woodMat, darkWoodMat, goldMat, glowMat) {
+    const archX = 11.2;
+
+    // Left archway wall post
+    const archPost1 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 3.2, 4.0), wallMat);
+    archPost1.position.set(archX, 1.6, -4.5);
+    group.add(archPost1);
+
+    // Right archway wall post
+    const archPost2 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 3.2, 4.0), wallMat);
+    archPost2.position.set(archX, 1.6, 4.5);
+    group.add(archPost2);
+
+    // Top lintel / arch header
+    const archTop = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.8, 13.0), wallMat);
+    archTop.position.set(archX, 3.4, 0);
+    group.add(archTop);
+
+    // Glowing Haveli Brass Lantern
+    const lantern = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.5, 0.35), glowMat);
+    lantern.position.set(archX, 2.8, 0);
+    group.add(lantern);
+
+    const lanternFrame = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.55, 0.4), darkWoodMat);
+    lanternFrame.position.set(archX, 2.8, 0);
+    group.add(lanternFrame);
+
+    // 3D Physical Steps ascending upward
+    const stepCount = 6;
+    const stepW = 2.4;
+    const stepD = 0.65;
+    const stepH = 0.32;
+
+    for (let i = 0; i < stepCount; i++) {
+      const step = new THREE.Mesh(new THREE.BoxGeometry(stepW, stepH * (i + 1), stepD), woodMat);
+      step.position.set(13.2, (stepH * (i + 1)) / 2, -2.5 + i * stepD);
+      step.castShadow = true;
+      step.receiveShadow = true;
+      group.add(step);
+    }
+
+    // Handrail Banister
+    const handrail = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, stepCount * stepD + 0.5), darkWoodMat);
+    handrail.rotation.x = 0.42;
+    handrail.position.set(12.0, 1.4, -0.8);
+    group.add(handrail);
+
+    // Balusters
+    for (let i = 0; i < 4; i++) {
+      const baluster = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.1, 8), goldMat);
+      baluster.position.set(12.0, 0.6 + i * 0.28, -2.2 + i * 0.9);
+      group.add(baluster);
+    }
+  }
+
+  // Helper: Build 2F Living Hub Dual Staircase Room
+  buildHubStairRoom(group, wallMat, woodMat, darkWoodMat, goldMat, glowMat) {
+    const archX = 11.2;
+
+    // Archway posts & lintel
+    const archPost1 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 3.2, 4.0), wallMat);
+    archPost1.position.set(archX, 1.6, -4.5);
+    group.add(archPost1);
+
+    const archPost2 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 3.2, 4.0), wallMat);
+    archPost2.position.set(archX, 1.6, 4.5);
+    group.add(archPost2);
+
+    const archTop = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.8, 13.0), wallMat);
+    archTop.position.set(archX, 3.4, 0);
+    group.add(archTop);
+
+    // Glowing Lantern
+    const lantern = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.5, 0.35), glowMat);
+    lantern.position.set(archX, 2.8, 0);
+    group.add(lantern);
+
+    // Flight A: Steps descending down to 1F (Back section z = -4.5 to -1.5)
+    for (let i = 0; i < 5; i++) {
+      const stepDown = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.28 * (5 - i), 0.55), woodMat);
+      stepDown.position.set(13.0, (0.28 * (5 - i)) / 2, -4.2 + i * 0.55);
+      group.add(stepDown);
+    }
+    const railDown = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 2.8), darkWoodMat);
+    railDown.rotation.x = -0.45;
+    railDown.position.set(11.9, 1.1, -3.1);
+    group.add(railDown);
+
+    // Flight B: Steps ascending up to 3F (Front section z = 1.0 to 4.2)
+    for (let i = 0; i < 5; i++) {
+      const stepUp = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.28 * (i + 1), 0.55), woodMat);
+      stepUp.position.set(13.2, (0.28 * (i + 1)) / 2, 1.2 + i * 0.55);
+      group.add(stepUp);
+    }
+    const railUp = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 2.8), darkWoodMat);
+    railUp.rotation.x = 0.45;
+    railUp.position.set(12.1, 1.1, 2.3);
+    group.add(railUp);
+  }
+
+  // Helper: Build 3F Terrace Rooftop Stairwell Enclosure
+  buildTerraceStairRoom(group, wallMat, woodMat, darkWoodMat, goldMat, glowMat) {
+    const shedX = 12.8;
+
+    // Enclosed Stairhead Cabin Walls (Left, Right, Back)
+    const shedWallL = new THREE.Mesh(new THREE.BoxGeometry(0.3, 2.8, 5.0), wallMat);
+    shedWallL.position.set(10.8, 1.4, 0);
+    group.add(shedWallL);
+
+    const shedWallR = new THREE.Mesh(new THREE.BoxGeometry(0.3, 2.8, 5.0), wallMat);
+    shedWallR.position.set(14.6, 1.4, 0);
+    group.add(shedWallR);
+
+    const shedWallBack = new THREE.Mesh(new THREE.BoxGeometry(3.8, 2.8, 0.3), wallMat);
+    shedWallBack.position.set(12.7, 1.4, -2.5);
+    group.add(shedWallBack);
+
+    // Sloping Stairhead Canopy Roof
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.25, 5.6), darkWoodMat);
+    roof.position.set(12.7, 2.9, 0);
+    roof.rotation.z = -0.08;
+    group.add(roof);
+
+    // Lantern above Doorway Opening
+    const lantern = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.4, 0.3), glowMat);
+    lantern.position.set(10.8, 2.4, 0);
+    group.add(lantern);
+
+    // Descending Steps into the stairwell opening
+    for (let i = 0; i < 4; i++) {
+      const step = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.25 * (4 - i), 0.6), woodMat);
+      step.position.set(12.7, (0.25 * (4 - i)) / 2, -1.5 + i * 0.6);
+      group.add(step);
+    }
   }
 
   createTaskMarkers() {
@@ -377,24 +524,24 @@ export class HaveliWorld3D {
       { id: "HS_CHAI", text: "☕ Kitchen: Make Chai", x: -10.5, z: -4.2, floor: 0, color: "#F59E0B" },
       { id: "HS_RANGOLI", text: "🌸 Veranda: Rangoli", x: 0, z: 1.5, floor: 0, color: "#EC4899" },
       { id: "HS_VERANDA", text: "👡 Veranda: Shoe Rack", x: 6.5, z: 1.5, floor: 0, color: "#FBBF24" },
-      { id: "HS_STORE_ACHAR", text: "🏺 Store: Achar Jars", x: 10.5, z: -4.2, floor: 0, color: "#D97706" },
-      { id: "HS_SWITCHES", text: "⚡ 1F Ground Power Board", x: 13.5, z: -3.5, floor: 0, color: "#EF4444" },
-      { id: "HS_STAIRS_G_UP", text: "🪜 Go Up to 2F (Stairs)", x: 14.2, z: 0.0, floor: 0, color: "#10B981" },
+      { id: "HS_STORE_ACHAR", text: "🏺 Store: Achar Jars", x: 8.2, z: -4.2, floor: 0, color: "#D97706" },
+      { id: "HS_SWITCHES", text: "⚡ 1F Ground Power Board", x: 9.8, z: -4.5, floor: 0, color: "#EF4444" },
+      { id: "HS_STAIRS_G_UP", text: "🪜 Go Up to 2F (Stairwell)", x: 13.0, z: 0.0, floor: 0, color: "#10B981" },
 
       // Floor 1: Middle Floor Tasks & Central Meeting Hub
       { id: "HS_HOMEWORK", text: "📚 Study: Math Homework", x: -10.5, z: -4.0, floor: 1, color: "#3B82F6" },
       { id: "HS_BALCONY", text: "🌿 Balcony: Water Tulsi", x: -13.5, z: 2.5, floor: 1, color: "#10B981" },
       { id: "HS_PHONE_BOX", text: "📦 Phone Lock Box (Meeting)", x: 0, z: -1.8, floor: 1, color: "#06B6D4" },
-      { id: "HS_BED_1", text: "🛏️ Bedroom: Fold Bed", x: 10.5, z: -3.2, floor: 1, color: "#F43F5E" },
+      { id: "HS_BED_1", text: "🛏️ Bedroom: Fold Bed", x: 8.2, z: -3.2, floor: 1, color: "#F43F5E" },
       { id: "HS_FUSE_2F", text: "⚡ 2F Hall Switchboard", x: 4.5, z: -4.5, floor: 1, color: "#EF4444" },
-      { id: "HS_STAIRS_HUB_DOWN", text: "🪜 Go Down to 1F (Stairs)", x: 12.9, z: 0.0, floor: 1, color: "#10B981" },
-      { id: "HS_STAIRS_HUB_UP", text: "🪜 Go Up to 3F (Stairs)", x: 14.7, z: 0.0, floor: 1, color: "#10B981" },
+      { id: "HS_STAIRS_HUB_DOWN", text: "🪜 Go Down to 1F", x: 12.5, z: -2.5, floor: 1, color: "#10B981" },
+      { id: "HS_STAIRS_HUB_UP", text: "🪜 Go Up to 3F", x: 13.5, z: 2.2, floor: 1, color: "#10B981" },
 
       // Floor 2: Top Terrace Tasks & Navigation
       { id: "HS_SOLAR", text: "☀️ Roof: Solar Panels", x: -10.0, z: -3.5, floor: 2, color: "#06B6D4" },
       { id: "HS_CLOTHES", text: "🧺 Terrace: Fold Sarees", x: 0, z: 0.5, floor: 2, color: "#8B5CF6" },
-      { id: "HS_FUSE_3F", text: "⚡ 3F Solar Inverter & Fuse", x: 10.0, z: -4.0, floor: 2, color: "#EF4444" },
-      { id: "HS_STAIRS_T", text: "🪜 Go Down to 2F (Stairs)", x: 12.6, z: 0.0, floor: 2, color: "#10B981" }
+      { id: "HS_FUSE_3F", text: "⚡ 3F Solar Inverter & Fuse", x: 7.5, z: -4.0, floor: 2, color: "#EF4444" },
+      { id: "HS_STAIRS_T", text: "🪜 Go Down to 2F (Stairwell)", x: 12.5, z: 0.0, floor: 2, color: "#10B981" }
     ];
 
     markersData.forEach((data) => {
@@ -421,7 +568,7 @@ export class HaveliWorld3D {
     const ctx = canvas.getContext('2d');
 
     // Glowing Pill Background
-    ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
     ctx.beginPath();
     ctx.roundRect(8, 8, 324, 60, 16);
     ctx.fill();

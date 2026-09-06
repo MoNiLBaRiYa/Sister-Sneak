@@ -1011,6 +1011,14 @@ export class Game {
 
   handleHotspotInteraction(hs) {
     if (hs.isEmergencyButton) {
+      if (this.meetingEngine) {
+        const check = this.meetingEngine.canPlayerCallMeeting();
+        if (!check.allowed) {
+          this.showNotification(check.reason, 3500);
+          if (this.audio) this.audio.playSabotageAlert();
+          return;
+        }
+      }
       const callText = `Emergency Meeting Called by ${this.player.name} at ${hs.label}!`;
       this.meetingEngine.startMeeting(callText);
       if (this.multiplayer && this.multiplayer.isMultiplayer) {

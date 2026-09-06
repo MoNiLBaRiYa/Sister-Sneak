@@ -25,27 +25,27 @@ export const ROOMS = {
     id: "TERRACE_DRY",
     floor: 2,
     name: "Terrace Clothes Line & Solar Roof",
-    bounds: { x: 60, y: FLOOR_Y[2] + 20, w: 500, h: 160 },
+    bounds: { x: 60, y: FLOOR_Y[2] + 20, w: 480, h: 160 },
     theme: "#E0F2FE",
     icon: "🧺"
   },
   TERRACE_TANK: {
     id: "TERRACE_TANK",
     floor: 2,
-    name: "Water Tank & Papad Terrace",
-    bounds: { x: 580, y: FLOOR_Y[2] + 20, w: 320, h: 160 },
+    name: "Water Tank & Inverter Station",
+    bounds: { x: 550, y: FLOOR_Y[2] + 20, w: 380, h: 160 },
     theme: "#BAE6FD",
     icon: "🚰"
   },
   TERRACE_STAIRS: {
     id: "TERRACE_STAIRS",
     floor: 2,
-    name: "Terrace Stairs",
-    bounds: { x: 920, y: FLOOR_Y[2] + 20, w: 260, h: 160 },
+    name: "Rooftop Stairwell",
+    bounds: { x: 940, y: FLOOR_Y[2] + 20, w: 280, h: 160 },
     theme: "#FDE68A",
     icon: "🪜",
     isStairs: true,
-    connectsTo: { floor: 1, x: 960, y: FLOOR_Y[1] + 100 }
+    connectsTo: { floor: 1, x: 1100, y: FLOOR_Y[1] + 100 }
   },
 
   // --- 1ST FLOOR - LIVING HUB (Floor 1 / 2F) ---
@@ -78,19 +78,19 @@ export const ROOMS = {
     id: "KITCHEN",
     floor: 1,
     name: "Grand Kitchen",
-    bounds: { x: 780, y: FLOOR_Y[1] + 20, w: 250, h: 160 },
+    bounds: { x: 780, y: FLOOR_Y[1] + 20, w: 260, h: 160 },
     theme: "#FFEDD5",
     icon: "🍳"
   },
   HUB_STAIRS: {
     id: "HUB_STAIRS",
     floor: 1,
-    name: "Living Hub Stairs",
-    bounds: { x: 1040, y: FLOOR_Y[1] + 20, w: 180, h: 160 },
+    name: "Living Hub Stairwell",
+    bounds: { x: 1050, y: FLOOR_Y[1] + 20, w: 170, h: 160 },
     theme: "#FDE68A",
     icon: "🪜",
     isStairs: true,
-    connectsTo: { floor: 2, x: 980, y: FLOOR_Y[2] + 100 }
+    connectsTo: { floor: 2, x: 1120, y: FLOOR_Y[2] + 100 }
   },
 
   // --- GROUND FLOOR - STORAGE & ENTRY (Floor 0 / 1F) ---
@@ -122,19 +122,19 @@ export const ROOMS = {
     id: "GROUND_BEDROOM",
     floor: 0,
     name: "Ground Guest Room & Power Board",
-    bounds: { x: 800, y: FLOOR_Y[0] + 20, w: 230, h: 160 },
+    bounds: { x: 800, y: FLOOR_Y[0] + 20, w: 240, h: 160 },
     theme: "#F1F5F9",
     icon: "💡"
   },
   GROUND_STAIRS: {
     id: "GROUND_STAIRS",
     floor: 0,
-    name: "Ground Floor Stairs",
-    bounds: { x: 1040, y: FLOOR_Y[0] + 20, w: 180, h: 160 },
+    name: "Ground Floor Stairwell",
+    bounds: { x: 1050, y: FLOOR_Y[0] + 20, w: 170, h: 160 },
     theme: "#FDE68A",
     icon: "🪜",
     isStairs: true,
-    connectsTo: { floor: 1, x: 1060, y: FLOOR_Y[1] + 100 }
+    connectsTo: { floor: 1, x: 1100, y: FLOOR_Y[1] + 100 }
   }
 };
 
@@ -155,7 +155,7 @@ export const HOTSPOTS = [
   {
     id: "HS_CLOTHES",
     floor: 2,
-    x: 600,
+    x: 480,
     y: FLOOR_Y[2] + 116,
     radius: 42,
     taskId: "CLOTHES_COLLECT",
@@ -165,7 +165,7 @@ export const HOTSPOTS = [
   {
     id: "HS_FUSE_3F",
     floor: 2,
-    x: 980,
+    x: 820,
     y: FLOOR_Y[2] + 62,
     radius: 38,
     taskId: "SWITCHES_OFF",
@@ -176,12 +176,12 @@ export const HOTSPOTS = [
   {
     id: "HS_STAIRS_T",
     floor: 2,
-    x: 1080,
-    y: FLOOR_Y[2] + 110,
+    x: 1120,
+    y: FLOOR_Y[2] + 105,
     radius: 48,
     isStairHotspot: true,
     targetFloor: 1,
-    targetX: 1090,
+    targetX: 1100,
     label: "Go Down to 2F (Stairs)",
     icon: "⬇️"
   },
@@ -233,7 +233,7 @@ export const HOTSPOTS = [
   {
     id: "HS_BED_1",
     floor: 1,
-    x: 999,
+    x: 920,
     y: FLOOR_Y[1] + 72,
     radius: 40,
     taskId: "BEDSHEET_TUCK",
@@ -244,7 +244,7 @@ export const HOTSPOTS = [
     id: "HS_STAIRS_HUB_DOWN",
     floor: 1,
     x: 1090,
-    y: FLOOR_Y[1] + 110,
+    y: FLOOR_Y[1] + 75,
     radius: 36,
     isStairHotspot: true,
     targetFloor: 0,
@@ -255,12 +255,12 @@ export const HOTSPOTS = [
   {
     id: "HS_STAIRS_HUB_UP",
     floor: 1,
-    x: 1160,
-    y: FLOOR_Y[1] + 110,
+    x: 1165,
+    y: FLOOR_Y[1] + 125,
     radius: 36,
     isStairHotspot: true,
     targetFloor: 2,
-    targetX: 1080,
+    targetX: 1120,
     label: "Go Up to 3F",
     icon: "⬆️"
   },
@@ -301,7 +301,7 @@ export const HOTSPOTS = [
   {
     id: "HS_STORE_ACHAR",
     floor: 0,
-    x: 999,
+    x: 920,
     y: FLOOR_Y[0] + 60,
     radius: 40,
     taskId: "ACHAR_HUNT",
@@ -311,7 +311,7 @@ export const HOTSPOTS = [
   {
     id: "HS_SWITCHES",
     floor: 0,
-    x: 1113,
+    x: 1010,
     y: FLOOR_Y[0] + 68,
     radius: 38,
     taskId: "SWITCHES_OFF",
