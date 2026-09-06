@@ -526,7 +526,7 @@ export class HaveliWorld3D {
       { id: "HS_VERANDA", text: "👡 Veranda: Shoe Rack", x: 6.5, z: 1.5, floor: 0, color: "#FBBF24" },
       { id: "HS_STORE_ACHAR", text: "🏺 Store: Achar Jars", x: 8.2, z: -4.2, floor: 0, color: "#D97706" },
       { id: "HS_SWITCHES", text: "⚡ 1F Ground Power Board", x: 9.8, z: -4.5, floor: 0, color: "#EF4444" },
-      { id: "HS_STAIRS_G_UP", text: "🪜 Go Up to 2F (Stairwell)", x: 13.0, z: 0.0, floor: 0, color: "#10B981" },
+      { id: "HS_STAIRS_G_UP", text: "🪜 Go Up to 2F (Stairwell)", x: 13.2, z: -0.5, floor: 0, color: "#10B981" },
 
       // Floor 1: Middle Floor Tasks & Central Meeting Hub
       { id: "HS_HOMEWORK", text: "📚 Study: Math Homework", x: -10.5, z: -4.0, floor: 1, color: "#3B82F6" },
@@ -534,14 +534,14 @@ export class HaveliWorld3D {
       { id: "HS_PHONE_BOX", text: "📦 Phone Lock Box (Meeting)", x: 0, z: -1.8, floor: 1, color: "#06B6D4" },
       { id: "HS_BED_1", text: "🛏️ Bedroom: Fold Bed", x: 8.2, z: -3.2, floor: 1, color: "#F43F5E" },
       { id: "HS_FUSE_2F", text: "⚡ 2F Hall Switchboard", x: 4.5, z: -4.5, floor: 1, color: "#EF4444" },
-      { id: "HS_STAIRS_HUB_DOWN", text: "🪜 Go Down to 1F", x: 12.5, z: -2.5, floor: 1, color: "#10B981" },
-      { id: "HS_STAIRS_HUB_UP", text: "🪜 Go Up to 3F", x: 13.5, z: 2.2, floor: 1, color: "#10B981" },
+      { id: "HS_STAIRS_HUB_DOWN", text: "🪜 Go Down to 1F", x: 12.8, z: -2.5, floor: 1, color: "#10B981" },
+      { id: "HS_STAIRS_HUB_UP", text: "🪜 Go Up to 3F", x: 13.4, z: 1.5, floor: 1, color: "#10B981" },
 
       // Floor 2: Top Terrace Tasks & Navigation
       { id: "HS_SOLAR", text: "☀️ Roof: Solar Panels", x: -10.0, z: -3.5, floor: 2, color: "#06B6D4" },
       { id: "HS_CLOTHES", text: "🧺 Terrace: Fold Sarees", x: 0, z: 0.5, floor: 2, color: "#8B5CF6" },
       { id: "HS_FUSE_3F", text: "⚡ 3F Solar Inverter & Fuse", x: 7.5, z: -4.0, floor: 2, color: "#EF4444" },
-      { id: "HS_STAIRS_T", text: "🪜 Go Down to 2F (Stairwell)", x: 12.5, z: 0.0, floor: 2, color: "#10B981" }
+      { id: "HS_STAIRS_T", text: "🪜 Go Down to 2F (Stairwell)", x: 13.2, z: -0.5, floor: 2, color: "#10B981" }
     ];
 
     markersData.forEach((data) => {

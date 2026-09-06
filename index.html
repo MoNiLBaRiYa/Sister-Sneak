@@ -722,13 +722,13 @@
         if ('caches' in window) {
           caches.keys().then((names) => {
             for (let name of names) {
-              if (name !== 'sister-sneak-v20260906_v6') {
+              if (name !== 'sister-sneak-v20260906_v7') {
                 caches.delete(name);
               }
             }
           });
         }
-        navigator.serviceWorker.register('/sw.js?v=20260906_v6')
+        navigator.serviceWorker.register('/sw.js?v=20260906_v7')
           .then((reg) => {
             reg.update();
           })

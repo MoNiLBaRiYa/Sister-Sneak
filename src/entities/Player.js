@@ -161,7 +161,7 @@ export class Player extends Character {
       this.vx = 0;
       game.showTopToast("🔒 This room's door is locked with KUNDI from outside!");
     } else {
-      this.x = Math.max(80, Math.min(1120, nextX));
+      this.x = Math.max(80, Math.min(1175, nextX));
     }
 
     const nextY = this.y + this.vy * dt;

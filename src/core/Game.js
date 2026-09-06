@@ -108,7 +108,7 @@ export class Game {
         btn.addEventListener("click", () => {
           if (this.player && this.state === "PLAYING") {
             if (this.player.floor === floorNum) return;
-            const isNearStairs = this.activeNearbyHotspot && this.activeNearbyHotspot.isStairHotspot;
+            const isNearStairs = (this.activeNearbyHotspot && this.activeNearbyHotspot.isStairHotspot) || (this.player.currentRoom && this.player.currentRoom.isStairs);
             if (isNearStairs) {
               this.setPlayerFloor(floorNum);
             } else {
