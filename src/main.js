@@ -262,6 +262,10 @@ window.addEventListener('DOMContentLoaded', () => {
       const rolePrefEl = document.querySelector('input[name="rolePref"]:checked');
       const rolePref = rolePrefEl ? rolePrefEl.value : "random";
 
+      // Auto-minimize Creator message when playing so game canvas is clear
+      const creatorBadge = document.getElementById('creator-corner-badge');
+      if (creatorBadge) creatorBadge.classList.add('minimized');
+
       document.getElementById('screen-lobby').classList.add('hidden');
       game.audio.resume();
       game.audio.playClick();
