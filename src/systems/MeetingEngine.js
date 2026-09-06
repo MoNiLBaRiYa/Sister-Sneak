@@ -169,8 +169,44 @@ export class MeetingEngine {
 
     if (screen) screen.classList.remove("hidden");
 
+    this.populateForensicClues();
     this.populateDebateLog();
     this.startDiscussionPhase();
+  }
+
+  populateForensicClues() {
+    const list = document.getElementById("forensic-clues-list");
+    if (!list) return;
+    list.innerHTML = "";
+
+    const allSisters = this.getAllSisters();
+    const prankster = allSisters.find(s => s.role === "prankster") || allSisters[0];
+    const living = this.getLivingSisters();
+
+    // Clue 1: Sabotage context
+    if (this.game.sabotageSystem) {
+      const sFloor = this.game.sabotageSystem.sabotageFloor;
+      const sFloorName = sFloor === 2 ? "3F Terrace" : sFloor === 1 ? "2F Living Hub" : "1F Ground Floor";
+      const item1 = document.createElement("div");
+      item1.className = "forensic-item";
+      item1.innerText = `⚡ Crime Scene: Blown Fuse reported on ${sFloorName}!`;
+      list.appendChild(item1);
+    }
+
+    // Clue 2: Sister whereabouts
+    living.forEach((s) => {
+      const fName = s.floor === 2 ? "3F Terrace" : s.floor === 1 ? "2F Living" : "1F Ground";
+      const item = document.createElement("div");
+      item.className = "forensic-item";
+      const isHighSusp = (s.suspicion || 0) > 40;
+      if (isHighSusp) {
+        item.innerText = `🚨 Alert: ${s.name} had high suspicion (${Math.round(s.suspicion)}%) on ${fName}!`;
+        item.style.borderLeftColor = "#EF4444";
+      } else {
+        item.innerText = `📍 Alibi: ${s.name} was spotted near ${fName}.`;
+      }
+      list.appendChild(item);
+    });
   }
 
   // Phase 1: Discussion Phase (Chat open, voting locked)

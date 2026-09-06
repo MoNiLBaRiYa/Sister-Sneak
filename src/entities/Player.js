@@ -225,12 +225,13 @@ export class Player extends Character {
           game.showTopToast("🎨 Shruti's Masterstroke! Burst +20% Cleanliness & Flow Speed!");
         }
       } else {
-        // PRANKSTER (Trap & Irritate): Rangoli Paint Splatter - Blinds innocent screens with paint for 5s + +30% Suspicion
+        // PRANKSTER (Trap & Irritate): Rangoli Paint Splatter - Blinds innocent screens with paint for 5s, drops cleanliness by 10% + +30% Suspicion
         this.auraColor = "#DC2626";
         this.auraTimer = 6.0;
         this.activePowerLabel = "🎨 PAINT SPLATTER BLIND";
         game.applyPranksterDebuffToInnocents("PAINT_SPLATTER", this.floor);
-        game.showTopToast("😈 Prankster Shruti splattered Rangoli Paint! Blinded innocent screens & raised suspicion!");
+        if (game.taskManager) game.taskManager.contributeCleanliness(-10);
+        game.showTopToast("😈 Prankster Shruti splattered Rangoli Paint! Blinds innocents & dropped -10% Cleanliness!");
       }
     }
 
@@ -300,12 +301,16 @@ export class Player extends Character {
         game.sabotageSystem?.resolveCriticalSabotage();
         game.showTopToast("⚡ Jyeana's Smart Inverter Hack! Restored all lights + 7s Hyper Sprint!");
       } else {
-        // PRANKSTER (Trap & Irritate): EMP Jammer & Inverted Controls - Inverts movement controls & freezes chores for 6s
+        // PRANKSTER (Trap & Irritate): EMP Jammer & Inverted Controls - Inverts movement controls & resets Sabotage cooldowns
         this.auraColor = "#EF4444";
         this.auraTimer = 7.0;
         this.activePowerLabel = "⚡ EMP CONTROLS JAMMER";
         game.applyPranksterDebuffToInnocents("EMP_JAMMER", this.floor);
-        game.showTopToast("😈 Prankster Jyeana pulsed an EMP Jammer! Glitched and inverted all innocent controls for 6s!");
+        if (game.sabotageSystem) {
+          game.sabotageSystem.cooldowns.BLACKOUT = 0;
+          game.sabotageSystem.cooldowns.KUNDI = 0;
+        }
+        game.showTopToast("😈 Prankster Jyeana pulsed an EMP Jammer! Controls inverted & Sabotage cooldowns reset!");
       }
     }
 

@@ -101,13 +101,20 @@ export class Game {
   }
 
   bindHUDButtons() {
-    // Floor Navigation
+    // Floor Navigation (Enforces staircase usage)
     [0, 1, 2].forEach((floorNum) => {
       const btn = document.getElementById(`floor-btn-${floorNum}`);
       if (btn) {
         btn.addEventListener("click", () => {
           if (this.player && this.state === "PLAYING") {
-            this.setPlayerFloor(floorNum);
+            if (this.player.floor === floorNum) return;
+            const isNearStairs = this.activeNearbyHotspot && this.activeNearbyHotspot.isStairHotspot;
+            if (isNearStairs) {
+              this.setPlayerFloor(floorNum);
+            } else {
+              const targetName = floorNum === 2 ? '3F Terrace' : floorNum === 1 ? '2F Living Hub' : '1F Ground Veranda';
+              this.showTopToast(`🪜 Walk to the Staircase on the right to go to ${targetName}!`);
+            }
           }
         });
       }
@@ -743,24 +750,40 @@ export class Game {
             this.isoCamera.update(dt, { x: p3d.x, y: this.isoCamera.floorHeights[this.player.floor], z: p3d.z });
           }
 
-          // 3D Waypoint Compass Arrow pointing to nearest unfinished assigned task
+          // 3D Waypoint Compass Arrow pointing to Emergency Fuse Box or nearest assigned task
           if (this.taskManager && this.player3D) {
-            const myAssigned = HOTSPOTS.filter(hs => hs.taskId && this.taskManager.assignedTasks.has(hs.taskId) && !this.taskManager.isTaskCompleted(hs.taskId));
-            if (myAssigned.length > 0) {
-              const onFloor = myAssigned.filter(hs => hs.floor === this.player.floor);
-              let targetHotspot = null;
-              if (onFloor.length > 0) {
-                targetHotspot = onFloor.reduce((prev, curr) => Math.hypot(curr.x - this.player.x, curr.y - this.player.y) < Math.hypot(prev.x - this.player.x, prev.y - this.player.y) ? curr : prev);
-              } else {
-                const targetFloor = myAssigned[0].floor;
-                const stairs = HOTSPOTS.filter(hs => hs.isStairHotspot && hs.floor === this.player.floor && ((targetFloor > this.player.floor && hs.targetFloor > this.player.floor) || (targetFloor < this.player.floor && hs.targetFloor < this.player.floor)));
-                targetHotspot = stairs.length > 0 ? stairs[0] : null;
-              }
+            let targetHotspot = null;
+            let isEmergency = false;
 
-              if (targetHotspot) {
-                const tc3d = this.coord2Dto3D(targetHotspot.x, targetHotspot.y, targetHotspot.floor);
-                this.player3D.updateWaypoint(tc3d.x, tc3d.z);
+            if (this.sabotageSystem && this.sabotageSystem.criticalSabotageActive) {
+              isEmergency = true;
+              const fuseHotspot = HOTSPOTS.find(hs => hs.id === this.sabotageSystem.activeFuseHotspotId) || HOTSPOTS.find(hs => hs.isFuseBox && hs.floor === this.sabotageSystem.sabotageFloor);
+              if (fuseHotspot) {
+                if (fuseHotspot.floor === this.player.floor) {
+                  targetHotspot = fuseHotspot;
+                } else {
+                  const targetFloor = fuseHotspot.floor;
+                  const stairs = HOTSPOTS.filter(hs => hs.isStairHotspot && hs.floor === this.player.floor && ((targetFloor > this.player.floor && hs.targetFloor > this.player.floor) || (targetFloor < this.player.floor && hs.targetFloor < this.player.floor)));
+                  targetHotspot = stairs.length > 0 ? stairs[0] : null;
+                }
               }
+            } else {
+              const myAssigned = HOTSPOTS.filter(hs => hs.taskId && this.taskManager.assignedTasks.has(hs.taskId) && !this.taskManager.isTaskCompleted(hs.taskId));
+              if (myAssigned.length > 0) {
+                const onFloor = myAssigned.filter(hs => hs.floor === this.player.floor);
+                if (onFloor.length > 0) {
+                  targetHotspot = onFloor.reduce((prev, curr) => Math.hypot(curr.x - this.player.x, curr.y - this.player.y) < Math.hypot(prev.x - this.player.x, prev.y - this.player.y) ? curr : prev);
+                } else {
+                  const targetFloor = myAssigned[0].floor;
+                  const stairs = HOTSPOTS.filter(hs => hs.isStairHotspot && hs.floor === this.player.floor && ((targetFloor > this.player.floor && hs.targetFloor > this.player.floor) || (targetFloor < this.player.floor && hs.targetFloor < this.player.floor)));
+                  targetHotspot = stairs.length > 0 ? stairs[0] : null;
+                }
+              }
+            }
+
+            if (targetHotspot) {
+              const tc3d = this.coord2Dto3D(targetHotspot.x, targetHotspot.y, targetHotspot.floor);
+              this.player3D.updateWaypoint(tc3d.x, tc3d.z, isEmergency, this.sabotageSystem?.criticalTimer || 0);
             }
           }
 
@@ -955,15 +978,31 @@ export class Game {
 
       const pText = prompt.querySelector(".prompt-text");
       const kBadge = prompt.querySelector(".key-badge");
-      const isTask = !!this.activeNearbyHotspot.taskId;
-      const isDone = isTask && this.taskManager.isTaskCompleted(this.activeNearbyHotspot.taskId);
+      const isEmergency = this.sabotageSystem && this.sabotageSystem.criticalSabotageActive && this.activeNearbyHotspot.isFuseBox;
 
-      if (isDone) {
-        if (kBadge) kBadge.innerText = "✨";
-        if (pText) pText.innerText = `${this.activeNearbyHotspot.label} (Cleaned)`;
+      if (isEmergency) {
+        prompt.classList.add("emergency-prompt");
+        if (kBadge) kBadge.innerText = "⚡";
+        if (pText) pText.innerText = `FIX BLOWN FUSE (${Math.ceil(this.sabotageSystem.criticalTimer)}s)`;
       } else {
-        if (kBadge) kBadge.innerText = "E";
-        if (pText) pText.innerText = this.activeNearbyHotspot.label;
+        prompt.classList.remove("emergency-prompt");
+        if (this.activeNearbyHotspot.isEmergencyButton) {
+          if (kBadge) kBadge.innerText = "🚨";
+          if (pText) pText.innerText = `${this.activeNearbyHotspot.label}`;
+        } else if (this.activeNearbyHotspot.isStairHotspot) {
+          if (kBadge) kBadge.innerText = "🪜";
+          if (pText) pText.innerText = `${this.activeNearbyHotspot.label}`;
+        } else {
+          const isTask = !!this.activeNearbyHotspot.taskId;
+          const isDone = isTask && this.taskManager.isTaskCompleted(this.activeNearbyHotspot.taskId);
+          if (isDone) {
+            if (kBadge) kBadge.innerText = "✨";
+            if (pText) pText.innerText = `${this.activeNearbyHotspot.label} (Cleaned)`;
+          } else {
+            if (kBadge) kBadge.innerText = "E";
+            if (pText) pText.innerText = this.activeNearbyHotspot.label;
+          }
+        }
       }
     } else {
       prompt.classList.add("hidden");
@@ -972,8 +1011,11 @@ export class Game {
 
   handleHotspotInteraction(hs) {
     if (hs.isEmergencyButton) {
-      this.meetingEngine.startMeeting("Emergency Called at Phone Lock Box!");
-      this.multiplayer.syncMeeting("Emergency Called at Phone Lock Box!");
+      const callText = `Emergency Meeting Called by ${this.player.name} at ${hs.label}!`;
+      this.meetingEngine.startMeeting(callText);
+      if (this.multiplayer && this.multiplayer.isMultiplayer) {
+        this.multiplayer.syncMeeting(callText);
+      }
     } else if (hs.isStairHotspot) {
       this.setPlayerFloor(hs.targetFloor, hs.targetX);
     } else if (hs.taskId) {

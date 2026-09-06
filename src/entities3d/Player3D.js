@@ -121,12 +121,21 @@ export class Player3D {
     this.mesh.position.set(this.x, this.y, this.z);
   }
 
-  updateWaypoint(target3DX, target3DZ) {
+  updateWaypoint(target3DX, target3DZ, isEmergency = false, time = 0) {
     if (!this.waypointArrow) return;
     const dx = target3DX - this.x;
     const dz = target3DZ - this.z;
     const angle = Math.atan2(dx, dz);
     this.waypointArrow.rotation.y = angle - this.mesh.rotation.y;
+
+    if (isEmergency) {
+      this.waypointArrow.material.color.set(0xef4444);
+      const pulse = 1.35 + Math.sin(time * 10) * 0.35;
+      this.waypointArrow.scale.set(pulse, pulse, pulse * 1.2);
+    } else {
+      this.waypointArrow.material.color.set(0xf59e0b);
+      this.waypointArrow.scale.set(1.0, 1.0, 1.0);
+    }
   }
 
   update(dt, vx, vz, auraColor = null, isStealth = false) {

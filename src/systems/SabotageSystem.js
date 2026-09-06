@@ -16,12 +16,18 @@ export class SabotageSystem {
     };
     this.criticalSabotageActive = false;
     this.criticalTimer = 0;
+    this.sabotageFloor = 1;
+    this.activeFuseHotspotId = "HS_FUSE_2F";
+    this.activeFuseName = "2F Main Hall Switchboard";
     this.bindUI();
   }
 
   bindUI() {
     const btnBlackout = document.getElementById("sab-blackout");
     const btnKundi = document.getElementById("sab-kundi");
+    const btnOpenMap = document.getElementById("btn-open-sab-map");
+    const btnCloseMap = document.getElementById("btn-close-sab-map");
+    const screenMap = document.getElementById("screen-sabotage-map");
 
     if (btnBlackout) {
       btnBlackout.addEventListener("click", () => this.triggerSabotage("BLACKOUT"));
@@ -29,6 +35,31 @@ export class SabotageSystem {
     if (btnKundi) {
       btnKundi.addEventListener("click", () => this.triggerSabotage("KUNDI"));
     }
+
+    if (btnOpenMap && screenMap) {
+      btnOpenMap.addEventListener("click", () => {
+        if (this.game.player && this.game.player.role === "prankster") {
+          screenMap.classList.remove("hidden");
+        }
+      });
+    }
+
+    if (btnCloseMap && screenMap) {
+      btnCloseMap.addEventListener("click", () => {
+        screenMap.classList.add("hidden");
+      });
+    }
+
+    // Interactive Map Nodes
+    const mapButtons = document.querySelectorAll(".sab-map-btn");
+    mapButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const floor = parseInt(btn.getAttribute("data-floor"), 10);
+        const type = btn.getAttribute("data-type");
+        this.triggerSabotage(type, floor);
+        if (screenMap) screenMap.classList.add("hidden");
+      });
+    });
   }
 
   update(dt) {
@@ -50,9 +81,30 @@ export class SabotageSystem {
     if (this.criticalSabotageActive) {
       this.criticalTimer -= dt;
       const alertEl = document.getElementById("mummy-alert");
+      const floorLabel = this.sabotageFloor === 2 ? "3F Terrace" : this.sabotageFloor === 1 ? "2F Living" : "1F Ground";
+
       if (alertEl) {
         alertEl.classList.remove("hidden");
-        alertEl.innerHTML = `<span class="pulse-icon">🚨</span><span class="warning-text">CRITICAL SABOTAGE: FUSE OVERHEAT (${Math.ceil(this.criticalTimer)}s)! FIX AT FUSE BOX OR PRANKSTER WINS!</span>`;
+        alertEl.innerHTML = `<span class="pulse-icon">🚨</span><span class="warning-text">CRITICAL SABOTAGE: ${floorLabel.toUpperCase()} FUSE OVERHEAT (${Math.ceil(this.criticalTimer)}s)! FIX AT ${this.activeFuseName.toUpperCase()} OR PRANKSTER WINS!</span>`;
+      }
+
+      // Pulse floor HUD buttons
+      [0, 1, 2].forEach((f) => {
+        const btn = document.getElementById(`floor-btn-${f}`);
+        if (btn) {
+          if (f === this.sabotageFloor) {
+            btn.classList.add("emergency-floor-pulse");
+          } else {
+            btn.classList.remove("emergency-floor-pulse");
+          }
+        }
+      });
+
+      // Haptic vibration pulse on mobile in last 10 seconds
+      if (this.criticalTimer <= 10 && this.criticalTimer > 0 && typeof navigator !== "undefined" && navigator.vibrate) {
+        if (Math.floor(this.criticalTimer * 2) % 2 === 0) {
+          try { navigator.vibrate(120); } catch (_) {}
+        }
       }
 
       if (this.criticalTimer <= 0) {
@@ -89,12 +141,30 @@ export class SabotageSystem {
     this.game.audio.playSabotageAlert();
 
     const floor = targetFloor !== null ? targetFloor : (this.game.player ? this.game.player.floor : 1);
+    this.sabotageFloor = floor;
 
     if (type === "BLACKOUT") {
       this.game.houseMap.setFloorBlackout(floor, true);
       this.criticalSabotageActive = true;
       this.criticalTimer = 35.0; // 35 seconds to fix or Prankster wins!
-      this.game.showTopToast(`🚨 CRITICAL SABOTAGE: Blackout on Floor ${floor === 2 ? '3F' : floor === 1 ? '2F' : '1F'} (35s)! Fix it at the Fuse Box!`);
+
+      if (floor === 2) {
+        this.activeFuseHotspotId = "HS_FUSE_3F";
+        this.activeFuseName = "3F Solar Inverter & Fuse Box";
+      } else if (floor === 1) {
+        this.activeFuseHotspotId = "HS_FUSE_2F";
+        this.activeFuseName = "2F Main Hall Switchboard";
+      } else {
+        this.activeFuseHotspotId = "HS_SWITCHES";
+        this.activeFuseName = "1F Ground Power Board";
+      }
+
+      if (this.game.lighting3D) {
+        this.game.lighting3D.setBlackout(true);
+      }
+
+      const floorName = floor === 2 ? "3F Terrace" : floor === 1 ? "2F Living" : "1F Ground";
+      this.game.showTopToast(`🚨 CRITICAL SABOTAGE: Blown Fuse on ${floorName}! Follow the RED Emergency Arrow to the Fuse Box!`);
     } else if (type === "KUNDI") {
       const player = this.game.player;
       const px = player ? player.x : 500;
@@ -120,6 +190,10 @@ export class SabotageSystem {
     if (this.game.lighting3D) {
       this.game.lighting3D.setBlackout(false);
     }
+    [0, 1, 2].forEach((f) => {
+      const btn = document.getElementById(`floor-btn-${f}`);
+      if (btn) btn.classList.remove("emergency-floor-pulse");
+    });
     const alertEl = document.getElementById("mummy-alert");
     if (alertEl) {
       alertEl.classList.add("hidden");

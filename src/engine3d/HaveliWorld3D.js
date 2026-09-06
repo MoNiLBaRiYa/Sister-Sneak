@@ -373,24 +373,30 @@ export class HaveliWorld3D {
     const floorHeights = [0, 8, 16];
 
     const markersData = [
-      // Floor 0: Ground Floor Tasks
+      // Floor 0: Ground Floor Tasks & Navigation
       { id: "HS_CHAI", text: "☕ Kitchen: Make Chai", x: -10.5, z: -4.2, floor: 0, color: "#F59E0B" },
+      { id: "HS_EMERGENCY_1F", text: "🔔 Veranda Bell (Meeting)", x: -4.7, z: 1.0, floor: 0, color: "#06B6D4" },
       { id: "HS_RANGOLI", text: "🌸 Veranda: Rangoli", x: 0, z: 1.5, floor: 0, color: "#EC4899" },
       { id: "HS_VERANDA", text: "👡 Veranda: Shoe Rack", x: 6.5, z: 1.5, floor: 0, color: "#FBBF24" },
       { id: "HS_STORE_ACHAR", text: "🏺 Store: Achar Jars", x: 10.5, z: -4.2, floor: 0, color: "#D97706" },
-      { id: "HS_SWITCHES", text: "⚡ 1F Power Board", x: 13.5, z: -3.5, floor: 0, color: "#EF4444" },
+      { id: "HS_SWITCHES", text: "⚡ 1F Ground Power Board", x: 13.5, z: -3.5, floor: 0, color: "#EF4444" },
+      { id: "HS_STAIRS_G_UP", text: "🪜 Go Up to 2F (Stairs)", x: 14.2, z: 0.0, floor: 0, color: "#10B981" },
 
-      // Floor 1: Middle Floor Tasks
+      // Floor 1: Middle Floor Tasks & Navigation
       { id: "HS_HOMEWORK", text: "📚 Study: Math Homework", x: -10.5, z: -4.0, floor: 1, color: "#3B82F6" },
       { id: "HS_BALCONY", text: "🌿 Balcony: Water Tulsi", x: -13.5, z: 2.5, floor: 1, color: "#10B981" },
       { id: "HS_PHONE_BOX", text: "📦 Phone Lock Box (Meeting)", x: 0, z: -1.8, floor: 1, color: "#06B6D4" },
       { id: "HS_BED_1", text: "🛏️ Bedroom: Fold Bed", x: 10.5, z: -3.2, floor: 1, color: "#F43F5E" },
       { id: "HS_FUSE_2F", text: "⚡ 2F Hall Switchboard", x: 4.5, z: -4.5, floor: 1, color: "#EF4444" },
+      { id: "HS_STAIRS_HUB_DOWN", text: "🪜 Go Down to 1F (Stairs)", x: 12.9, z: 0.0, floor: 1, color: "#10B981" },
+      { id: "HS_STAIRS_HUB_UP", text: "🪜 Go Up to 3F (Stairs)", x: 14.7, z: 0.0, floor: 1, color: "#10B981" },
 
-      // Floor 2: Top Terrace Tasks
-      { id: "HS_CLOTHES", text: "🧺 Terrace: Fold Sarees", x: 0, z: 0.5, floor: 2, color: "#8B5CF6" },
+      // Floor 2: Top Terrace Tasks & Navigation
       { id: "HS_SOLAR", text: "☀️ Roof: Solar Panels", x: -10.0, z: -3.5, floor: 2, color: "#06B6D4" },
-      { id: "HS_FUSE_3F", text: "⚡ 3F Solar Inverter", x: 10.0, z: -4.0, floor: 2, color: "#EF4444" }
+      { id: "HS_EMERGENCY_3F", text: "🚨 Terrace Bell (Meeting)", x: -4.7, z: 1.0, floor: 2, color: "#06B6D4" },
+      { id: "HS_CLOTHES", text: "🧺 Terrace: Fold Sarees", x: 0, z: 0.5, floor: 2, color: "#8B5CF6" },
+      { id: "HS_FUSE_3F", text: "⚡ 3F Solar Inverter & Fuse", x: 10.0, z: -4.0, floor: 2, color: "#EF4444" },
+      { id: "HS_STAIRS_T", text: "🪜 Go Down to 2F (Stairs)", x: 12.6, z: 0.0, floor: 2, color: "#10B981" }
     ];
 
     markersData.forEach((data) => {

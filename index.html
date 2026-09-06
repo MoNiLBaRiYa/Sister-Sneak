@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#06B6D4">
   <title>Sister Sneak: Phone Locked 📱🔒</title>
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="css/style.css?v=20260905_v6">
+  <link rel="stylesheet" href="css/style.css?v=20260906_v1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700;800&family=Yatra+One&display=swap" rel="stylesheet">
@@ -104,6 +104,10 @@
             <span class="sab-icon">🔒</span>
             <span class="sab-label">Door Kundi</span>
             <span class="sab-cd" id="cd-kundi"></span>
+          </button>
+          <button class="sab-btn map-sab-btn" id="btn-open-sab-map" title="Open Tactical Sabotage Map (Hotkey: M)">
+            <span class="sab-icon">🗺️</span>
+            <span class="sab-label">Sabotage Map</span>
           </button>
         </div>
       </div>
@@ -483,6 +487,57 @@
         </div>
       </div>
 
+      <!-- 3b. Tactical Prankster Sabotage Map Modal (Among Us Style) -->
+      <div id="screen-sabotage-map" class="screen-view hidden">
+        <div class="sabotage-map-card">
+          <div class="sabotage-map-header">
+            <div class="sab-badge">🤫 TACTICAL SABOTAGE ARCHITECTURE MAP 🗺️</div>
+            <h2>Select Floor & Room to Sabotage</h2>
+            <button id="btn-close-sab-map" class="close-modal-btn">✕</button>
+          </div>
+          <div class="sabotage-floors-container">
+            <!-- 3F Terrace -->
+            <div class="sab-floor-row" data-floor="2">
+              <div class="sab-floor-tag">3F TERRACE</div>
+              <div class="sab-node-group">
+                <button class="sab-node-btn sab-map-btn" data-floor="2" data-type="BLACKOUT">
+                  <span>⚡ 3F Solar Inverter (Blackout)</span>
+                </button>
+                <button class="sab-node-btn sab-map-btn" data-floor="2" data-type="KUNDI">
+                  <span>🔒 Terrace Door Kundi</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 2F Living Hub -->
+            <div class="sab-floor-row" data-floor="1">
+              <div class="sab-floor-tag">2F LIVING HUB</div>
+              <div class="sab-node-group">
+                <button class="sab-node-btn sab-map-btn" data-floor="1" data-type="BLACKOUT">
+                  <span>⚡ 2F Main Hall Switchboard (Blackout)</span>
+                </button>
+                <button class="sab-node-btn sab-map-btn" data-floor="1" data-type="KUNDI">
+                  <span>🔒 Bedroom Door Kundi</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 1F Ground Entry -->
+            <div class="sab-floor-row" data-floor="0">
+              <div class="sab-floor-tag">1F GROUND ENTRY</div>
+              <div class="sab-node-group">
+                <button class="sab-node-btn sab-map-btn" data-floor="0" data-type="BLACKOUT">
+                  <span>⚡ 1F Ground Power Board (Blackout)</span>
+                </button>
+                <button class="sab-node-btn sab-map-btn" data-floor="0" data-type="KUNDI">
+                  <span>🔒 Store Room Door Kundi</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- 4. Emergency Meeting / Courtroom Screen with Live Multiplayer Chat -->
       <div id="screen-meeting" class="screen-view hidden">
         <div class="courtroom-card">
@@ -491,49 +546,64 @@
             <h2 id="meeting-trigger-reason">Sabotage Discovered in the Kitchen!</h2>
           </div>
 
-          <div class="courtroom-stage">
-            <div class="mummy-judge-stand">
-              <div class="mummy-portrait" id="court-mummy-portrait">👩‍🦱</div>
-              <div class="mummy-name-tag" id="court-mummy-name">Riddhi & Jahanvi's Mummy</div>
-              <div class="suspicion-bubble" id="mummy-dialogue-bubble">
-                "Bolo! Kona lidhe aa badho kachro thayo?! Who did this?!"
+          <div class="courtroom-main-layout">
+            <!-- Left Column: Mummy Judge & Sisters Voting Grid -->
+            <div class="courtroom-left-col">
+              <div class="mummy-judge-stand">
+                <div class="mummy-portrait" id="court-mummy-portrait">👩‍🦱</div>
+                <div class="mummy-name-tag" id="court-mummy-name">Riddhi & Jahanvi's Mummy</div>
+                <div class="suspicion-bubble" id="mummy-dialogue-bubble">
+                  "Bolo! Kona lidhe aa badho kachro thayo?! Who did this?!"
+                </div>
+              </div>
+
+              <!-- Sister Debate & Voting Cards -->
+              <div class="sisters-debate-grid" id="debate-sisters-grid">
+                <!-- Dynamically populated with sister cards, alibis, suspicion bars & vote buttons -->
               </div>
             </div>
 
-            <!-- Sister Debate Circle -->
-            <div class="sisters-debate-grid" id="debate-sisters-grid">
-              <!-- Dynamically populated with sister cards, alibis, suspicion bars & vote buttons -->
-            </div>
-          </div>
+            <!-- Right Column: Forensic Witness Clues & Discussion Chat -->
+            <div class="courtroom-right-col">
+              <!-- Forensic Witness Log & Timeline Clues -->
+              <div class="courtroom-forensics" id="courtroom-forensics">
+                <div class="forensic-title">🕵️ FORENSIC WITNESS LOG & ALIBI CLUES:</div>
+                <div class="forensic-clues-list" id="forensic-clues-list">
+                  <div class="forensic-item">📍 Riddhi was seen folding clothes on 3F Terrace.</div>
+                  <div class="forensic-item">📍 Shruti was near the 2F Switchboard 4s before the blackout!</div>
+                </div>
+              </div>
 
-          <!-- Live Chat / Quick-Chat Section for Emergency Meeting -->
-          <div class="meeting-chat-container">
-            <div class="courtroom-debate-log" id="debate-log">
-              <div class="log-entry system-entry">⚠️ Emergency Meeting called. Discuss, chat, and vote who the Prankster is!</div>
-            </div>
+              <!-- Live Chat / Quick-Chat Section for Emergency Meeting -->
+              <div class="meeting-chat-container">
+                <div class="courtroom-debate-log" id="debate-log">
+                  <div class="log-entry system-entry">⚠️ Emergency Meeting called. Discuss, chat, and vote who the Prankster is!</div>
+                </div>
 
-            <!-- Quick Chat Chips -->
-            <div class="quick-chat-chips" id="quick-chat-chips">
-              <button class="qc-chip" data-msg="I was folding clothes on 3F Terrace! 🧺">🧺 Terrace</button>
-              <button class="qc-chip" data-msg="I was in the Kitchen making chai! ☕">☕ Kitchen</button>
-              <button class="qc-chip" data-msg="I was watering plants on the Balcony! 🌿">🌿 Balcony</button>
-              <button class="qc-chip" data-msg="I saw someone sneaking near the switchboard! ⚡">⚡ Switchboard</button>
-              <button class="qc-chip" data-msg="I am innocent! Mummy please believe me! 😇">😇 Innocent</button>
-              <button class="qc-chip" data-msg="Skip vote! We don't have enough proof yet! 🤐">🤐 Skip Vote</button>
-            </div>
+                <!-- Quick Chat Chips -->
+                <div class="quick-chat-chips" id="quick-chat-chips">
+                  <button class="qc-chip" data-msg="I was folding clothes on 3F Terrace! 🧺">🧺 Terrace</button>
+                  <button class="qc-chip" data-msg="I was in the Kitchen making chai! ☕">☕ Kitchen</button>
+                  <button class="qc-chip" data-msg="I was watering plants on the Balcony! 🌿">🌿 Balcony</button>
+                  <button class="qc-chip" data-msg="I saw someone sneaking near the switchboard! ⚡">⚡ Switchboard</button>
+                  <button class="qc-chip" data-msg="I am innocent! Mummy please believe me! 😇">😇 Innocent</button>
+                  <button class="qc-chip" data-msg="Skip vote! We don't have enough proof yet! 🤐">🤐 Skip Vote</button>
+                </div>
 
-            <!-- Voice Reaction Soundboard Row -->
-            <div class="soundboard-row">
-              <span class="sb-label">🗣️ Reactions:</span>
-              <button class="sb-btn" id="sb-mummy-aavi">🚨 "Mummy Aavi!"</button>
-              <button class="sb-btn" id="sb-pakdi-gayi">😱 "Pakdi Gayi!"</button>
-              <button class="sb-btn" id="sb-sus">🤫 "Sus Che!"</button>
-            </div>
+                <!-- Voice Reaction Soundboard Row -->
+                <div class="soundboard-row">
+                  <span class="sb-label">🗣️ Reactions:</span>
+                  <button class="sb-btn" id="sb-mummy-aavi">🚨 "Mummy Aavi!"</button>
+                  <button class="sb-btn" id="sb-pakdi-gayi">😱 "Pakdi Gayi!"</button>
+                  <button class="sb-btn" id="sb-sus">🤫 "Sus Che!"</button>
+                </div>
 
-            <!-- Interactive Chat Input Row -->
-            <div class="chat-input-row">
-              <input type="text" id="meeting-chat-input" placeholder="💬 Type your alibi, defense, or accuse someone..." maxlength="120" />
-              <button id="btn-meeting-chat-send">Send 💬</button>
+                <!-- Interactive Chat Input Row -->
+                <div class="chat-input-row">
+                  <input type="text" id="meeting-chat-input" placeholder="💬 Type your alibi, defense, or accuse someone..." maxlength="120" />
+                  <button id="btn-meeting-chat-send">Send 💬</button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -643,7 +713,7 @@
   </div>
 
   <!-- Game Scripts (ES6 Modules) -->
-  <script type="module" src="src/main.js?v=20260905_v6"></script>
+  <script type="module" src="src/main.js?v=20260906_v1"></script>
 
   <!-- PWA Service Worker Registration & Cache Purge -->
   <script>
@@ -652,13 +722,13 @@
         if ('caches' in window) {
           caches.keys().then((names) => {
             for (let name of names) {
-              if (name !== 'sister-sneak-v20260905_v6') {
+              if (name !== 'sister-sneak-v20260906_v1') {
                 caches.delete(name);
               }
             }
           });
         }
-        navigator.serviceWorker.register('/sw.js?v=20260905_v6')
+        navigator.serviceWorker.register('/sw.js?v=20260906_v1')
           .then((reg) => {
             reg.update();
           })

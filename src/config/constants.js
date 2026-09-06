@@ -174,15 +174,25 @@ export const HOTSPOTS = [
     icon: "⚡"
   },
   {
+    id: "HS_EMERGENCY_3F",
+    floor: 2,
+    x: 420,
+    y: FLOOR_Y[2] + 88,
+    radius: 44,
+    isEmergencyButton: true,
+    label: "Terrace Intercom (Call Meeting)",
+    icon: "🚨"
+  },
+  {
     id: "HS_STAIRS_T",
     floor: 2,
     x: 1080,
     y: FLOOR_Y[2] + 110,
-    radius: 38,
+    radius: 48,
     isStairHotspot: true,
     targetFloor: 1,
     targetX: 1090,
-    label: "Go Down to 2F",
+    label: "Go Down to 2F (Stairs)",
     icon: "⬇️"
   },
 
@@ -309,6 +319,16 @@ export const HOTSPOTS = [
     icon: "🏺"
   },
   {
+    id: "HS_EMERGENCY_1F",
+    floor: 0,
+    x: 420,
+    y: FLOOR_Y[0] + 88,
+    radius: 44,
+    isEmergencyButton: true,
+    label: "Veranda Haveli Bell (Call Meeting)",
+    icon: "🔔"
+  },
+  {
     id: "HS_SWITCHES",
     floor: 0,
     x: 1113,
@@ -324,11 +344,11 @@ export const HOTSPOTS = [
     floor: 0,
     x: 1140,
     y: FLOOR_Y[0] + 110,
-    radius: 36,
+    radius: 48,
     isStairHotspot: true,
     targetFloor: 1,
     targetX: 1090,
-    label: "Go Up to 2F",
+    label: "Go Up to 2F (Stairs)",
     icon: "⬆️"
   }
 ];
