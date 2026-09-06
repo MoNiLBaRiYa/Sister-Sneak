@@ -11,17 +11,24 @@ export class MeetingEngine {
     this.game = game;
     this.isActive = false;
     this.phase = "IDLE"; // "DISCUSSION", "VOTING", "REVEAL", "VERDICT"
-    this.discussionTimer = 10;
-    this.votingTimer = 20;
-    this.revealTimer = 4;
+    this.discussionTimer = 25;
+    this.votingTimer = 45;
+    this.revealTimer = 5;
     this.timerInterval = null;
     this.votes = {};      // { sisterId: targetId }
     this.votedSisters = new Set();
     this.jishaShieldUsed = false;
     this.playerMeetingsUsed = 0;
     this.maxPlayerMeetings = 1;
+    this.meetingCooldown = 25;
 
     this.bindUI();
+  }
+
+  update(dt) {
+    if (this.meetingCooldown > 0 && !this.isActive) {
+      this.meetingCooldown = Math.max(0, this.meetingCooldown - dt);
+    }
   }
 
   bindUI() {
@@ -138,6 +145,9 @@ export class MeetingEngine {
     if (this.game.sabotageSystem && this.game.sabotageSystem.criticalSabotageActive) {
       return { allowed: false, reason: "⚡ Blown fuse active! You must fix the power board before calling a meeting!" };
     }
+    if (this.meetingCooldown > 0) {
+      return { allowed: false, reason: `🚨 Emergency Meeting is on cooldown! (${Math.ceil(this.meetingCooldown)}s remaining)` };
+    }
     if (this.playerMeetingsUsed >= this.maxPlayerMeetings) {
       return { allowed: false, reason: "🚨 You have already used your 1 Emergency Meeting for this match!" };
     }
@@ -153,13 +163,18 @@ export class MeetingEngine {
       return;
     }
 
+    if (this.meetingCooldown > 0) {
+      this.game.showNotification(`🚨 Emergency Meeting is on cooldown (${Math.ceil(this.meetingCooldown)}s)!`, 3000);
+      return;
+    }
+
     this.isActive = true;
     this.game.state = "MEETING";
     this.votes = {};
     this.votedSisters.clear();
-    this.discussionTimer = 10;
-    this.votingTimer = 20;
-    this.revealTimer = 4;
+    this.discussionTimer = 25;
+    this.votingTimer = 45;
+    this.revealTimer = 5;
 
     this.playerMeetingsUsed++;
 
@@ -574,6 +589,7 @@ export class MeetingEngine {
   closeVerdict() {
     this.isActive = false;
     this.phase = "IDLE";
+    this.meetingCooldown = 25;
     const verdictScreen = document.getElementById("screen-verdict");
     const meetingScreen = document.getElementById("screen-meeting");
     if (verdictScreen) verdictScreen.classList.add("hidden");

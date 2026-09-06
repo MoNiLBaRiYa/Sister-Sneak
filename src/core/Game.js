@@ -891,6 +891,11 @@ export class Game {
         this.sabotageSystem.update(dt);
       }
 
+      // 6. Meeting Engine Cooldown Update
+      if (this.meetingEngine) {
+        this.meetingEngine.update(dt);
+      }
+
       this.updateScreenOverlays();
     }
   }

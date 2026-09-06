@@ -1,5 +1,5 @@
 // Sister Sneak: Phone Locked - Service Worker (Network-First Strategy)
-const CACHE_NAME = 'sister-sneak-v20260906_v4';
+const CACHE_NAME = 'sister-sneak-v20260906_v5';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
