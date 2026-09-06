@@ -507,7 +507,35 @@ html, body {
   pointer-events: auto !important;
 }
 
-.screen-view {
+/* Global Strict Hidden Rules (Overrides any child display !important) */
+.hidden,
+.screen-view.hidden,
+.modal-card.hidden,
+.screen-fx-overlay.hidden,
+.touch-layer.hidden,
+.mummy-warning-banner.hidden,
+.action-bubble.hidden,
+.floor-nav-panel.hidden,
+.sabotage-panel.hidden,
+.tasklist-drawer.hidden,
+#screen-meeting.hidden,
+#screen-lobby.hidden,
+#screen-cutscene.hidden,
+#screen-minigame.hidden,
+#screen-sabotage-map.hidden,
+#screen-verdict.hidden,
+#screen-gameover.hidden,
+#screen-pause.hidden,
+#screen-help.hidden,
+#modal-secret-passage.hidden,
+[hidden] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.screen-view:not(.hidden) {
   position: fixed !important;
   inset: 0 !important;
   width: 100vw !important;
@@ -1832,7 +1860,7 @@ html, body {
 /* ==========================================================================
    Full-Screen Emergency Family Meeting Command Center (Edge-to-Edge Responsive)
    ========================================================================== */
-#screen-meeting {
+#screen-meeting:not(.hidden) {
   position: fixed !important;
   inset: 0 !important;
   width: 100vw !important;
@@ -1848,6 +1876,13 @@ html, body {
   align-items: stretch !important;
   overflow: hidden !important;
   box-sizing: border-box !important;
+}
+
+#screen-meeting.hidden {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 .courtroom-card {
