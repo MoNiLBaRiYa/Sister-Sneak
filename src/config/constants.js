@@ -174,16 +174,6 @@ export const HOTSPOTS = [
     icon: "⚡"
   },
   {
-    id: "HS_EMERGENCY_3F",
-    floor: 2,
-    x: 420,
-    y: FLOOR_Y[2] + 88,
-    radius: 44,
-    isEmergencyButton: true,
-    label: "Terrace Intercom (Call Meeting)",
-    icon: "🚨"
-  },
-  {
     id: "HS_STAIRS_T",
     floor: 2,
     x: 1080,
@@ -317,16 +307,6 @@ export const HOTSPOTS = [
     taskId: "ACHAR_HUNT",
     label: "Store: Hunt Mango Achar",
     icon: "🏺"
-  },
-  {
-    id: "HS_EMERGENCY_1F",
-    floor: 0,
-    x: 420,
-    y: FLOOR_Y[0] + 88,
-    radius: 44,
-    isEmergencyButton: true,
-    label: "Veranda Haveli Bell (Call Meeting)",
-    icon: "🔔"
   },
   {
     id: "HS_SWITCHES",
