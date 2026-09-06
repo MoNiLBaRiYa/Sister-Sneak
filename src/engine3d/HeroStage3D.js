@@ -1,7 +1,7 @@
 /**
  * Sister Sneak 3D - Hero Stage 3D Viewport
  * Interactive 3D Landing Page Showcase with Rotating Character Podium,
- * dynamic stage lighting, and dual Innocent / Prankster (Imposter) power particle bursts.
+ * dynamic stage lighting, drag-to-rotate controls, eye blinking, and dual power particle bursts.
  */
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
@@ -13,9 +13,11 @@ export class HeroStage3D {
     this.container = canvasContainer;
     this.currentSisterId = "RIDDHI";
     this.currentMesh = null;
-    this.rotationSpeed = 0.012;
     this.animTime = 0;
     this.particles = [];
+    this.userRotationY = 0;
+    this.isDragging = false;
+    this.prevPointerX = 0;
 
     this.initThree();
   }
@@ -29,45 +31,56 @@ export class HeroStage3D {
     // Scene
     this.scene = new THREE.Scene();
 
-    // Camera
-    this.camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 100);
-    this.camera.position.set(0, 1.6, 4.4);
-    this.camera.lookAt(0, 1.1, 0);
+    // Camera (Centered nicely on the chibi character)
+    this.camera = new THREE.PerspectiveCamera(36, width / height, 0.1, 100);
+    this.camera.position.set(0, 1.45, 3.8);
+    this.camera.lookAt(0, 1.05, 0);
 
     // Renderer
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setSize(width, height);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.15;
     this.container.appendChild(this.renderer.domElement);
 
-    // Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+    // Studio 3-Point Lights
+    const ambientLight = new THREE.AmbientLight(0xfff7ed, 1.5);
     this.scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1.4);
-    dirLight.position.set(3, 5, 4);
-    this.scene.add(dirLight);
+    // Front-Right Key Light
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.8);
+    keyLight.position.set(2.5, 3.5, 3.5);
+    keyLight.castShadow = true;
+    this.scene.add(keyLight);
 
-    const cyanRim = new THREE.PointLight(0x06b6d4, 2.5, 8);
-    cyanRim.position.set(-2, 2.5, -2);
-    this.scene.add(cyanRim);
+    // Front-Left Soft Fill Light
+    const fillLight = new THREE.DirectionalLight(0xe0f2fe, 1.0);
+    fillLight.position.set(-2.5, 2.0, 2.5);
+    this.scene.add(fillLight);
 
-    const goldSpot = new THREE.PointLight(0xf59e0b, 2.0, 8);
-    goldSpot.position.set(2, 0.5, 2);
+    // Back Rim / Hair Highlights
+    const backRim = new THREE.PointLight(0x38bdf8, 2.8, 8);
+    backRim.position.set(0, 3.0, -2.5);
+    this.scene.add(backRim);
+
+    // Glowing Warm Ground Spotlight
+    const goldSpot = new THREE.PointLight(0xf59e0b, 2.2, 7);
+    goldSpot.position.set(1.5, 0.4, 1.5);
     this.scene.add(goldSpot);
 
     // Glowing Rotating Podium
     this.podiumGroup = new THREE.Group();
 
-    const podiumGeo = new THREE.CylinderGeometry(1.2, 1.35, 0.25, 32);
+    const podiumGeo = new THREE.CylinderGeometry(1.2, 1.35, 0.22, 32);
     const podiumMat = new THREE.MeshStandardMaterial({
       color: 0x1e293b,
-      roughness: 0.3,
-      metalness: 0.6
+      roughness: 0.25,
+      metalness: 0.7
     });
     const podium = new THREE.Mesh(podiumGeo, podiumMat);
-    podium.position.y = -0.125;
+    podium.position.y = -0.11;
     this.podiumGroup.add(podium);
 
     // Neon Edge Ring
@@ -80,6 +93,9 @@ export class HeroStage3D {
     this.ringMat = ringMat;
 
     this.scene.add(this.podiumGroup);
+
+    // Interactive Drag-to-Rotate
+    this.bindInteraction();
 
     // Load initial sister
     this.setSister("RIDDHI");
@@ -94,6 +110,38 @@ export class HeroStage3D {
       this.resizeObserver = new ResizeObserver(() => this.onResize());
       this.resizeObserver.observe(this.container);
     }
+  }
+
+  bindInteraction() {
+    const el = this.renderer.domElement;
+    el.style.cursor = 'grab';
+
+    const onPointerDown = (e) => {
+      this.isDragging = true;
+      this.prevPointerX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+      el.style.cursor = 'grabbing';
+    };
+
+    const onPointerMove = (e) => {
+      if (!this.isDragging) return;
+      const clientX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+      const deltaX = clientX - this.prevPointerX;
+      this.prevPointerX = clientX;
+      this.userRotationY += deltaX * 0.015;
+    };
+
+    const onPointerUp = () => {
+      this.isDragging = false;
+      el.style.cursor = 'grab';
+    };
+
+    el.addEventListener('mousedown', onPointerDown);
+    window.addEventListener('mousemove', onPointerMove);
+    window.addEventListener('mouseup', onPointerUp);
+
+    el.addEventListener('touchstart', onPointerDown, { passive: true });
+    window.addEventListener('touchmove', onPointerMove, { passive: true });
+    window.addEventListener('touchend', onPointerUp);
   }
 
   onResize() {
@@ -128,8 +176,8 @@ export class HeroStage3D {
     const isPrankster = (mode === "prankster");
     const color = isPrankster ? new THREE.Color("#EF4444") : new THREE.Color(config.color || "#10B981");
 
-    // Spawn 35 glowing orbital burst particles
-    for (let i = 0; i < 35; i++) {
+    // Spawn 40 glowing orbital burst particles
+    for (let i = 0; i < 40; i++) {
       const geo = new THREE.SphereGeometry(0.06 + Math.random() * 0.05, 8, 8);
       const mat = new THREE.MeshBasicMaterial({
         color: color,
@@ -138,8 +186,8 @@ export class HeroStage3D {
       });
       const p = new THREE.Mesh(geo, mat);
       p.position.set(0, 1.2, 0);
-      const angle = (i / 35) * Math.PI * 2;
-      const speed = (isPrankster ? 2.5 : 1.8) + Math.random() * 1.5;
+      const angle = (i / 40) * Math.PI * 2;
+      const speed = (isPrankster ? 2.6 : 1.9) + Math.random() * 1.5;
       p.velocity = new THREE.Vector3(
         Math.cos(angle) * speed,
         (Math.random() - 0.2) * (isPrankster ? 3.0 : 2.0),
@@ -155,24 +203,45 @@ export class HeroStage3D {
     requestAnimationFrame(this.animate);
     this.animTime += 0.03;
 
-    // Rotate character and podium
     if (this.currentMesh) {
-      this.currentMesh.rotation.y += this.rotationSpeed;
+      // If user is not dragging, do a soft, charming showcase front sway
+      if (!this.isDragging) {
+        const autoSway = Math.sin(this.animTime * 0.9) * 0.35;
+        this.currentMesh.rotation.y = this.userRotationY + autoSway;
+      } else {
+        this.currentMesh.rotation.y = this.userRotationY;
+      }
 
       // Gentle breathing idle bounce
-      this.currentMesh.position.y = Math.sin(this.animTime * 2) * 0.04;
+      this.currentMesh.position.y = Math.sin(this.animTime * 2.2) * 0.035;
+
+      // Natural Eye Blinking on Hero Stage
+      if (this.currentMesh.eyes) {
+        const blinkCycle = this.animTime % 3.6;
+        if (blinkCycle > 3.42) {
+          this.currentMesh.eyes.scale.y = 0.1; // Closed
+        } else {
+          this.currentMesh.eyes.scale.y = 1.0; // Open
+        }
+      }
 
       // Articulated gentle arm sway
       if (this.currentMesh.leftArm) {
-        this.currentMesh.leftArm.rotation.x = Math.sin(this.animTime * 2) * 0.2;
+        this.currentMesh.leftArm.rotation.x = Math.sin(this.animTime * 2.2) * 0.15;
       }
       if (this.currentMesh.rightArm) {
-        this.currentMesh.rightArm.rotation.x = -Math.sin(this.animTime * 2) * 0.2;
+        this.currentMesh.rightArm.rotation.x = -Math.sin(this.animTime * 2.2) * 0.15;
       }
+
+      // Secondary motion on braids/ponytails
+      const hairSway = Math.sin(this.animTime * 2.2) * 0.12;
+      if (this.currentMesh.leftBraid) this.currentMesh.leftBraid.rotation.z = -0.1 + hairSway;
+      if (this.currentMesh.rightBraid) this.currentMesh.rightBraid.rotation.z = 0.1 + hairSway;
+      if (this.currentMesh.pony) this.currentMesh.pony.rotation.z = hairSway * 1.5;
     }
 
     if (this.podiumGroup) {
-      this.podiumGroup.rotation.y += this.rotationSpeed * 0.5;
+      this.podiumGroup.rotation.y += 0.005;
     }
 
     // Update Particles
@@ -194,3 +263,4 @@ export class HeroStage3D {
     }
   }
 }
+

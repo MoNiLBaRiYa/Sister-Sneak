@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#06B6D4">
   <title>Sister Sneak: Phone Locked 📱🔒</title>
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="css/style.css?v=20260906_v9">
+  <link rel="stylesheet" href="css/style.css?v=20260906_v10">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700;800&family=Yatra+One&display=swap" rel="stylesheet">
@@ -744,7 +744,7 @@
   </div>
 
   <!-- Game Scripts (ES6 Modules) -->
-  <script type="module" src="src/main.js?v=20260906_v9"></script>
+  <script type="module" src="src/main.js?v=20260906_v10"></script>
 
   <!-- PWA Service Worker Registration & Cache Purge -->
   <script>
@@ -753,13 +753,13 @@
         if ('caches' in window) {
           caches.keys().then((names) => {
             for (let name of names) {
-              if (name !== 'sister-sneak-v20260906_v9') {
+              if (name !== 'sister-sneak-v20260906_v10') {
                 caches.delete(name);
               }
             }
           });
         }
-        navigator.serviceWorker.register('/sw.js?v=20260906_v9')
+        navigator.serviceWorker.register('/sw.js?v=20260906_v10')
           .then((reg) => {
             reg.update();
           })
