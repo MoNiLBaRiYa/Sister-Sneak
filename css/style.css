@@ -503,6 +503,10 @@ html, body {
   pointer-events: none !important;
 }
 
+.modal-layer > * {
+  pointer-events: auto !important;
+}
+
 .screen-view {
   position: fixed !important;
   inset: 0 !important;
@@ -517,6 +521,7 @@ html, body {
   padding: 12px !important;
   overflow-y: auto !important;
   pointer-events: auto !important;
+  touch-action: pan-y !important;
 }
 
 /* ==========================================================================
@@ -535,6 +540,26 @@ html, body {
   overflow-y: auto !important;
   overflow-x: hidden !important;
   z-index: 100 !important;
+  pointer-events: auto !important;
+  touch-action: pan-y !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+#screen-lobby::-webkit-scrollbar {
+  width: 8px;
+}
+
+#screen-lobby::-webkit-scrollbar-track {
+  background: rgba(11, 15, 25, 0.95);
+}
+
+#screen-lobby::-webkit-scrollbar-thumb {
+  background: #06B6D4;
+  border-radius: 4px;
+}
+
+#screen-lobby::-webkit-scrollbar-thumb:hover {
+  background: #38BDF8;
 }
 
 #screen-lobby.hidden {
@@ -554,6 +579,8 @@ html, body {
   box-sizing: border-box !important;
   display: flex !important;
   flex-direction: column !important;
+  pointer-events: auto !important;
+  touch-action: pan-y !important;
 }
 
 /* Among Us In-Game Modals (Meeting, Cutscenes, Minigames) */
@@ -569,6 +596,8 @@ html, body {
   overflow-y: auto;
   color: #FFF;
   margin: auto;
+  pointer-events: auto !important;
+  touch-action: pan-y !important;
 }
 
 .portal-header {
