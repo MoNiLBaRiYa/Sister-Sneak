@@ -49,28 +49,33 @@ export class Player3D {
     this.nameBadge = this.createNameTagSprite(badgeText, isLocalPlayer, config.color || "#FFF");
     this.mesh.add(this.nameBadge);
 
-    // 3. 3D Waypoint Compass Arrow (Orbits at radius 1.45m outside character's feet)
+    // 3. 3D Waypoint Emergency Compass Arrow (Visible ONLY during Blackout / Blown Fuse / Emergency Sabotage)
     if (isLocalPlayer) {
       this.waypointPivot = new THREE.Group();
-      this.waypointPivot.position.set(0, 0.14, 0);
+      this.waypointPivot.position.set(0, 0.2, 0);
+      this.waypointPivot.visible = false; // Hidden during normal tasks
 
-      // Arrow Cone Tip pointing forward +Z
-      const coneGeo = new THREE.ConeGeometry(0.3, 0.65, 12);
+      // High-visibility Emergency Chevron Pointer
+      const arrowGroup = new THREE.Group();
+      arrowGroup.position.set(0, 0, 1.35);
+
+      // Glowing Arrowhead Tip
+      const coneGeo = new THREE.ConeGeometry(0.24, 0.55, 12);
       coneGeo.rotateX(Math.PI / 2);
-      this.arrowMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b, depthTest: false });
+      this.arrowMat = new THREE.MeshBasicMaterial({ color: 0xff1744, depthTest: false, transparent: true, opacity: 0.95 });
       const arrowCone = new THREE.Mesh(coneGeo, this.arrowMat);
-      arrowCone.position.set(0, 0, 1.45);
       arrowCone.renderOrder = 999;
-      this.waypointPivot.add(arrowCone);
+      arrowGroup.add(arrowCone);
 
-      // Arrow Stem Shaft
-      const stemGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.45, 8);
+      // Glowing Shaft
+      const stemGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.38, 8);
       stemGeo.rotateX(Math.PI / 2);
       const arrowStem = new THREE.Mesh(stemGeo, this.arrowMat);
-      arrowStem.position.set(0, 0, 1.0);
+      arrowStem.position.set(0, 0, -0.38);
       arrowStem.renderOrder = 999;
-      this.waypointPivot.add(arrowStem);
+      arrowGroup.add(arrowStem);
 
+      this.waypointPivot.add(arrowGroup);
       this.mesh.add(this.waypointPivot);
     }
 
@@ -100,14 +105,11 @@ export class Player3D {
     ctx.textBaseline = 'middle';
     ctx.fillText(text, 150, 35);
 
-    // Down Arrow for Local Player
+    // Subtle Marker Dot for Local Player
     if (isLocalPlayer) {
       ctx.fillStyle = '#06B6D4';
       ctx.beginPath();
-      ctx.moveTo(138, 62);
-      ctx.lineTo(162, 62);
-      ctx.lineTo(150, 80);
-      ctx.closePath();
+      ctx.arc(150, 70, 7, 0, Math.PI * 2);
       ctx.fill();
     }
 
@@ -137,24 +139,36 @@ export class Player3D {
 
   updateWaypoint(target3DX, target3DZ, isEmergency = false, time = 0) {
     if (!this.waypointPivot) return;
+
+    // ONLY display arrow during active emergencies (Blackout, Blown Fuse, Critical Sabotage)
+    if (!isEmergency) {
+      this.waypointPivot.visible = false;
+      if (this.groundRingMat) {
+        this.groundRingMat.color.set(0x00f0ff);
+        this.groundRingMat.opacity = 0.35;
+      }
+      if (this.groundRing) this.groundRing.scale.set(1.0, 1.0, 1.0);
+      return;
+    }
+
+    // Emergency Active: Show glowing red pulsating navigation beacon
+    this.waypointPivot.visible = true;
     const dx = target3DX - this.x;
     const dz = target3DZ - this.z;
     const worldAngle = Math.atan2(dx, dz);
     this.waypointPivot.rotation.y = worldAngle - this.mesh.rotation.y;
 
-    if (isEmergency) {
-      if (this.arrowMat) this.arrowMat.color.set(0xff1744);
-      const pulse = 1.35 + Math.sin(time * 12) * 0.35;
-      this.waypointPivot.scale.set(pulse, pulse, pulse);
-      if (this.groundRingMat) this.groundRingMat.color.set(0xff1744);
-      const ringPulse = 1.0 + Math.sin(time * 8) * 0.2;
-      this.groundRing.scale.set(ringPulse, ringPulse, 1.0);
-    } else {
-      if (this.arrowMat) this.arrowMat.color.set(0xf59e0b);
-      this.waypointPivot.scale.set(1.0, 1.0, 1.0);
-      if (this.groundRingMat) this.groundRingMat.color.set(0x00f0ff);
-      this.groundRing.scale.set(1.0, 1.0, 1.0);
+    if (this.arrowMat) this.arrowMat.color.set(0xff1744);
+    const pulse = 1.2 + Math.sin(time * 10) * 0.25;
+    this.waypointPivot.scale.set(pulse, pulse, pulse);
+    this.waypointPivot.position.y = 0.22 + Math.sin(time * 6) * 0.08;
+
+    if (this.groundRingMat) {
+      this.groundRingMat.color.set(0xff1744);
+      this.groundRingMat.opacity = 0.8;
     }
+    const ringPulse = 1.0 + Math.sin(time * 8) * 0.25;
+    if (this.groundRing) this.groundRing.scale.set(ringPulse, ringPulse, 1.0);
   }
 
   update(dt, vx, vz, auraColor = null, isStealth = false) {

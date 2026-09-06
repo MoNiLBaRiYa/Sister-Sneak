@@ -104,54 +104,55 @@ export class CharacterMeshBuilder {
     root.add(shadow);
 
     // =========================================================================
-    // 3. TORSO & ETHNIC KURTI DRESS
+    // 3. TORSO & ETHNIC KURTI DRESS (Sleek, Natural Tailored Indian Silhouette)
     // =========================================================================
     const torsoGroup = new THREE.Group();
-    torsoGroup.position.y = 0.85;
+    torsoGroup.position.y = 0.92;
 
-    // Upper Kurti Bodice
-    const upperBodice = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.30, 0.35, 0.45, 20),
-      dressMat
-    );
+    // Upper Kurti Bodice (Flat-front anatomical depth, wider shoulders)
+    const bodiceGeo = new THREE.CylinderGeometry(0.24, 0.22, 0.44, 18);
+    bodiceGeo.scale(1.0, 1.0, 0.62); // Flattened front-to-back depth
+    const upperBodice = new THREE.Mesh(bodiceGeo, dressMat);
     upperBodice.position.y = 0.22;
     upperBodice.castShadow = true;
     torsoGroup.add(upperBodice);
 
-    // Golden Neckline Collar Trim
+    // Golden V-Neckline / Collar Trim
     const collar = new THREE.Mesh(
-      new THREE.TorusGeometry(0.24, 0.03, 8, 20, Math.PI),
+      new THREE.TorusGeometry(0.18, 0.024, 8, 16, Math.PI),
       goldMat
     );
-    collar.position.set(0, 0.44, 0.12);
+    collar.position.set(0, 0.41, 0.09);
     collar.rotation.x = -Math.PI / 3;
     torsoGroup.add(collar);
 
-    // Waist Belt / Golden Border
-    const waistBelt = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.355, 0.355, 0.06, 20),
-      goldMat
-    );
-    waistBelt.position.y = 0.02;
-    torsoGroup.add(waistBelt);
+    // Kurti Button Patti / Center Embroidery
+    const pattiGeo = new THREE.BoxGeometry(0.04, 0.26, 0.02);
+    const patti = new THREE.Mesh(pattiGeo, goldMat);
+    patti.position.set(0, 0.22, 0.12);
+    torsoGroup.add(patti);
 
-    // Flared Kurti Bell Skirt with Slits
-    const skirt = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.35, 0.54, 0.52, 20),
-      dressMat
-    );
-    skirt.position.y = -0.25;
-    skirt.castShadow = true;
-    torsoGroup.add(skirt);
+    // Sleek Tailored Kurti Tunic (A-line with side slits, natural hip contour, NO round bell)
+    const tunicGeo = new THREE.CylinderGeometry(0.22, 0.26, 0.38, 18);
+    tunicGeo.scale(1.0, 1.0, 0.62);
+    const tunic = new THREE.Mesh(tunicGeo, dressMat);
+    tunic.position.y = -0.16;
+    tunic.castShadow = true;
+    torsoGroup.add(tunic);
 
-    // Golden Zari Hem Trim on Skirt Edge
-    const hemTrim = new THREE.Mesh(
-      new THREE.TorusGeometry(0.54, 0.035, 8, 24),
-      goldMat
-    );
-    hemTrim.rotation.x = Math.PI / 2;
-    hemTrim.position.set(0, -0.51, 0);
+    // Golden Zari Hem Border on Kurti Bottom
+    const hemGeo = new THREE.CylinderGeometry(0.262, 0.262, 0.035, 18, 1, true);
+    hemGeo.scale(1.0, 1.0, 0.62);
+    const hemTrim = new THREE.Mesh(hemGeo, goldMat);
+    hemTrim.position.y = -0.34;
     torsoGroup.add(hemTrim);
+
+    // Elegant Draped Dupatta Sash crossing over left shoulder
+    const sashGeo = new THREE.BoxGeometry(0.11, 0.54, 0.03);
+    const sash = new THREE.Mesh(sashGeo, dressMat);
+    sash.position.set(-0.05, 0.10, 0.12);
+    sash.rotation.z = -0.40;
+    torsoGroup.add(sash);
 
     root.add(torsoGroup);
     root.torso = torsoGroup;
@@ -496,12 +497,12 @@ export class CharacterMeshBuilder {
     // =========================================================================
     const armUpperGeo = new THREE.CylinderGeometry(0.09, 0.08, 0.32, 10);
     const armLowerGeo = new THREE.CylinderGeometry(0.075, 0.065, 0.30, 10);
-    const handGeo = new THREE.SphereGeometry(0.085, 12, 12);
+    const handGeo = new THREE.SphereGeometry(0.08, 12, 12);
     handGeo.scale(0.8, 1.0, 0.7);
 
     // Left Arm Group
     const leftArmGroup = new THREE.Group();
-    leftArmGroup.position.set(0.40, 1.25, 0);
+    leftArmGroup.position.set(0.30, 1.18, 0);
 
     const leftUpperArm = new THREE.Mesh(armUpperGeo, dressMat);
     leftUpperArm.position.y = -0.14;
@@ -535,7 +536,7 @@ export class CharacterMeshBuilder {
 
     // Right Arm Group
     const rightArmGroup = new THREE.Group();
-    rightArmGroup.position.set(-0.40, 1.25, 0);
+    rightArmGroup.position.set(-0.30, 1.18, 0);
 
     const rightUpperArm = new THREE.Mesh(armUpperGeo, dressMat);
     rightUpperArm.position.y = -0.14;
@@ -557,31 +558,31 @@ export class CharacterMeshBuilder {
     // =========================================================================
     // 7. ARTICULATED LEGS & TRADITIONAL INDIAN MOJARI SHOES
     // =========================================================================
-    const legGeo = new THREE.CylinderGeometry(0.085, 0.075, 0.58, 10);
-    const mojariGeo = new THREE.BoxGeometry(0.16, 0.09, 0.26);
-    const mojariToe = new THREE.SphereGeometry(0.08, 8, 8);
+    const legGeo = new THREE.CylinderGeometry(0.075, 0.065, 0.56, 10);
+    const mojariGeo = new THREE.BoxGeometry(0.14, 0.08, 0.24);
+    const mojariToe = new THREE.SphereGeometry(0.07, 8, 8);
     mojariToe.scale(1, 0.6, 1.4);
 
     // Left Leg
     const leftLegGroup = new THREE.Group();
-    leftLegGroup.position.set(0.18, 0.50, 0);
+    leftLegGroup.position.set(0.13, 0.52, 0);
 
     const leftLeg = new THREE.Mesh(legGeo, whiteFabricMat);
-    leftLeg.position.y = -0.24;
+    leftLeg.position.y = -0.22;
     leftLeg.castShadow = true;
     leftLegGroup.add(leftLeg);
 
-    const leftPayal = new THREE.Mesh(new THREE.TorusGeometry(0.08, 0.02, 6, 12), goldMat);
+    const leftPayal = new THREE.Mesh(new THREE.TorusGeometry(0.07, 0.018, 6, 12), goldMat);
     leftPayal.rotation.x = Math.PI / 2;
-    leftPayal.position.y = -0.48;
+    leftPayal.position.y = -0.46;
     leftLegGroup.add(leftPayal);
 
     const leftShoe = new THREE.Mesh(mojariGeo, shoeMat);
-    leftShoe.position.set(0, -0.54, 0.04);
+    leftShoe.position.set(0, -0.50, 0.04);
     leftLegGroup.add(leftShoe);
 
     const leftToe = new THREE.Mesh(mojariToe, goldMat);
-    leftToe.position.set(0, -0.53, 0.16);
+    leftToe.position.set(0, -0.49, 0.15);
     leftLegGroup.add(leftToe);
 
     root.add(leftLegGroup);
@@ -589,24 +590,24 @@ export class CharacterMeshBuilder {
 
     // Right Leg
     const rightLegGroup = new THREE.Group();
-    rightLegGroup.position.set(-0.18, 0.50, 0);
+    rightLegGroup.position.set(-0.13, 0.52, 0);
 
     const rightLeg = new THREE.Mesh(legGeo, whiteFabricMat);
-    rightLeg.position.y = -0.24;
+    rightLeg.position.y = -0.22;
     rightLeg.castShadow = true;
     rightLegGroup.add(rightLeg);
 
-    const rightPayal = new THREE.Mesh(new THREE.TorusGeometry(0.08, 0.02, 6, 12), goldMat);
+    const rightPayal = new THREE.Mesh(new THREE.TorusGeometry(0.07, 0.018, 6, 12), goldMat);
     rightPayal.rotation.x = Math.PI / 2;
-    rightPayal.position.y = -0.48;
+    rightPayal.position.y = -0.46;
     rightLegGroup.add(rightPayal);
 
     const rightShoe = new THREE.Mesh(mojariGeo, shoeMat);
-    rightShoe.position.set(0, -0.54, 0.04);
+    rightShoe.position.set(0, -0.50, 0.04);
     rightLegGroup.add(rightShoe);
 
     const rightToe = new THREE.Mesh(mojariToe, goldMat);
-    rightToe.position.set(0, -0.53, 0.16);
+    rightToe.position.set(0, -0.49, 0.15);
     rightLegGroup.add(rightToe);
 
     root.add(rightLegGroup);
@@ -618,6 +619,7 @@ export class CharacterMeshBuilder {
   static createMummyMesh() {
     const root = new THREE.Group();
 
+    // Materials
     const skinMat = new THREE.MeshStandardMaterial({ color: 0xfbd38d, roughness: 0.45 });
     const bandhaniTex = CharacterMeshBuilder.createBandhaniTexture("#991B1B", "#FDE68A");
     const sareeMat = new THREE.MeshStandardMaterial({
@@ -629,102 +631,162 @@ export class CharacterMeshBuilder {
     const hairMat = new THREE.MeshStandardMaterial({ color: 0x1e1b18, roughness: 0.5 });
     const gajraMat = new THREE.MeshStandardMaterial({ color: 0xfef3c7, roughness: 0.85 });
     const mouthMat = new THREE.MeshBasicMaterial({ color: 0xb91c1c });
+    const sandalMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.4 });
 
-    // 1. Saree Torso & Pleats
-    const torsoGeo = new THREE.CylinderGeometry(0.42, 0.72, 1.25, 20);
-    const torso = new THREE.Mesh(torsoGeo, sareeMat);
-    torso.position.y = 1.05;
-    torso.castShadow = true;
-    root.add(torso);
-    root.torso = torso;
+    // Soft Ground Shadow
+    const shadowGeo = new THREE.PlaneGeometry(1.4, 1.4);
+    const shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.35 });
+    const shadow = new THREE.Mesh(shadowGeo, shadowMat);
+    shadow.rotation.x = -Math.PI / 2;
+    shadow.position.y = 0.02;
+    root.add(shadow);
 
-    // Golden Zari Hem Border
-    const hemBorder = new THREE.Mesh(new THREE.TorusGeometry(0.72, 0.05, 8, 24), goldMat);
-    hemBorder.rotation.x = Math.PI / 2;
-    hemBorder.position.set(0, -0.6, 0);
-    torso.add(hemBorder);
+    // =========================================================================
+    // 1. SLEEK TAILORED BANDHANI SAREE BODY (Anatomical Flat-front, NO round bell!)
+    // =========================================================================
+    const torsoGroup = new THREE.Group();
+    torsoGroup.position.y = 0.95;
 
-    // Gold Bandhani Pallu Draped Across Shoulder
-    const palluGeo = new THREE.BoxGeometry(0.95, 0.12, 0.55);
+    // Upper Blouse / Choli & Saree Wrap (Wider shoulders X, flat depth Z)
+    const blouseGeo = new THREE.CylinderGeometry(0.28, 0.25, 0.46, 18);
+    blouseGeo.scale(1.0, 1.0, 0.65);
+    const upperTorso = new THREE.Mesh(blouseGeo, sareeMat);
+    upperTorso.position.y = 0.25;
+    upperTorso.castShadow = true;
+    torsoGroup.add(upperTorso);
+
+    // Saree Pleats & Petticoat (Graceful straight drape, flat-front silhouette)
+    const sareeGeo = new THREE.CylinderGeometry(0.25, 0.29, 0.80, 18);
+    sareeGeo.scale(1.0, 1.0, 0.65);
+    const sareeSkirt = new THREE.Mesh(sareeGeo, sareeMat);
+    sareeSkirt.position.y = -0.35;
+    sareeSkirt.castShadow = true;
+    torsoGroup.add(sareeSkirt);
+
+    // Golden Zari Hem Border along the saree base
+    const hemGeo = new THREE.CylinderGeometry(0.292, 0.292, 0.045, 18, 1, true);
+    hemGeo.scale(1.0, 1.0, 0.65);
+    const hemBorder = new THREE.Mesh(hemGeo, goldMat);
+    hemBorder.position.y = -0.73;
+    torsoGroup.add(hemBorder);
+
+    // Front Saree Pleat Center Line
+    const pleatGeo = new THREE.BoxGeometry(0.10, 0.76, 0.035);
+    const pleats = new THREE.Mesh(pleatGeo, sareeMat);
+    pleats.position.set(0, -0.35, 0.17);
+    torsoGroup.add(pleats);
+
+    // Golden Bandhani Pallu Draped Elegantly Across Shoulder
+    const palluGeo = new THREE.BoxGeometry(0.15, 0.70, 0.04);
     const pallu = new THREE.Mesh(palluGeo, goldMat);
-    pallu.position.set(0, 1.48, 0.12);
-    pallu.rotation.z = -0.38;
-    root.add(pallu);
+    pallu.position.set(-0.06, 0.20, 0.15);
+    pallu.rotation.z = -0.36;
+    torsoGroup.add(pallu);
 
-    // 2. Head & Facial Features
-    const headGeo = new THREE.SphereGeometry(0.42, 24, 24);
+    root.add(torsoGroup);
+    root.torso = torsoGroup;
+
+    // Traditional Sandals & Feet under Saree
+    const leftFoot = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.06, 0.22), sandalMat);
+    leftFoot.position.set(0.11, 0.04, 0.03);
+    root.add(leftFoot);
+    const rightFoot = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.06, 0.22), sandalMat);
+    rightFoot.position.set(-0.11, 0.04, 0.03);
+    root.add(rightFoot);
+
+    // =========================================================================
+    // 2. HEAD & FACIAL FEATURES
+    // =========================================================================
+    const headGeo = new THREE.SphereGeometry(0.40, 24, 24);
     const head = new THREE.Mesh(headGeo, skinMat);
-    head.position.y = 1.85;
+    head.position.y = 1.62;
     head.castShadow = true;
     root.add(head);
     root.head = head;
 
     // Big Royal Red Chandlo / Bindi
     const bindi = new THREE.Mesh(new THREE.CircleGeometry(0.065, 14), new THREE.MeshBasicMaterial({ color: 0xdc2626 }));
-    bindi.position.set(0, 0.16, 0.41);
+    bindi.position.set(0, 0.14, 0.39);
     head.add(bindi);
 
-    // Eyes
-    const leftEye = new THREE.Mesh(new THREE.SphereGeometry(0.065, 10, 10), new THREE.MeshBasicMaterial({ color: 0x1e1b18 }));
-    leftEye.position.set(0.14, 0.04, 0.38);
-    head.add(leftEye);
-    const rightEye = new THREE.Mesh(new THREE.SphereGeometry(0.065, 10, 10), new THREE.MeshBasicMaterial({ color: 0x1e1b18 }));
-    rightEye.position.set(-0.14, 0.04, 0.38);
-    head.add(rightEye);
+    // Sparkling Eyes with Dual Highlights
+    const createMummyEye = (isRight) => {
+      const eyeG = new THREE.Group();
+      const xOff = isRight ? 0.13 : -0.13;
+      eyeG.position.set(xOff, 0.03, 0.36);
+
+      const sclera = new THREE.Mesh(new THREE.SphereGeometry(0.065, 12, 12), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+      sclera.scale.set(1.1, 0.95, 0.4);
+      eyeG.add(sclera);
+
+      const iris = new THREE.Mesh(new THREE.CircleGeometry(0.042, 12), new THREE.MeshBasicMaterial({ color: 0x1e1b18 }));
+      iris.position.set(0, 0, 0.026);
+      eyeG.add(iris);
+
+      const shine = new THREE.Mesh(new THREE.CircleGeometry(0.016, 8), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+      shine.position.set(0.013, 0.015, 0.029);
+      eyeG.add(shine);
+
+      return eyeG;
+    };
+    head.add(createMummyEye(false));
+    head.add(createMummyEye(true));
 
     // Golden Jhumkas
-    const jhumkaGeo = new THREE.ConeGeometry(0.07, 0.12, 8);
+    const jhumkaGeo = new THREE.ConeGeometry(0.06, 0.11, 8);
     const leftJhumka = new THREE.Mesh(jhumkaGeo, goldMat);
-    leftJhumka.position.set(0.44, -0.06, 0.1);
+    leftJhumka.position.set(0.41, -0.06, 0.08);
     head.add(leftJhumka);
     const rightJhumka = new THREE.Mesh(jhumkaGeo, goldMat);
-    rightJhumka.position.set(-0.44, -0.06, 0.1);
+    rightJhumka.position.set(-0.41, -0.06, 0.08);
     head.add(rightJhumka);
 
     // Gentle Authoritative Smile
-    const mouth = new THREE.Mesh(new THREE.TorusGeometry(0.05, 0.012, 6, 16, Math.PI), mouthMat);
-    mouth.position.set(0, -0.14, 0.39);
+    const mouth = new THREE.Mesh(new THREE.TorusGeometry(0.045, 0.012, 6, 16, Math.PI), mouthMat);
+    mouth.position.set(0, -0.13, 0.37);
     mouth.rotation.z = Math.PI;
     head.add(mouth);
 
     // Traditional Hair Juda & Fresh Jasmine Gajra Garland
-    const judaGeo = new THREE.SphereGeometry(0.30, 16, 16);
+    const judaGeo = new THREE.SphereGeometry(0.28, 16, 16);
     const juda = new THREE.Mesh(judaGeo, hairMat);
-    juda.position.set(0, 0.1, -0.38);
+    juda.position.set(0, 0.08, -0.34);
     head.add(juda);
 
-    const gajraGeo = new THREE.TorusGeometry(0.28, 0.08, 8, 18);
+    const gajraGeo = new THREE.TorusGeometry(0.26, 0.07, 8, 18);
     const gajra = new THREE.Mesh(gajraGeo, gajraMat);
-    gajra.position.set(0, 0.1, -0.36);
+    gajra.position.set(0, 0.08, -0.32);
     head.add(gajra);
 
-    // 3. Arms with Stacked Golden Wrist Bangles
-    const armGeo = new THREE.CylinderGeometry(0.1, 0.09, 0.65, 8);
-    const bangleGeo = new THREE.TorusGeometry(0.11, 0.025, 8, 16);
+    // =========================================================================
+    // 3. ARMS WITH STACKED GOLDEN WRIST BANGLES
+    // =========================================================================
+    const armGeo = new THREE.CylinderGeometry(0.075, 0.07, 0.56, 8);
+    const bangleGeo = new THREE.TorusGeometry(0.08, 0.018, 8, 16);
 
     const leftArmGroup = new THREE.Group();
-    leftArmGroup.position.set(0.50, 1.42, 0);
+    leftArmGroup.position.set(0.34, 1.22, 0);
     const leftArm = new THREE.Mesh(armGeo, sareeMat);
-    leftArm.position.y = -0.32;
+    leftArm.position.y = -0.28;
     leftArmGroup.add(leftArm);
     for (let b = 0; b < 3; b++) {
       const leftBangle = new THREE.Mesh(bangleGeo, goldMat);
       leftBangle.rotation.x = Math.PI / 2;
-      leftBangle.position.set(0, -0.42 - b * 0.04, 0);
+      leftBangle.position.set(0, -0.36 - b * 0.035, 0);
       leftArmGroup.add(leftBangle);
     }
     root.add(leftArmGroup);
     root.leftArm = leftArmGroup;
 
     const rightArmGroup = new THREE.Group();
-    rightArmGroup.position.set(-0.50, 1.42, 0);
+    rightArmGroup.position.set(-0.34, 1.22, 0);
     const rightArm = new THREE.Mesh(armGeo, sareeMat);
-    rightArm.position.y = -0.32;
+    rightArm.position.y = -0.28;
     rightArmGroup.add(rightArm);
     for (let b = 0; b < 3; b++) {
       const rightBangle = new THREE.Mesh(bangleGeo, goldMat);
       rightBangle.rotation.x = Math.PI / 2;
-      rightBangle.position.set(0, -0.42 - b * 0.04, 0);
+      rightBangle.position.set(0, -0.36 - b * 0.035, 0);
       rightArmGroup.add(rightBangle);
     }
     root.add(rightArmGroup);

@@ -790,13 +790,12 @@ export class Game {
             this.isoCamera.update(dt, { x: p3d.x, y: this.isoCamera.floorHeights[this.player.floor], z: p3d.z });
           }
 
-          // 3D Waypoint Compass Arrow pointing to Emergency Fuse Box or nearest assigned task
-          if (this.taskManager && this.player3D) {
-            let targetHotspot = null;
-            let isEmergency = false;
+          // 3D Waypoint Compass Arrow (Visible ONLY during Blackout / Blown Fuse / Emergency Sabotage)
+          if (this.player3D) {
+            const isEmergency = this.sabotageSystem && (this.sabotageSystem.criticalSabotageActive || this.sabotageSystem.isBlackoutActive || this.sabotageSystem.isSabotageActive);
 
-            if (this.sabotageSystem && this.sabotageSystem.criticalSabotageActive) {
-              isEmergency = true;
+            if (isEmergency) {
+              let targetHotspot = null;
               const fuseHotspot = HOTSPOTS.find(hs => hs.id === this.sabotageSystem.activeFuseHotspotId) || HOTSPOTS.find(hs => hs.isFuseBox && hs.floor === this.sabotageSystem.sabotageFloor);
               if (fuseHotspot) {
                 if (fuseHotspot.floor === this.player.floor) {
@@ -807,23 +806,16 @@ export class Game {
                   targetHotspot = stairs.length > 0 ? stairs[0] : null;
                 }
               }
-            } else {
-              const myAssigned = HOTSPOTS.filter(hs => hs.taskId && this.taskManager.assignedTasks.has(hs.taskId) && !this.taskManager.isTaskCompleted(hs.taskId));
-              if (myAssigned.length > 0) {
-                const onFloor = myAssigned.filter(hs => hs.floor === this.player.floor);
-                if (onFloor.length > 0) {
-                  targetHotspot = onFloor.reduce((prev, curr) => Math.hypot(curr.x - this.player.x, curr.y - this.player.y) < Math.hypot(prev.x - this.player.x, prev.y - this.player.y) ? curr : prev);
-                } else {
-                  const targetFloor = myAssigned[0].floor;
-                  const stairs = HOTSPOTS.filter(hs => hs.isStairHotspot && hs.floor === this.player.floor && ((targetFloor > this.player.floor && hs.targetFloor > this.player.floor) || (targetFloor < this.player.floor && hs.targetFloor < this.player.floor)));
-                  targetHotspot = stairs.length > 0 ? stairs[0] : null;
-                }
-              }
-            }
 
-            if (targetHotspot) {
-              const tc3d = this.coord2Dto3D(targetHotspot.x, targetHotspot.y, targetHotspot.floor);
-              this.player3D.updateWaypoint(tc3d.x, tc3d.z, isEmergency, this.sabotageSystem?.criticalTimer || 0);
+              if (targetHotspot) {
+                const tc3d = this.coord2Dto3D(targetHotspot.x, targetHotspot.y, targetHotspot.floor);
+                this.player3D.updateWaypoint(tc3d.x, tc3d.z, true, this.sabotageSystem?.criticalTimer || 0);
+              } else {
+                this.player3D.updateWaypoint(0, 0, false, 0);
+              }
+            } else {
+              // Normal tasks: Hide navigation arrow completely
+              this.player3D.updateWaypoint(0, 0, false, 0);
             }
           }
 

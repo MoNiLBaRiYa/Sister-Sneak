@@ -689,23 +689,23 @@ export class HaveliWorld3D {
   // 4. Marigold Flower Toran on Arch (ગલગોટા તોરણ)
   buildToran(group) {
     const toranGroup = new THREE.Group();
-    toranGroup.position.set(0, 3.4, 0);
+    toranGroup.position.set(0, 3.2, 4.85); // Mounted above south entrance portal arch
 
     const yellowMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
     const orangeMat = new THREE.MeshBasicMaterial({ color: 0xf97316 });
     const leafMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.5 });
 
-    const span = 10;
-    const count = 16;
+    const span = 3.6; // Fits entrance archway width
+    const count = 12;
     for (let i = 0; i <= count; i++) {
       const frac = i / count;
       const x = -span / 2 + frac * span;
-      const droop = -Math.sin(frac * Math.PI) * 0.4;
-      const fl = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), i % 2 === 0 ? yellowMat : orangeMat);
+      const droop = -Math.sin(frac * Math.PI) * 0.32;
+      const fl = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), i % 2 === 0 ? yellowMat : orangeMat);
       fl.position.set(x, droop, 0);
       toranGroup.add(fl);
 
-      if (i % 3 === 0) {
+      if (i % 2 === 0) {
         const leaf = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.16, 4), leafMat);
         leaf.rotation.x = Math.PI;
         leaf.position.set(x, droop - 0.1, 0);
