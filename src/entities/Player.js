@@ -181,29 +181,34 @@ export class Player extends Character {
     if (this.abilityCooldown > 0) return false;
     this.abilityCooldown = this.maxAbilityCooldown;
 
-    game.audio.playTaskComplete();
     const isPrankster = (this.role === "prankster");
+    const p3d = game.player3D ? game.player3D.mesh.position : { x: 0, y: 0, z: 0 };
 
     // =========================================================================
     // 1. 🌸 RIDDHI
     // =========================================================================
     if (this.id === "RIDDHI") {
       if (!isPrankster) {
-        // INNOCENT (Help Self): Blanket Sanctuary - Invisible to Mummy, 0% Suspicion, gentle escape speed for 10s
+        // INNOCENT: Blanket Sanctuary - Translucent Ghost Invisibility + 0% Suspicion for 10s
         this.stealthTimer = 10.0;
         this.suspicion = 0;
         this.sprintTimer = 10.0;
-        this.auraColor = "#F472B6";
+        this.auraColor = "#EC4899";
         this.auraTimer = 10.0;
         this.activePowerLabel = "🛌 BLANKET SANCTUARY (10s)";
-        game.showTopToast("🌸 Riddhi's Blanket Sanctuary! Invisible to Mummy & 0% Suspicion for 10s!");
+        game.audio.playPower();
+        game.showTopToast("🌸 Riddhi's Blanket Sanctuary ACTIVE! Ghost Invisibility & 0% Suspicion for 10s!");
       } else {
-        // PRANKSTER (Trap & Irritate): Sleep Cloud Trap - Slows all innocents by 60% with drowsy haze for 8s
+        // PRANKSTER: Sleep Cloud Trap - 3D volumetric purple mist cloud slowing all innocents by 60%
         this.auraColor = "#EF4444";
         this.auraTimer = 8.0;
         this.activePowerLabel = "😴 SLEEP CLOUD TRAP (8s)";
+        if (game.particles3D) {
+          game.particles3D.spawnSleepCloud(p3d.x, p3d.y, p3d.z, 8.0);
+        }
         game.applyPranksterDebuffToInnocents("SLEEP_CLOUD", this.floor);
-        game.showTopToast("😈 Prankster Riddhi dropped a Sleep Cloud! All innocent sisters slowed by 60%!");
+        game.audio.playPower();
+        game.showTopToast("😈 Prankster Riddhi dropped a 3D Sleep Cloud! Nearby innocent sisters slowed by 60%!");
       }
     }
 
@@ -212,26 +217,36 @@ export class Player extends Character {
     // =========================================================================
     else if (this.id === "SHRUTI") {
       if (!isPrankster) {
-        // INNOCENT (Help Self): Artistic Masterstroke - Auto-solve chore or +20% Cleanliness burst + 6s Sprint
+        // INNOCENT: Artistic Masterstroke - Auto-completes nearest active chore + +25% Cleanliness + 6s Sprint
         this.auraColor = "#38BDF8";
         this.auraTimer = 6.0;
         this.sprintTimer = 6.0;
-        this.activePowerLabel = "✨ MASTERSTROKE (+20%)";
+        this.activePowerLabel = "✨ MASTERSTROKE (+25%)";
+        game.audio.playVictory();
+
         if (game.taskManager.activeMiniGame) {
           game.taskManager.activeMiniGame.updateProgress(1.0);
-          game.showTopToast("🎨 Shruti's Artistic Masterstroke AUTO-SOLVED the chore! ✨");
+          game.showTopToast("🎨 Shruti's Artistic Masterstroke AUTO-SOLVED the current minigame! ✨");
         } else {
-          game.taskManager.contributeCleanliness(20);
-          game.showTopToast("🎨 Shruti's Masterstroke! Burst +20% Cleanliness & Flow Speed!");
+          const myAssigned = HOTSPOTS.filter(hs => hs.taskId && game.taskManager.assignedTasks.has(hs.taskId) && !game.taskManager.isTaskCompleted(hs.taskId));
+          if (myAssigned.length > 0) {
+            const nearest = myAssigned.reduce((prev, curr) => Math.hypot(curr.x - this.x, curr.y - this.y) < Math.hypot(prev.x - this.x, prev.y - this.y) ? curr : prev);
+            game.taskManager.completeTask(nearest.taskId);
+            game.showTopToast(`🎨 Masterstroke! Auto-Completed "${nearest.label}" (+25% Cleanliness)! ✨`);
+          } else {
+            game.taskManager.contributeCleanliness(25);
+            game.showTopToast("🎨 Shruti's Masterstroke! Instant +25% Cleanliness Boost & Flow Speed!");
+          }
         }
       } else {
-        // PRANKSTER (Trap & Irritate): Rangoli Paint Splatter - Blinds innocent screens with paint for 5s, drops cleanliness by 10% + +30% Suspicion
+        // PRANKSTER: Rangoli Paint Splatter - Blinds innocent screens with paint for 5s & drops cleanliness
         this.auraColor = "#DC2626";
         this.auraTimer = 6.0;
         this.activePowerLabel = "🎨 PAINT SPLATTER BLIND";
         game.applyPranksterDebuffToInnocents("PAINT_SPLATTER", this.floor);
-        if (game.taskManager) game.taskManager.contributeCleanliness(-10);
-        game.showTopToast("😈 Prankster Shruti splattered Rangoli Paint! Blinds innocents & dropped -10% Cleanliness!");
+        if (game.taskManager) game.taskManager.contributeCleanliness(-15);
+        game.audio.playPower();
+        game.showTopToast("😈 Prankster Shruti splattered Rangoli Paint! Blinds innocents & dropped -15% Cleanliness!");
       }
     }
 
@@ -240,23 +255,24 @@ export class Player extends Character {
     // =========================================================================
     else if (this.id === "JAHANVI") {
       if (!isPrankster) {
-        // INNOCENT (Help Self): Turbo Vent Shortcut - Instant floor teleport + 7s Supersonic Dash (2.2x speed)
-        const nextFloor = (this.floor + 1) % 3;
-        this.setFloor(nextFloor, 250 + Math.random() * 700);
-        game.camera.setFloor(nextFloor);
-        game.updateFloorButtonsUI(nextFloor);
-        this.sprintTimer = 7.0;
-        this.auraColor = "#F59E0B";
-        this.auraTimer = 7.0;
-        this.activePowerLabel = "🌀 TURBO VENT DASH (7s)";
-        game.showTopToast(`🌀 Jahanvi's Turbo Vent Portal! Teleported to Floor ${nextFloor === 2 ? '3F' : nextFloor === 1 ? '2F' : '1F'} + Supersonic Dash!`);
+        // INNOCENT: Supersonic Turbo Dash (2.5x speed for 8s)
+        this.sprintTimer = 8.0;
+        this.auraColor = "#06B6D4";
+        this.auraTimer = 8.0;
+        this.activePowerLabel = "⚡ SUPERSONIC DASH (8s)";
+        game.audio.playPower();
+        game.showTopToast("⚡ Jahanvi's Supersonic Dash ACTIVE! 2.5x Speed Boost for 8s!");
       } else {
-        // PRANKSTER (Trap & Irritate): Sticky Bubblegum Snare - Completely roots & immobilizes innocent sisters for 5s
+        // PRANKSTER: Sticky Bubblegum Snare - Spawns 3D sticky floor puddle trapping whoever steps on it for 3.5s
         this.auraColor = "#EF4444";
         this.auraTimer = 7.0;
-        this.activePowerLabel = "🦶 STICKY GUM TRAP (5s)";
+        this.activePowerLabel = "🦶 STICKY GUM TRAP (12s)";
+        if (game.particles3D) {
+          game.particles3D.spawnStickyGumTrap(p3d.x, p3d.y, p3d.z, 12.0);
+        }
         game.applyPranksterDebuffToInnocents("STICKY_GUM", this.floor, { x: this.x, y: this.y });
-        game.showTopToast("😈 Prankster Jahanvi laid Sticky Bubblegum! Trapped innocent sisters in place for 5s!");
+        game.audio.playPower();
+        game.showTopToast("😈 Prankster Jahanvi placed a 3D Sticky Bubblegum puddle on the floor!");
       }
     }
 
@@ -265,24 +281,29 @@ export class Player extends Character {
     // =========================================================================
     else if (this.id === "JISHA") {
       if (!isPrankster) {
-        // INNOCENT (Help Self): Mummy's Ladli Shield - 12s total Mummy immunity, 0% suspicion, and auto-solve math sheets
+        // INNOCENT: Mummy's Ladli Shield - Orbiting 3D Golden Star Crown + 12s 100% Immunity & 0% Suspicion
         this.ladliShieldTimer = 12.0;
         this.suspicion = 0;
-        this.auraColor = "#A78BFA";
+        this.auraColor = "#F59E0B";
         this.auraTimer = 12.0;
         this.activePowerLabel = "⭐ MUMMY'S GOLDEN LADLI (12s)";
+        if (game.particles3D && game.player3D && game.player3D.mesh) {
+          game.particles3D.createLadliHalo(game.player3D.mesh);
+        }
+        game.audio.playVictory();
         if (game.taskManager.activeMiniGame && game.taskManager.activeMiniGame.id === "HOMEWORK_MATH") {
           game.taskManager.activeMiniGame.updateProgress(1.0);
           game.showTopToast("📚 Jisha's Genius Brain AUTO-SOLVED the study sheet! ⭐");
         } else {
-          game.showTopToast("📚 Jisha's Golden Ladli Shield! 100% Mummy Immunity & 0% Suspicion!");
+          game.showTopToast("⭐ Jisha's Golden Ladli Shield! 100% Mummy Immunity & 0% Suspicion for 12s!");
         }
       } else {
-        // PRANKSTER (Trap & Irritate): False Alarm & Blame Transfer - Triggers Mummy to chase innocent sisters + +35% Suspicion
+        // PRANKSTER: False Alarm & Blame Transfer - Screams false alarm, sending Mummy to chase innocent sisters
         this.auraColor = "#7C3AED";
         this.auraTimer = 8.0;
         this.activePowerLabel = "📢 FALSE ALARM & BLAME";
         game.applyPranksterDebuffToInnocents("FALSE_ALARM", this.floor);
+        game.audio.playDefeat();
         game.showTopToast("😈 Prankster Jisha screamed a FALSE ALARM! Mummy is rushing to inspect the nearest sister!");
       }
     }
@@ -292,16 +313,17 @@ export class Player extends Character {
     // =========================================================================
     else if (this.id === "JYEANA") {
       if (!isPrankster) {
-        // INNOCENT (Help Self): Smart Inverter Hack - Restores all blacked-out lights + Night Vision + 7s Hyper Sprint
+        // INNOCENT: Smart Inverter Hack - Restores all blacked-out floors + fixes blown fuses + 7s Hyper Sprint
         this.sprintTimer = 7.0;
         this.auraColor = "#10B981";
         this.auraTimer = 7.0;
         this.activePowerLabel = "⚡ SMART INVERTER OVERDRIVE";
         game.houseMap.blackedOutFloors.clear();
         game.sabotageSystem?.resolveCriticalSabotage();
+        game.audio.playVictory();
         game.showTopToast("⚡ Jyeana's Smart Inverter Hack! Restored all lights + 7s Hyper Sprint!");
       } else {
-        // PRANKSTER (Trap & Irritate): EMP Jammer & Inverted Controls - Inverts movement controls & resets Sabotage cooldowns
+        // PRANKSTER: EMP Jammer - Inverts controls + glitches scanlines + resets Sabotage cooldowns
         this.auraColor = "#EF4444";
         this.auraTimer = 7.0;
         this.activePowerLabel = "⚡ EMP CONTROLS JAMMER";
@@ -310,6 +332,7 @@ export class Player extends Character {
           game.sabotageSystem.cooldowns.BLACKOUT = 0;
           game.sabotageSystem.cooldowns.KUNDI = 0;
         }
+        game.audio.playPower();
         game.showTopToast("😈 Prankster Jyeana pulsed an EMP Jammer! Controls inverted & Sabotage cooldowns reset!");
       }
     }

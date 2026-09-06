@@ -174,23 +174,32 @@ export class HeroStage3D {
   triggerPowerBurst(mode = "innocent") {
     const config = SISTERS[this.currentSisterId] || SISTERS.RIDDHI;
     const isPrankster = (mode === "prankster");
-    const color = isPrankster ? new THREE.Color("#EF4444") : new THREE.Color(config.color || "#10B981");
+    const colorHex = isPrankster ? 0xef4444 : (config.color ? parseInt(config.color.replace('#', '0x')) : 0x10b981);
+    const color = new THREE.Color(colorHex);
 
-    // Spawn 40 glowing orbital burst particles
-    for (let i = 0; i < 40; i++) {
-      const geo = new THREE.SphereGeometry(0.06 + Math.random() * 0.05, 8, 8);
+    this.powerJumpTimer = 1.2;
+
+    // Pulse the Podium Neon Ring with signature color
+    if (this.ringMat) {
+      this.ringMat.color.set(colorHex);
+    }
+
+    // Spawn 65 glowing orbital shockwave particles and sparkle stars
+    for (let i = 0; i < 65; i++) {
+      const isStar = (i % 3 === 0);
+      const geo = isStar ? new THREE.OctahedronGeometry(0.08 + Math.random() * 0.06) : new THREE.SphereGeometry(0.06 + Math.random() * 0.05, 8, 8);
       const mat = new THREE.MeshBasicMaterial({
-        color: color,
+        color: isStar ? 0xffffff : color,
         transparent: true,
         opacity: 1.0
       });
       const p = new THREE.Mesh(geo, mat);
-      p.position.set(0, 1.2, 0);
-      const angle = (i / 40) * Math.PI * 2;
-      const speed = (isPrankster ? 2.6 : 1.9) + Math.random() * 1.5;
+      p.position.set(0, 1.1 + Math.random() * 0.4, 0);
+      const angle = (i / 65) * Math.PI * 2 + Math.random() * 0.3;
+      const speed = (isPrankster ? 2.8 : 2.2) + Math.random() * 1.8;
       p.velocity = new THREE.Vector3(
         Math.cos(angle) * speed,
-        (Math.random() - 0.2) * (isPrankster ? 3.0 : 2.0),
+        (Math.random() - 0.2) * (isPrankster ? 3.5 : 2.8),
         Math.sin(angle) * speed
       );
       p.life = 1.0;
@@ -212,8 +221,13 @@ export class HeroStage3D {
         this.currentMesh.rotation.y = this.userRotationY;
       }
 
-      // Gentle breathing idle bounce
-      this.currentMesh.position.y = Math.sin(this.animTime * 2.2) * 0.035;
+      // Gentle breathing idle bounce or Power Jump Float
+      let baseOffsetY = 0;
+      if (this.powerJumpTimer > 0) {
+        this.powerJumpTimer -= 0.03;
+        baseOffsetY = Math.sin(this.powerJumpTimer * Math.PI) * 0.35;
+      }
+      this.currentMesh.position.y = baseOffsetY + Math.sin(this.animTime * 2.2) * 0.035;
 
       // Natural Eye Blinking on Hero Stage
       if (this.currentMesh.eyes) {

@@ -978,15 +978,37 @@ export class Game {
         powerNameEl.innerText = activePower.name;
       }
 
+      const isPowerActive = (this.player.auraTimer > 0 || this.player.sprintTimer > 0 || this.player.stealthTimer > 0 || this.player.ladliShieldTimer > 0);
+      const activeTimeRemaining = Math.max(this.player.auraTimer, this.player.sprintTimer, this.player.stealthTimer, this.player.ladliShieldTimer);
+
       if (powerBtn) {
-        if (this.player.abilityCooldown > 0) {
+        if (isPowerActive) {
           powerBtn.disabled = true;
-          if (cdLabel) cdLabel.innerText = `(${Math.ceil(this.player.abilityCooldown)}s)`;
-          if (touchPowerBtn) touchPowerBtn.style.opacity = "0.5";
+          powerBtn.classList.add("power-active");
+          powerBtn.classList.remove("power-ready");
+          if (cdLabel) cdLabel.innerText = `✨ ACTIVE (${Math.ceil(activeTimeRemaining)}s)`;
+          if (touchPowerBtn) {
+            touchPowerBtn.classList.add("power-active");
+            touchPowerBtn.style.opacity = "1";
+          }
+        } else if (this.player.abilityCooldown > 0) {
+          powerBtn.disabled = true;
+          powerBtn.classList.remove("power-active");
+          powerBtn.classList.remove("power-ready");
+          if (cdLabel) cdLabel.innerText = `⏳ (${Math.ceil(this.player.abilityCooldown)}s)`;
+          if (touchPowerBtn) {
+            touchPowerBtn.classList.remove("power-active");
+            touchPowerBtn.style.opacity = "0.5";
+          }
         } else {
           powerBtn.disabled = false;
-          if (cdLabel) cdLabel.innerText = "(READY)";
-          if (touchPowerBtn) touchPowerBtn.style.opacity = "1";
+          powerBtn.classList.remove("power-active");
+          powerBtn.classList.add("power-ready");
+          if (cdLabel) cdLabel.innerText = "⚡ (READY)";
+          if (touchPowerBtn) {
+            touchPowerBtn.classList.remove("power-active");
+            touchPowerBtn.style.opacity = "1";
+          }
         }
       }
     }
